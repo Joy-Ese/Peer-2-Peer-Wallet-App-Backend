@@ -1,0 +1,17 @@
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\bin\Debug\net6.0\WalletPayment.Services.deps.json
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\bin\Debug\net6.0\WalletPayment.Services.runtimeconfig.json
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\bin\Debug\net6.0\WalletPayment.Services.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\bin\Debug\net6.0\WalletPayment.Services.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\bin\Debug\net6.0\WalletPayment.Models.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\bin\Debug\net6.0\WalletPayment.Models.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.csproj.AssemblyReference.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.AssemblyInfoInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.AssemblyInfo.cs
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.csproj.CoreCompileInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.csproj.CopyComplete
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\refint\WalletPayment.Services.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\WalletPayment.Services.genruntimeconfig.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Services\obj\Debug\net6.0\ref\WalletPayment.Services.dll

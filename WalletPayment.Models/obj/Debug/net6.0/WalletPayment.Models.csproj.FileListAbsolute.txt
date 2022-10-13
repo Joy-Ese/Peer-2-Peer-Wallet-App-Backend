@@ -1,0 +1,14 @@
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\bin\Debug\net6.0\WalletPayment.Models.deps.json
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\bin\Debug\net6.0\WalletPayment.Models.runtimeconfig.json
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\bin\Debug\net6.0\WalletPayment.Models.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\bin\Debug\net6.0\WalletPayment.Models.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\WalletPayment.Models.csproj.AssemblyReference.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\WalletPayment.Models.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\WalletPayment.Models.AssemblyInfoInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\WalletPayment.Models.AssemblyInfo.cs
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\WalletPayment.Models.csproj.CoreCompileInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\WalletPayment.Models.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\refint\WalletPayment.Models.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\WalletPayment.Models.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\WalletPayment.Models.genruntimeconfig.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Models\obj\Debug\net6.0\ref\WalletPayment.Models.dll

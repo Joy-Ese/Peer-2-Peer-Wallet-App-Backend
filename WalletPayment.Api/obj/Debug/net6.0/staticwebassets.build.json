@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "rdowTU4LX3VTmkT6ZopfZCnolWDfQACoZ5t7IzZKYlg=",
+  "Source": "WalletPayment.Api",
+  "BasePath": "_content/WalletPayment.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
