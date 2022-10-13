@@ -1,0 +1,15 @@
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\bin\Debug\net6.0\WalletPayment.Validation.deps.json
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\bin\Debug\net6.0\WalletPayment.Validation.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\bin\Debug\net6.0\WalletPayment.Validation.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\bin\Debug\net6.0\WalletPayment.Models.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\bin\Debug\net6.0\WalletPayment.Models.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\WalletPayment.Validation.csproj.AssemblyReference.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\WalletPayment.Validation.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\WalletPayment.Validation.AssemblyInfoInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\WalletPayment.Validation.AssemblyInfo.cs
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\WalletPayment.Validation.csproj.CoreCompileInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\WalletPayment.Validation.csproj.CopyComplete
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\WalletPayment.Validation.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\refint\WalletPayment.Validation.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\WalletPayment.Validation.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Validation\obj\Debug\net6.0\ref\WalletPayment.Validation.dll

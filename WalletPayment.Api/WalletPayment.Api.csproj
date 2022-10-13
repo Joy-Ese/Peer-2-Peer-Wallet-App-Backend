@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.9" />
@@ -26,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WalletPayment.Models\WalletPayment.Models.csproj" />
     <ProjectReference Include="..\WalletPayment.Services\WalletPayment.Services.csproj" />
+    <ProjectReference Include="..\WalletPayment.Validation\WalletPayment.Validation.csproj" />
   </ItemGroup>
 
 </Project>

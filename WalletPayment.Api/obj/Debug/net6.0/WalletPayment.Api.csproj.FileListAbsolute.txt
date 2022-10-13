@@ -5,6 +5,9 @@ C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debu
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Api.runtimeconfig.json
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Api.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Api.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\FluentValidation.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\FluentValidation.AspNetCore.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Humanizer.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.Data.SqlClient.dll
@@ -50,13 +53,16 @@ C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debu
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Models.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Services.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Validation.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Models.pdb
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Services.pdb
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Validation.pdb
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.csproj.AssemblyReference.cache
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.AssemblyInfoInputs.cache
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.AssemblyInfo.cs
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.csproj.CoreCompileInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\staticwebassets.build.json
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\staticwebassets.development.json

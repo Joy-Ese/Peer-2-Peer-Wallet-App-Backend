@@ -20,19 +20,18 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPost("sign-up")]
-        public async Task<ActionResult> Register([FromBody] UserSignUpDto request)
+        public async Task<IActionResult> Register([FromBody] UserSignUpDto request)
         {
             var result = await _userService.Register(request);
             return Ok(result);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult> Login(UserLoginDto request)
+        public async Task<IActionResult> Login(UserLoginDto request)
         {
             var result = await _userService.Login(request);
             return Ok(result);
         }
 
-        //testing Git Desktop
     }
 }

@@ -1,9 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "lph7hd4I7XH+aNC8F8/Y1c+L3Kd1oxN+DfsvtRslNh9JmRROGV/aVUk+VYZtTM8z6nm3DZ2gBSWEm9LKRp7TKw==",
+  "dgSpecHash": "tzuhP2VDZkYsIdqylCb2VSz8jAEVk+mIVClkQO+Ek/X90XD+1SXI9dyvm1tYaxbvQZ667vu1jyFVseAzaMGFLA==",
   "success": true,
   "projectFilePath": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Models\\WalletPayment.Models.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\joyihama\\.nuget\\packages\\fluentvalidation\\11.2.1\\fluentvalidation.11.2.1.nupkg.sha512",
+    "C:\\Users\\joyihama\\.nuget\\packages\\fluentvalidation.aspnetcore\\11.2.2\\fluentvalidation.aspnetcore.11.2.2.nupkg.sha512",
+    "C:\\Users\\joyihama\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.2.1\\fluentvalidation.dependencyinjectionextensions.11.2.1.nupkg.sha512",
     "C:\\Users\\joyihama\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\joyihama\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.9\\microsoft.aspnetcore.authentication.jwtbearer.6.0.9.nupkg.sha512",
     "C:\\Users\\joyihama\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",

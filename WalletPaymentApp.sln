@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletPayment.Api", "WalletPayment.Api\WalletPayment.Api.csproj", "{C538EC7A-952D-4916-BECD-45A34CB17C29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WalletPayment.Api", "WalletPayment.Api\WalletPayment.Api.csproj", "{C538EC7A-952D-4916-BECD-45A34CB17C29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletPayment.Models", "WalletPayment.Models\WalletPayment.Models.csproj", "{EA7D0A23-2DE4-41A5-9E6B-741383FD7CD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WalletPayment.Models", "WalletPayment.Models\WalletPayment.Models.csproj", "{EA7D0A23-2DE4-41A5-9E6B-741383FD7CD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletPayment.Services", "WalletPayment.Services\WalletPayment.Services.csproj", "{8EEB02FC-6969-4671-AAE3-BDA172420C77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WalletPayment.Services", "WalletPayment.Services\WalletPayment.Services.csproj", "{8EEB02FC-6969-4671-AAE3-BDA172420C77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletPayment.Validation", "WalletPayment.Validation\WalletPayment.Validation.csproj", "{198E3718-E499-44B9-A497-8EA279221F5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{8EEB02FC-6969-4671-AAE3-BDA172420C77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8EEB02FC-6969-4671-AAE3-BDA172420C77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8EEB02FC-6969-4671-AAE3-BDA172420C77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{198E3718-E499-44B9-A497-8EA279221F5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{198E3718-E499-44B9-A497-8EA279221F5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{198E3718-E499-44B9-A497-8EA279221F5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{198E3718-E499-44B9-A497-8EA279221F5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
