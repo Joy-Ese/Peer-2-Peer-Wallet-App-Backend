@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -33,7 +34,9 @@ namespace WalletPayment.Models.DataObjects
 
     public class UserLoginDto
     {
+        [Required]
         public string username { get; set; } = string.Empty;
+        [Required]
         public string password { get; set; } = string.Empty;
     }
 
@@ -44,4 +47,6 @@ namespace WalletPayment.Models.DataObjects
         public const string AccountNumber = "http://schemas.microsoft.com/ws/2008/06/identity/claims/accountnumber";
         public const string FirstName = "http://schemas.microsoft.com/ws/2008/06/identity/claims/firstname";
     }
+
+   
 }

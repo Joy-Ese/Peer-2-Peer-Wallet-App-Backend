@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -89,11 +91,11 @@ namespace WalletPayment.Services.Services
             try
             {
                 var data = await _context.Users.Include(user => user.UserAccount).FirstOrDefaultAsync(user => user.Username == request.username);
-                if (data == null) return "Invalid RegNumber or Password";
+                if (data == null) return "Invalid Username or Password";
 
                 if (!VerifyPasswordHash(request.password, data.PasswordHash, data.PasswordSalt))
                 {
-                    return "Invalid RegNumber or Password";
+                    return "Invalid Username or Password";
                 }
 
                 string token = CreateToken(data);
@@ -105,7 +107,7 @@ namespace WalletPayment.Services.Services
                 Console.WriteLine(ex.Message);
                 return string.Empty;
             }
-        }
+        } 
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
