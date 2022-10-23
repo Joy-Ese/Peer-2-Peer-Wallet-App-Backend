@@ -20,6 +20,14 @@ namespace WalletPayment.Models.DataObjects
         public string Address { get; set; } = string.Empty;
     }
 
+    public class UserDashboardViewModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string AccountNumber { get; set; } = string.Empty;
+    }
+
     public class UserSignUpDto
     {
         public string username { get; set; } = string.Empty;

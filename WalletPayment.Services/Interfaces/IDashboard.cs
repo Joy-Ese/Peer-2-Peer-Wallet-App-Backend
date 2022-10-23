@@ -9,7 +9,7 @@ namespace WalletPayment.Services.Interfaces
 {
     public interface IDashboard
     {
-        Task<string> GetUserDetails();
+        Task<UserDashboardViewModel> GetUserDetails();
 
     }
 }

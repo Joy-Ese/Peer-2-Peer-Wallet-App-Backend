@@ -23,33 +23,37 @@ namespace WalletPayment.Services.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<string> GetUserDetails()
+        public async Task<UserDashboardViewModel> GetUserDetails()
         {
             try
             {
-                string userID = string.Empty;
-                if(_httpContextAccessor.HttpContext != null)
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
                 {
-                    userID = _httpContextAccessor.HttpContext.User.FindFirst(CustomClaims.UserId).Value;
+                    return new UserDashboardViewModel();
                 }
 
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
-                var userDATA = await _context.Users
-                                .Where(userInfo => userInfo.Id.ToString() == userID)
-                                .Select(userInfo => new 
-                                { 
-                                    userInfo.Username, userInfo.FirstName, userInfo.LastName, userInfo.UserAccount.AccountNumber 
+                var userData = await _context.Users
+                                .Where(userInfo => userInfo.Id == userID)
+                                .Select(userInfo => new UserDashboardViewModel
+                                {
+                                    Username = userInfo.Username,
+                                    FirstName = userInfo.FirstName,
+                                    LastName = userInfo.LastName,
+                                    AccountNumber = userInfo.UserAccount.AccountNumber
                                 })
                                 .FirstOrDefaultAsync();
 
+                if (userData == null) return new UserDashboardViewModel();
 
-
-                return userDATA.ToString();
+                return userData;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return "Error Occured";
+                return new UserDashboardViewModel();
             }
         }
     }
