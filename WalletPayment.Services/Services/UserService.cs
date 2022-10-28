@@ -126,6 +126,7 @@ namespace WalletPayment.Services.Services
                 new Claim(CustomClaims.UserName, user.Username),
                 new Claim(CustomClaims.FirstName, user.FirstName),
                 new Claim(CustomClaims.AccountNumber, user.UserAccount.AccountNumber),
+                new Claim(CustomClaims.Balance, user.UserAccount.Balance.ToString()),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(

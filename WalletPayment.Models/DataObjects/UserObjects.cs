@@ -26,6 +26,7 @@ namespace WalletPayment.Models.DataObjects
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string AccountNumber { get; set; } = string.Empty;
+        public string Balance { get; set; } = string.Empty;
     }
 
     public class UserSignUpDto
@@ -54,6 +55,7 @@ namespace WalletPayment.Models.DataObjects
         public const string UserName = "http://schemas.microsoft.com/ws/2008/06/identity/claims/username";
         public const string AccountNumber = "http://schemas.microsoft.com/ws/2008/06/identity/claims/accountnumber";
         public const string FirstName = "http://schemas.microsoft.com/ws/2008/06/identity/claims/firstname";
+        public const string Balance = "http://schemas.microsoft.com/ws/2008/06/identity/claims/balance";
     }
 
    

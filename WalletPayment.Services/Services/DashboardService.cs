@@ -42,7 +42,8 @@ namespace WalletPayment.Services.Services
                                     Username = userInfo.Username,
                                     FirstName = userInfo.FirstName,
                                     LastName = userInfo.LastName,
-                                    AccountNumber = userInfo.UserAccount.AccountNumber
+                                    AccountNumber = userInfo.UserAccount.AccountNumber,
+                                    Balance = userInfo.UserAccount.Balance.ToString(),
                                 })
                                 .FirstOrDefaultAsync();
 
