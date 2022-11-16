@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "zNQLZ+z5/2HYwpFTmI7Cyea4PgvOwgRypploFFyIHQrbZXI3VES0yEaNQlbccNvl95g6lElsiuXwu5Y1iJ1UNg==",
+  "dgSpecHash": "SZyuBgqpJyrDltoVpFdIAckquJ2A5ZbSY161W5X17w39KM9zc7TmxZmxOMpqAH9bmeHTcoTaUCWCiLyoFV3XGw==",
   "success": true,
   "projectFilePath": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Services\\WalletPayment.Services.csproj",
   "expectedPackageFiles": [
@@ -39,6 +39,9 @@
     "C:\\Users\\joyihama\\.nuget\\packages\\microsoft.openapi\\1.3.1\\microsoft.openapi.1.3.1.nupkg.sha512",
     "C:\\Users\\joyihama\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",
     "C:\\Users\\joyihama\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\joyihama\\.nuget\\packages\\nlog\\5.0.5\\nlog.5.0.5.nupkg.sha512",
+    "C:\\Users\\joyihama\\.nuget\\packages\\nlog.extensions.logging\\5.1.0\\nlog.extensions.logging.5.1.0.nupkg.sha512",
+    "C:\\Users\\joyihama\\.nuget\\packages\\nlog.web.aspnetcore\\5.1.5\\nlog.web.aspnetcore.5.1.5.nupkg.sha512",
     "C:\\Users\\joyihama\\.nuget\\packages\\scrutor\\3.3.0\\scrutor.3.3.0.nupkg.sha512",
     "C:\\Users\\joyihama\\.nuget\\packages\\swashbuckle.aspnetcore.filters\\7.0.5\\swashbuckle.aspnetcore.filters.7.0.5.nupkg.sha512",
     "C:\\Users\\joyihama\\.nuget\\packages\\swashbuckle.aspnetcore.filters.abstractions\\7.0.5\\swashbuckle.aspnetcore.filters.abstractions.7.0.5.nupkg.sha512",

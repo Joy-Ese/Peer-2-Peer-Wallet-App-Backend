@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WalletPayment.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace WalletPayment.Api.Controllers
 {
@@ -18,7 +19,7 @@ namespace WalletPayment.Api.Controllers
             _dashboardService = dashboardService;
         }
 
-        [HttpGet("user-details"), Authorize]
+        [HttpGet("UserDetails"), Authorize]
         public async Task<IActionResult> GetUserDetails()
         {
             var result = await _dashboardService.GetUserDetails();

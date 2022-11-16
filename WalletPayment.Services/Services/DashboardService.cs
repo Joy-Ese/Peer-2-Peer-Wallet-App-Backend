@@ -1,11 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WalletPayment.Models.DataObjects;
 using WalletPayment.Services.Data;
 using WalletPayment.Services.Interfaces;
@@ -16,11 +11,14 @@ namespace WalletPayment.Services.Services
     {
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<DashboardService> _logger;
 
-        public DashboardService(DataContext context, IHttpContextAccessor httpContextAccessor)
+        public DashboardService(DataContext context, IHttpContextAccessor httpContextAccessor, ILogger<DashboardService> logger)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
+            _logger.LogDebug(1, "Nlog injected into DashboardService");
         }
 
         public async Task<UserDashboardViewModel> GetUserDetails()
@@ -53,7 +51,9 @@ namespace WalletPayment.Services.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
                 return new UserDashboardViewModel();
             }
         }

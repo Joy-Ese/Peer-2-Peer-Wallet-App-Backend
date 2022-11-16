@@ -5,24 +5,45 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WalletPayment.Services.Migrations
 {
-    public partial class CreateOne : Migration
+    public partial class CreateFirst : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Transactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TransactionReference = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TransactionAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TransactionStatus = table.Column<int>(type: "int", nullable: false),
+                    TranSourceAccount = table.Column<string>(type: "varchar(50)", nullable: false),
+                    TranDestinationAccount = table.Column<string>(type: "varchar(50)", nullable: false),
+                    TransactionType = table.Column<int>(type: "int", nullable: false),
+                    TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transactions", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "varchar(50)", nullable: false),
                     PasswordHash = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Email = table.Column<string>(type: "varchar(50)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "varchar(20)", nullable: false),
+                    FirstName = table.Column<string>(type: "varchar(50)", nullable: false),
+                    LastName = table.Column<string>(type: "varchar(50)", nullable: false),
+                    Address = table.Column<string>(type: "varchar(50)", nullable: false),
+                    PinHash = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    PinSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,9 +56,9 @@ namespace WalletPayment.Services.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AccountNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountNumber = table.Column<string>(type: "varchar(50)", nullable: false),
                     Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Currency = table.Column<string>(type: "varchar(10)", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -62,6 +83,9 @@ namespace WalletPayment.Services.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Accounts");
+
+            migrationBuilder.DropTable(
+                name: "Transactions");
 
             migrationBuilder.DropTable(
                 name: "Users");

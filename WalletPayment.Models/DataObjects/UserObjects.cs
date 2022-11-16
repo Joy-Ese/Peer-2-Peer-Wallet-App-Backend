@@ -18,6 +18,8 @@ namespace WalletPayment.Models.DataObjects
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
+        public string Pin { get; set; } = string.Empty;
+        public string ConfirmPin { get; set; } = string.Empty;
     }
 
     public class UserDashboardViewModel
@@ -39,6 +41,14 @@ namespace WalletPayment.Models.DataObjects
         public string lastName { get; set; } = string.Empty;
         public string address { get; set; } = string.Empty;
 
+        [Required]
+        [RegularExpression(@"^[0-9]{4}$", ErrorMessage = "Pin must not be more than 4 digits")]
+        public string pin { get; set; } = string.Empty;
+        [Required]
+
+        [Compare("pin", ErrorMessage = "Pins do not match")]
+        public string confirmPin { get; set; } = string.Empty;
+
     }
 
     public class UserLoginDto
@@ -48,6 +58,20 @@ namespace WalletPayment.Models.DataObjects
         [Required]
         public string password { get; set; } = string.Empty;
     }
+
+    public class AccountViewModel
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+    }
+
+    public class TransactionDto
+    {
+        public string sourceAccount { get; set; } = string.Empty;
+        public string destinationAccount { get; set; } = string.Empty;
+        public decimal amount { get; set; } 
+    }
+
 
     public class CustomClaims
     {

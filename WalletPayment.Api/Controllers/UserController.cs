@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WalletPayment.Models.DataObjects;
+using WalletPayment.Models.Entites;
 using WalletPayment.Services.Interfaces;
 
 namespace WalletPayment.Api.Controllers
@@ -18,17 +19,24 @@ namespace WalletPayment.Api.Controllers
             _userService = userService;
         }
 
-        [HttpPost("sign-up")]
+        [HttpPost("SignUp")]
         public async Task<IActionResult> Register([FromBody] UserSignUpDto request)
         {
             var result = await _userService.Register(request);
             return Ok("Registration Successful");
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login(UserLoginDto request)
         {
             var result = await _userService.Login(request);
+            return Ok(result);
+        }
+
+        [HttpPost("Authenticate")]
+        public async Task<IActionResult> Authenticate(string AccountNumber)
+        {
+            var result = await _userService.Authenticate(AccountNumber);
             return Ok(result);
         }
     }

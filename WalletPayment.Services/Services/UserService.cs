@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -24,13 +25,16 @@ namespace WalletPayment.Services.Services
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<UserService> _logger;
 
         public UserService(DataContext context, IConfiguration configuration, 
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, ILogger<UserService> logger)
         {
             _context = context;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
+            _logger.LogDebug(1, "Nlog injected into UserService");
         }
 
         public string AccountNumberGenerator()
@@ -44,9 +48,18 @@ namespace WalletPayment.Services.Services
             try
             {
                 var data = await _context.Users.AnyAsync(user => user.Username == request.username);
-                if (data) return null;
+                if (data)
+                {
+                    _logger.LogWarning($"Duplicate username supplied {request.username}");
+                    return null;
+                }
+
+                if (!request.pin.Equals(request.confirmPin)) throw new ArgumentException("Pins do not match", "pin");
 
                 CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                CreatePinHash(request.pin, out byte[] pinHash, out byte[] pinSalt);
+
                 string generatedAcc = AccountNumberGenerator();
 
                 User newUser = new User
@@ -58,7 +71,9 @@ namespace WalletPayment.Services.Services
                     PhoneNumber = request.phoneNumber,
                     FirstName = request.firstName,
                     LastName = request.lastName,
-                    Address = request.address
+                    Address = request.address,
+                    PinHash = pinHash,
+                    PinSalt = pinSalt
                 };
 
                 var userResult = await _context.Users.AddAsync(newUser);
@@ -81,10 +96,37 @@ namespace WalletPayment.Services.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
                 return new UserSignUpDto();
             }
         }
+
+        public async Task<AccountViewModel> Authenticate(string AccountNumber)
+        {
+            AccountViewModel result = new AccountViewModel();
+            try
+            {
+                var userData = await _context.Users.Where(userAcc => userAcc.UserAccount.AccountNumber == AccountNumber).SingleOrDefaultAsync();
+                if (userData == null)
+                    return result;
+
+                result.FirstName = userData.FirstName;
+                result.LastName = userData.LastName;
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
+                return result;
+            }
+        }
+
+
 
         public async Task<string> Login(UserLoginDto request)
         {
@@ -104,7 +146,9 @@ namespace WalletPayment.Services.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
                 return string.Empty;
             }
         } 
@@ -115,6 +159,15 @@ namespace WalletPayment.Services.Services
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        private void CreatePinHash(string pin, out byte[] pinHash, out byte[] pinSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                pinSalt = hmac.Key;
+                pinHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(pin));
             }
         }
 
@@ -151,6 +204,22 @@ namespace WalletPayment.Services.Services
                 var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return computedHash.SequenceEqual(passwordHash);
             }
+        }
+
+        private bool VerifyPinHash(string pin, byte[] pinHash, byte[] pinSalt)
+        {
+            if (string.IsNullOrWhiteSpace(pin)) throw new ArgumentNullException("pin");
+
+            using (var hmac = new HMACSHA512(pinSalt))
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(pin));
+                for (int i = 0; i < computedHash.Length; i++)
+                {
+                    if (computedHash[i] != pinHash[i]) return false;
+                }
+            }
+
+            return true;
         }
     }
 }

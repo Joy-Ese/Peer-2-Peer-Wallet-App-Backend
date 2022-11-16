@@ -12,85 +12,116 @@ using WalletPayment.Models.DataObjects;
 using WalletPayment.Services.Interfaces;
 using WalletPayment.Services.Services;
 using WalletPayment.Validation.Validators;
+using NLog;
+using NLog.Web;
 
-var builder = WebApplication.CreateBuilder(args);
+var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+logger.Debug("init main");
 
-// Add services to the container.
-
-builder.Services.AddCors(options =>
+try
 {
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            //builder.WithOrigins("");
-            builder.AllowAnyOrigin();
-            builder.AllowAnyMethod();
-            builder.AllowAnyHeader();
-        });
-});
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+    //builder.Host.ConfigureLogging(logging =>
+    //{
+    //    logging.ClearProviders();
+    //    logging.AddConsole();
+    //});
 
-builder.Services.AddFluentValidation(x =>
-{
-    x.ImplicitlyValidateChildProperties = true;
-});
+    // Add services to the container.
 
-builder.Services.AddDbContext<DataContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
-// Services are injected here to be available app wide
-builder.Services.AddScoped<IUser, UserService>();
-builder.Services.AddScoped<IDashboard, DashboardService>();
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddTransient<IValidator<UserSignUpDto>, UserValidator>();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    builder.Services.AddCors(options =>
     {
-        Description = "Standard Authorization Header using the Bearer Scheme (\"bearer {token}\")",
-        In = ParameterLocation.Header,
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
+        options.AddDefaultPolicy(
+            builder =>
+            {
+                //builder.WithOrigins("");
+                builder.AllowAnyOrigin();
+                builder.AllowAnyMethod();
+                builder.AllowAnyHeader();
+            });
     });
 
-    options.OperationFilter<SecurityRequirementsOperationFilter>();
-});
+    // NLog: Setup NLog for Dependency injection
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => {
-        options.TokenValidationParameters = new TokenValidationParameters
+    builder.Services.AddControllers();
+
+    builder.Services.AddFluentValidation(x =>
+    {
+        x.ImplicitlyValidateChildProperties = true;
+    });
+
+    builder.Services.AddDbContext<DataContext>(options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    });
+
+    // Services are injected here to be available app wide
+    builder.Services.AddScoped<IUser, UserService>();
+    builder.Services.AddScoped<IDashboard, DashboardService>();
+    builder.Services.AddScoped<IAccount, AccountService>();
+    builder.Services.AddScoped<ITransaction, TransactionService>();
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddTransient<IValidator<UserSignUpDto>, UserValidator>();
+
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
         {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                .GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
+            Description = "Standard Authorization Header using the Bearer Scheme (\"bearer {token}\")",
+            In = ParameterLocation.Header,
+            Name = "Authorization",
+            Type = SecuritySchemeType.ApiKey
+        });
+
+        options.OperationFilter<SecurityRequirementsOperationFilter>();
     });
 
-var app = builder.Build();
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options => {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+                    .GetBytes(builder.Configuration.GetSection("AppSettings:Token").Value)),
+                ValidateIssuer = false,
+                ValidateAudience = false
+            };
+        });
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseCors();
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseCors();
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception exception)
+{
+    // NLog: catch setup errors
+    logger.Error(exception, "Stopped program because of exception");
+    throw;
+}
+finally
+{
+    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+    NLog.LogManager.Shutdown();
+}

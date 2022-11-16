@@ -14,6 +14,7 @@
           "Microsoft.EntityFrameworkCore.Design": "6.0.9",
           "Microsoft.EntityFrameworkCore.SqlServer": "6.0.9",
           "Microsoft.EntityFrameworkCore.Tools": "6.0.9",
+          "NLog.Web.AspNetCore": "5.1.5",
           "Swashbuckle.AspNetCore.Filters": "7.0.5",
           "WalletPayment.Models": "1.0.0",
           "WalletPayment.Validation": "1.0.0"
@@ -361,6 +362,38 @@
           }
         }
       },
+      "NLog/5.0.5": {
+        "runtime": {
+          "lib/netstandard2.0/NLog.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.5.1426"
+          }
+        }
+      },
+      "NLog.Extensions.Logging/5.1.0": {
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "6.0.0",
+          "Microsoft.Extensions.Logging": "6.0.0",
+          "NLog": "5.0.5"
+        },
+        "runtime": {
+          "lib/net6.0/NLog.Extensions.Logging.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.1.0.239"
+          }
+        }
+      },
+      "NLog.Web.AspNetCore/5.1.5": {
+        "dependencies": {
+          "NLog.Extensions.Logging": "5.1.0"
+        },
+        "runtime": {
+          "lib/net6.0/NLog.Web.AspNetCore.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.1.5.639"
+          }
+        }
+      },
       "Scrutor/3.3.0": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
@@ -565,6 +598,7 @@
           "Microsoft.AspNetCore.Authentication.JwtBearer": "6.0.9",
           "Microsoft.EntityFrameworkCore": "6.0.9",
           "Microsoft.EntityFrameworkCore.SqlServer": "6.0.9",
+          "NLog.Web.AspNetCore": "5.1.5",
           "Swashbuckle.AspNetCore.Filters": "7.0.5"
         },
         "runtime": {
@@ -574,6 +608,7 @@
       "WalletPayment.Validation/1.0.0": {
         "dependencies": {
           "FluentValidation.AspNetCore": "11.2.2",
+          "NLog.Web.AspNetCore": "5.1.5",
           "WalletPayment.Models": "1.0.0"
         },
         "runtime": {
@@ -832,6 +867,27 @@
       "sha512": "sha512-mtVirZr++rq+XCDITMUdnETD59XoeMxSpLRIII7JRI6Yj0LEDiO1pPn0ktlnIj12Ix8bfvQqQDMMIF9wC98oCA==",
       "path": "microsoft.win32.systemevents/4.7.0",
       "hashPath": "microsoft.win32.systemevents.4.7.0.nupkg.sha512"
+    },
+    "NLog/5.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-NOTWSyUEljmjMq7OqZ1X9iu4bJ+rW/o6pt79Jq8j2Q7s8DyoMMCJwe0HoCKcNjhYRJ++b+E8erH6E6WwaCTshQ==",
+      "path": "nlog/5.0.5",
+      "hashPath": "nlog.5.0.5.nupkg.sha512"
+    },
+    "NLog.Extensions.Logging/5.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-cQCKF2/iYjZUkn0d2o6VD1xkTUhIFHPYmZEm29KlTthLEzMht5aY80SwWlHZCKy0w19kaSq1jgLJSGrKsapUfg==",
+      "path": "nlog.extensions.logging/5.1.0",
+      "hashPath": "nlog.extensions.logging.5.1.0.nupkg.sha512"
+    },
+    "NLog.Web.AspNetCore/5.1.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-a7Pe6KdwIxPxcFYy6M7wLseU++tx1bBf/ROVNlcZPLfp40DPLA0KGOk1K9kvbcwPYKKLMikdSwiOyTRZZFlaXg==",
+      "path": "nlog.web.aspnetcore/5.1.5",
+      "hashPath": "nlog.web.aspnetcore.5.1.5.nupkg.sha512"
     },
     "Scrutor/3.3.0": {
       "type": "package",
