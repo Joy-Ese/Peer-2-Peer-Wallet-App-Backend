@@ -103,7 +103,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<AccountViewModel> Authenticate(string AccountNumber)
+        public async Task<AccountViewModel> AccountLookUp(string AccountNumber)
         {
             AccountViewModel result = new AccountViewModel();
             try
@@ -112,46 +112,89 @@ namespace WalletPayment.Services.Services
                 if (userData == null)
                     return result;
 
-                result.FirstName = userData.FirstName;
-                result.LastName = userData.LastName;
+                result.firstName = userData.FirstName;
+                result.lastName = userData.LastName;
+                result.status = true;
 
                 return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                _logger.LogInformation("The error occurred at",
-                    DateTime.UtcNow.ToLongTimeString());
                 return result;
             }
         }
 
 
 
-        public async Task<string> Login(UserLoginDto request)
+        public async Task<LoginViewModel> Login(UserLoginDto request)
         {
+            LoginViewModel loginResponse = new LoginViewModel();
+
             try
             {
                 var data = await _context.Users.Include(user => user.UserAccount).FirstOrDefaultAsync(user => user.Username == request.username);
-                if (data == null) return "Invalid Username or Password";
+                if (data == null)
+                {
+                    loginResponse.result = "Invalid Username or Password";
+                    return loginResponse;
+                }
 
                 if (!VerifyPasswordHash(request.password, data.PasswordHash, data.PasswordSalt))
                 {
-                    return "Invalid Username or Password";
+                    loginResponse.result = "Invalid Username or Password";
+                    return loginResponse;
                 }
 
                 string token = CreateToken(data);
+                if (token == null || token == "")
+                {
+                    loginResponse.result = "Login failed";
+                    return loginResponse;
+                }
 
-                return token;
+                loginResponse.status = true;
+                loginResponse.result = token;
+                return loginResponse;
+
+
+
+                var refreshToken = GenerateRefreshToken();
+                SetRefreshToken(refreshToken);
+
+
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                _logger.LogInformation("The error occurred at",
-                    DateTime.UtcNow.ToLongTimeString());
-                return string.Empty;
+                loginResponse.result = "An exception occured";
+                return loginResponse;
             }
         } 
+
+        private RefreshTokenViewModel GenerateRefreshToken()
+        {
+            var refreshToken = new RefreshTokenViewModel
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                ExpiresAt = DateTime.Now.AddDays(7),
+                CreatedAt = DateTime.Now
+            };
+
+            return refreshToken;
+        }
+
+        private void SetRefreshToken(RefreshTokenViewModel newRefreshTokenViewModel)
+        {
+            var Response = new HttpResponseMessage();
+            var cookie = new CookieOptions();
+
+            cookie.HttpOnly = true;
+            cookie.Expires = newRefreshTokenViewModel.ExpiresAt;
+
+            Response.Headers.Add("refreshToken", newRefreshTokenViewModel.Token); //TO CONTINUE FROM HERE
+
+        }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {

@@ -30,13 +30,16 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> Login(UserLoginDto request)
         {
             var result = await _userService.Login(request);
+            if (!result.status) return BadRequest(result);
+
             return Ok(result);
+
         }
 
-        [HttpPost("Authenticate")]
-        public async Task<IActionResult> Authenticate(string AccountNumber)
+        [HttpPost("AccountLookUp")]
+        public async Task<IActionResult> AccountLookUp(string AccountNumber)
         {
-            var result = await _userService.Authenticate(AccountNumber);
+            var result = await _userService.AccountLookUp(AccountNumber);
             return Ok(result);
         }
     }

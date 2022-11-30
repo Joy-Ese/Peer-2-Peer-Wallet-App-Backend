@@ -31,6 +31,14 @@ namespace WalletPayment.Models.DataObjects
         public string Balance { get; set; } = string.Empty;
     }
 
+    public class TransactionViewModel
+    {
+        public decimal amount { get; set; }
+        public string sourceAccount { get; set; }
+        public string destinationAccount { get; set; }
+        public DateTime date { get; set; }
+    }
+
     public class UserSignUpDto
     {
         public string username { get; set; } = string.Empty;
@@ -61,8 +69,9 @@ namespace WalletPayment.Models.DataObjects
 
     public class AccountViewModel
     {
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
+        public string firstName { get; set; } = string.Empty;
+        public string lastName { get; set; } = string.Empty;
+        public bool status { get; set; }
     }
 
     public class TransactionDto
@@ -70,6 +79,19 @@ namespace WalletPayment.Models.DataObjects
         public string sourceAccount { get; set; } = string.Empty;
         public string destinationAccount { get; set; } = string.Empty;
         public decimal amount { get; set; } 
+    }
+
+    public class LoginViewModel
+    {
+        public bool status { get; set; }
+        public string result { get; set; } = string.Empty;
+    }
+
+    public class RefreshTokenViewModel
+    {
+        public string Token { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime ExpiresAt { get; set; }
     }
 
 

@@ -11,7 +11,7 @@ namespace WalletPayment.Services.Interfaces
     public interface IUser
     {
         Task<UserSignUpDto> Register(UserSignUpDto request);
-        Task<string> Login(UserLoginDto request);
-        Task<AccountViewModel> Authenticate(string AccountNumber);
+        Task<LoginViewModel> Login(UserLoginDto request);
+        Task<AccountViewModel> AccountLookUp(string AccountNumber);
     }
 }

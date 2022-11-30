@@ -25,51 +25,10 @@ namespace WalletPayment.Services.Services
             AccountViewModel getAccountInfo = new AccountViewModel();
             try
             {
-
-                //string accNum;
-                //if (_httpContextAccessor.HttpContext == null)
-                //{
-                //    return new Account();
-                //}
-
-                //accNum = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.AccountNumber)?.Value;
-
-
-                //var userData = await _context.Users
-                //                .Where(userAccInfo => userAccInfo.Equals(_context.Accounts.) == AccountNumber)
-                //                .Select(userAccInfo => new AccountViewModel
-                //                {
-                //                    FirstName = userAccInfo.FirstName,
-                //                    LastName = userAccInfo.LastName
-                //                })
-                //                .FirstOrDefaultAsync();
-
-                //if (userData == null) return new Account();
-
-                //return userData;
-
-
-
-
                 var account = _context.Accounts.Where(x => x.AccountNumber == AccountNumber).FirstOrDefault();
                 if (account == null) return null;
 
                 return account;
-
-
-
-
-                //var accountData = await _context.Accounts.Where(
-                //                getData => getData.AccountNumber == AccountNumber).
-                //                Select(getAccountData => new AccountDto
-                //                {
-                //                    FirstName = getAccountData.User.FirstName,
-                //                    LastName = getAccountData.User.LastName,
-                //                }).FirstOrDefaultAsync();
-
-
-                //if (accountData == null) return new Account();
-                //return accountData;
 
             }
             catch (Exception ex)

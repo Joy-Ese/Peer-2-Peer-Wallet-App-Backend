@@ -34,9 +34,9 @@ namespace WalletPayment.Services.Services
             _logger.LogDebug(1, "Nlog injected into TransactionService");
         }
 
-        public async Task<Response> FindTransactionByDate(DateTime date)
+        public async Task<Responses> FindTransactionByDate(DateTime date)
         {
-            Response response = new Response();
+            Responses response = new Responses();
             var transaction = _context.Transactions.Where(tran => tran.TransactionDate == date).ToList();
 
             response.ResponseCode = "00";
@@ -46,9 +46,9 @@ namespace WalletPayment.Services.Services
             return response;
         }
 
-        public async Task<Response> TransferFund(TransactionDto request)
+        public async Task<Responses> TransferFund(TransactionDto request)
         {
-            Response response = new Response();
+            Responses response = new Responses();
             Transaction transaction = new Transaction();
 
             try
@@ -79,7 +79,6 @@ namespace WalletPayment.Services.Services
                     throw new ApplicationException("Transaction failed");
                 }
 
-                transaction.TransactionType = TranType.Transfer;
                 transaction.TranSourceAccount = request.sourceAccount;
                 transaction.TranDestinationAccount = request.destinationAccount;
                 transaction.TransactionAmount = request.amount;
@@ -102,9 +101,31 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<List<TransactionViewModel>> GetTransactionDetails(string AccountNumber)
+        {
+            List<TransactionViewModel> transactionsList = new List<TransactionViewModel>();
+            try
+            {
+                var data = await _context.Transactions.Where(a => a.TranSourceAccount == AccountNumber).ToListAsync();
+                data.ForEach(t => transactionsList.Add(new TransactionViewModel
+                {
+                    amount = t.TransactionAmount,
+                    sourceAccount = t.TranSourceAccount,
+                    destinationAccount = t.TranDestinationAccount,
+                    date = t.TransactionDate,
+                }));
 
+                return transactionsList;
 
-
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
+                return new List<TransactionViewModel>();
+            }
+        }
 
     }
 }

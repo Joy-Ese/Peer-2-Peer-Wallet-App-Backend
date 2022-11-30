@@ -22,7 +22,9 @@ namespace WalletPayment.Validation.Validators
             RuleFor(x => x.firstName).NotEmpty().WithMessage("First name required").Length(3, 100);
             RuleFor(x => x.lastName).NotEmpty().WithMessage("Last name required").Length(3, 100);
             RuleFor(x => x.address).NotEmpty().WithMessage("Address required").Length(3, 100);
-            
+            RuleFor(x => x.pin).Matches("^[0-9]{4}$")
+                .WithMessage("Pin required");
+
         }
     }
 }

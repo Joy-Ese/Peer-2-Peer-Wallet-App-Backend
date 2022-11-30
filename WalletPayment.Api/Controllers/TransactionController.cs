@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WalletPayment.Models.DataObjects;
 using WalletPayment.Services.Interfaces;
@@ -27,7 +28,12 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-
+        [HttpGet("TransactionDetails")]
+        public async Task<IActionResult> GetTransactionDetails(string AccountNumber)
+        {
+            var result = await _transactionService.GetTransactionDetails(AccountNumber);
+            return Ok(result);
+        }
 
     }
 }

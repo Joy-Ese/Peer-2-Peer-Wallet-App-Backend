@@ -10,10 +10,9 @@ namespace WalletPayment.Services.Interfaces
 {
     public interface ITransaction
     {
-        Task<Response> FindTransactionByDate(DateTime date);
-        Task<Response> TransferFund(TransactionDto request);
-
-
+        Task<Responses> FindTransactionByDate(DateTime date);
+        Task<Responses> TransferFund(TransactionDto request);
+        Task<List<TransactionViewModel>> GetTransactionDetails(string AccountNumber);
 
     }
 }
