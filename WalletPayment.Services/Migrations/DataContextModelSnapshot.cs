@@ -52,6 +52,34 @@ namespace WalletPayment.Services.Migrations
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -147,8 +175,21 @@ namespace WalletPayment.Services.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.RefreshToken", b =>
+                {
+                    b.HasOne("WalletPayment.Models.Entites.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.User", b =>
                 {
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("UserAccount")
                         .IsRequired();
                 });

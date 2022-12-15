@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WalletPayment.Models.DataObjects;
 using WalletPayment.Models.Entites;
@@ -36,10 +37,10 @@ namespace WalletPayment.Api.Controllers
 
         }
 
-        [HttpPost("AccountLookUp")]
-        public async Task<IActionResult> AccountLookUp(string AccountNumber)
+        [HttpPost("RefreshToken"), Authorize]
+        public async Task<IActionResult> RefreshToken()
         {
-            var result = await _userService.AccountLookUp(AccountNumber);
+            var result = await _userService.RefreshToken();
             return Ok(result);
         }
     }

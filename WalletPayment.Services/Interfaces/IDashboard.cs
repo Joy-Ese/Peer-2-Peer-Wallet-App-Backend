@@ -11,6 +11,11 @@ namespace WalletPayment.Services.Interfaces
     {
         Task<UserDashboardViewModel> GetUserDetails();
 
+        Task<UserBalanceViewModel> GetUserAccountBalance();
+
+        Task<UserDashboardViewModel> GetUserAccountNumber();
+
+        Task<UserUpdateViewModel> UpdateUserProfile(UserUpdateDto request);
     }
 }
 

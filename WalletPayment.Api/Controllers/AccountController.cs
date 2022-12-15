@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WalletPayment.Models.Entites;
 using WalletPayment.Services.Interfaces;
@@ -18,15 +19,20 @@ namespace WalletPayment.Api.Controllers
             _accountService = accountService;
         }
 
-        [HttpGet("GetByAccountNumber")]
+        [HttpGet("GetByAccountNumber"), Authorize]
         public async Task<IActionResult> GetByAccountNumber(string AccountNumber)
         {
             var result = await _accountService.GetByAccountNumber(AccountNumber);
             return Ok(result);
         }
 
-
-}
+        [HttpPost("AccountLookUp"), Authorize]
+        public async Task<IActionResult> AccountLookUp(string AccountNumber)
+        {
+            var result = await _accountService.AccountLookUp(AccountNumber);
+            return Ok(result);
+        }
+    }
 }
 
 

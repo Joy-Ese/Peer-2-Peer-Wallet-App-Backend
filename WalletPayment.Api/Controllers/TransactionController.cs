@@ -21,14 +21,14 @@ namespace WalletPayment.Api.Controllers
             _userService = userService;
         }
 
-        [HttpPost("CreateTransfer")]
+        [HttpPost("CreateTransfer"), Authorize]
         public async Task<IActionResult> TransferFund(TransactionDto request)
         {
             var result = await _transactionService.TransferFund(request);
             return Ok(result);
         }
 
-        [HttpGet("TransactionDetails")]
+        [HttpGet("TransactionDetails"), Authorize]
         public async Task<IActionResult> GetTransactionDetails(string AccountNumber)
         {
             var result = await _transactionService.GetTransactionDetails(AccountNumber);

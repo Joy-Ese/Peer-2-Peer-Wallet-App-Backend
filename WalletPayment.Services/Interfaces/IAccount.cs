@@ -11,6 +11,7 @@ namespace WalletPayment.Services.Interfaces
     public interface IAccount
     {
         Task<Account> GetByAccountNumber(string AccountNumber);
+        Task<AccountViewModel> AccountLookUp(string AccountNumber);
     }
 }
 

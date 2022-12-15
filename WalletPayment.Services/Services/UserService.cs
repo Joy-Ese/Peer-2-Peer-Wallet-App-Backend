@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Linq.Dynamic;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -27,7 +30,7 @@ namespace WalletPayment.Services.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(DataContext context, IConfiguration configuration, 
+        public UserService(DataContext context, IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor, ILogger<UserService> logger)
         {
             _context = context;
@@ -103,30 +106,6 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<AccountViewModel> AccountLookUp(string AccountNumber)
-        {
-            AccountViewModel result = new AccountViewModel();
-            try
-            {
-                var userData = await _context.Users.Where(userAcc => userAcc.UserAccount.AccountNumber == AccountNumber).SingleOrDefaultAsync();
-                if (userData == null)
-                    return result;
-
-                result.firstName = userData.FirstName;
-                result.lastName = userData.LastName;
-                result.status = true;
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return result;
-            }
-        }
-
-
-
         public async Task<LoginViewModel> Login(UserLoginDto request)
         {
             LoginViewModel loginResponse = new LoginViewModel();
@@ -147,7 +126,22 @@ namespace WalletPayment.Services.Services
                 }
 
                 string token = CreateToken(data);
-                if (token == null || token == "")
+
+                var refreshToken = GenerateRefreshToken();
+                SetRefreshToken(refreshToken);
+
+                RefreshToken addRefreshTokenToDb = new RefreshToken
+                {
+                    Token = refreshToken.Token,
+                    CreatedAt = refreshToken.CreatedAt,
+                    ExpiresAt = refreshToken.ExpiresAt,
+                    UserId = data.Id
+                };
+
+                await _context.RefreshTokens.AddAsync(addRefreshTokenToDb);
+                await _context.SaveChangesAsync();
+
+                if (token == null || token == "" || refreshToken == null)
                 {
                     loginResponse.result = "Login failed";
                     return loginResponse;
@@ -155,13 +149,8 @@ namespace WalletPayment.Services.Services
 
                 loginResponse.status = true;
                 loginResponse.result = token;
+                loginResponse.refreshedToken = refreshToken.Token;
                 return loginResponse;
-
-
-
-                var refreshToken = GenerateRefreshToken();
-                SetRefreshToken(refreshToken);
-
 
             }
             catch (Exception ex)
@@ -170,7 +159,7 @@ namespace WalletPayment.Services.Services
                 loginResponse.result = "An exception occured";
                 return loginResponse;
             }
-        } 
+        }
 
         private RefreshTokenViewModel GenerateRefreshToken()
         {
@@ -184,19 +173,69 @@ namespace WalletPayment.Services.Services
             return refreshToken;
         }
 
-        private void SetRefreshToken(RefreshTokenViewModel newRefreshTokenViewModel)
+        private void SetRefreshToken(RefreshTokenViewModel newRefreshToken)
         {
             var Response = new HttpResponseMessage();
-            var cookie = new CookieOptions();
+            var cookieOptions = new CookieOptions();
 
-            cookie.HttpOnly = true;
-            cookie.Expires = newRefreshTokenViewModel.ExpiresAt;
+            cookieOptions.HttpOnly = true;
+            cookieOptions.Expires = newRefreshToken.ExpiresAt;
 
-            Response.Headers.Add("refreshToken", newRefreshTokenViewModel.Token); //TO CONTINUE FROM HERE
+            if (_httpContextAccessor.HttpContext != null)
+                _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
 
         }
 
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public async Task<LoginRefreshModel> RefreshToken()
+        {
+            LoginRefreshModel loginRefreshResponse = new LoginRefreshModel();
+            try
+            {
+                var userData = new User();
+                var refreshToken = string.Empty;
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    refreshToken = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
+                    userData.Id = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+                    userData.FirstName = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.FirstName)?.Value;
+                    userData.Username = _httpContextAccessor.HttpContext?.User?.FindFirst(CustomClaims.UserName)?.Value;
+                    //userData.UserAccount.AccountNumber = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.AccountNumber)?.Value;
+                }
+
+                var tokenData = await _context.RefreshTokens
+                                .OrderByDescending(rt => rt.Token == refreshToken && rt.UserId == userData.Id)
+                                .LastOrDefaultAsync();
+
+                if (tokenData == null)
+                {
+                    loginRefreshResponse.message = "Invalid Refresh Token";
+                    return loginRefreshResponse;
+                }
+
+                if(tokenData.ExpiresAt < DateTime.Now)
+                {
+                    loginRefreshResponse.message = "Token Expired";
+                    return loginRefreshResponse;
+                }
+
+                string token = CreateToken(userData);
+                var newRefreshT = GenerateRefreshToken();
+                SetRefreshToken(newRefreshT);
+
+                loginRefreshResponse.status = true;
+                loginRefreshResponse.token = token;
+                loginRefreshResponse.refreshToken = newRefreshT.Token;
+                return loginRefreshResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                loginRefreshResponse.message = "An exception occured";
+                return loginRefreshResponse;
+            }
+        }
+
+        public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
             {
@@ -205,7 +244,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        private void CreatePinHash(string pin, out byte[] pinHash, out byte[] pinSalt)
+        public void CreatePinHash(string pin, out byte[] pinHash, out byte[] pinSalt)
         {
             using (var hmac = new HMACSHA512())
             {
@@ -221,8 +260,7 @@ namespace WalletPayment.Services.Services
                 new Claim(CustomClaims.UserId, user.Id.ToString()),
                 new Claim(CustomClaims.UserName, user.Username),
                 new Claim(CustomClaims.FirstName, user.FirstName),
-                new Claim(CustomClaims.AccountNumber, user.UserAccount.AccountNumber),
-                new Claim(CustomClaims.Balance, user.UserAccount.Balance.ToString()),
+                //new Claim(CustomClaims.AccountNumber, user.UserAccount.AccountNumber),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
@@ -240,7 +278,7 @@ namespace WalletPayment.Services.Services
             return jwt;
         }
 
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        public bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512(passwordSalt))
             {
@@ -249,7 +287,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        private bool VerifyPinHash(string pin, byte[] pinHash, byte[] pinSalt)
+        public bool VerifyPinHash(string pin, byte[] pinHash, byte[] pinSalt)
         {
             if (string.IsNullOrWhiteSpace(pin)) throw new ArgumentNullException("pin");
 

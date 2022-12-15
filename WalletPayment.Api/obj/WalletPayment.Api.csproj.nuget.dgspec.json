@@ -54,6 +54,10 @@
               "target": "Package",
               "version": "[11.2.2, )"
             },
+            "MailKit": {
+              "target": "Package",
+              "version": "[3.4.3, )"
+            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[6.0.9, )"
@@ -90,6 +94,10 @@
               "target": "Package",
               "version": "[7.0.0, )"
             },
+            "NETCore.MailKit": {
+              "target": "Package",
+              "version": "[2.1.0, )"
+            },
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
@@ -101,6 +109,10 @@
             "Swashbuckle.AspNetCore.Filters": {
               "target": "Package",
               "version": "[7.0.5, )"
+            },
+            "System.Linq.Dynamic.Core": {
+              "target": "Package",
+              "version": "[1.2.23, )"
             }
           },
           "imports": [
@@ -165,6 +177,10 @@
               "target": "Package",
               "version": "[11.2.2, )"
             },
+            "MailKit": {
+              "target": "Package",
+              "version": "[3.4.3, )"
+            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[6.0.9, )"
@@ -189,6 +205,10 @@
               "target": "Package",
               "version": "[6.0.9, )"
             },
+            "NETCore.MailKit": {
+              "target": "Package",
+              "version": "[2.1.0, )"
+            },
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
@@ -196,6 +216,10 @@
             "Swashbuckle.AspNetCore.Filters": {
               "target": "Package",
               "version": "[7.0.5, )"
+            },
+            "System.Linq.Dynamic.Core": {
+              "target": "Package",
+              "version": "[1.2.23, )"
             }
           },
           "imports": [
@@ -264,6 +288,10 @@
               "target": "Package",
               "version": "[11.2.2, )"
             },
+            "MailKit": {
+              "target": "Package",
+              "version": "[3.4.3, )"
+            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[6.0.9, )"
@@ -288,6 +316,10 @@
               "target": "Package",
               "version": "[6.0.9, )"
             },
+            "NETCore.MailKit": {
+              "target": "Package",
+              "version": "[2.1.0, )"
+            },
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
@@ -295,6 +327,10 @@
             "Swashbuckle.AspNetCore.Filters": {
               "target": "Package",
               "version": "[7.0.5, )"
+            },
+            "System.Linq.Dynamic.Core": {
+              "target": "Package",
+              "version": "[1.2.23, )"
             }
           },
           "imports": [
@@ -360,9 +396,21 @@
               "target": "Package",
               "version": "[11.2.2, )"
             },
+            "MailKit": {
+              "target": "Package",
+              "version": "[3.4.3, )"
+            },
+            "NETCore.MailKit": {
+              "target": "Package",
+              "version": "[2.1.0, )"
+            },
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
+            },
+            "System.Linq.Dynamic.Core": {
+              "target": "Package",
+              "version": "[1.2.23, )"
             }
           },
           "imports": [

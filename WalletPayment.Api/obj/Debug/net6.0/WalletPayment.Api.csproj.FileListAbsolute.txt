@@ -10,6 +10,7 @@ C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debu
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\FluentValidation.AspNetCore.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Humanizer.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\MailKit.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.Data.SqlClient.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.dll
@@ -39,9 +40,12 @@ C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debu
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.OpenApi.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\MimeKit.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\NETCore.MailKit.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\NLog.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\NLog.Extensions.Logging.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\NLog.Web.AspNetCore.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\BouncyCastle.Crypto.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Scrutor.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Swashbuckle.AspNetCore.Filters.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll
@@ -51,6 +55,7 @@ C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debu
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Configuration.ConfigurationManager.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Drawing.Common.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Linq.Dynamic.Core.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Runtime.Caching.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Security.Permissions.dll

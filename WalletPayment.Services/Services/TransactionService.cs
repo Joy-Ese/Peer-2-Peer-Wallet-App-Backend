@@ -39,8 +39,8 @@ namespace WalletPayment.Services.Services
             Responses response = new Responses();
             var transaction = _context.Transactions.Where(tran => tran.TransactionDate == date).ToList();
 
-            response.ResponseCode = "00";
-            response.ResponseMessage = "Transaction found successfully!";
+            response.status = true;
+            response.responseMessage = "Transaction found successfully!";
             response.Data = transaction;
 
             return response;
@@ -53,19 +53,40 @@ namespace WalletPayment.Services.Services
 
             try
             {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new Responses();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var data = await _context.Users
+                    .Where(uProfile => uProfile.Id == userID)
+                    .FirstOrDefaultAsync();
+
+                if (!_userService.VerifyPinHash(request.pin, data.PinHash, data.PinSalt))
+                {
+                    response.responseMessage = "Invalid Pin";
+                    return response;
+                }
+
                 if (request.amount <= 0)
                 {
-                    throw new ApplicationException("Transfer amount cannot be zero or negative");
+                    response.responseMessage = "Transfer amount cannot be zero or negative";
+                    return response;
                 }
 
                 var sourceAccountData = await _accountService.GetByAccountNumber(request.sourceAccount);
                 var destinationAccountData = await _accountService.GetByAccountNumber(request.destinationAccount);
+
                 if (sourceAccountData == null || destinationAccountData == null)
                     throw new ApplicationException("Invalid source or desitnation account");
 
                 if (sourceAccountData.Balance < request.amount)
                 {
-                    throw new ApplicationException("Insufficient Funds");
+                    response.responseMessage = "Insufficient Funds";
+                    return response;
                 }
 
                 using var dbTransaction = _context.Database.BeginTransaction();
@@ -76,7 +97,8 @@ namespace WalletPayment.Services.Services
                 var result = await _context.SaveChangesAsync();
                 if (!(result > 0))
                 {
-                    throw new ApplicationException("Transaction failed");
+                    response.responseMessage = "Transaction failed";
+                    return response;
                 }
 
                 transaction.TranSourceAccount = request.sourceAccount;
@@ -89,13 +111,14 @@ namespace WalletPayment.Services.Services
 
                 dbTransaction.Commit();
 
+                response.status = true;
+                response.responseMessage = "Transaction successful";
                 return response;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                _logger.LogInformation("The error occurred at",
-                    DateTime.UtcNow.ToLongTimeString());
+                response.responseMessage = "An exception occured";
                 return response;
 
             }

@@ -78,13 +78,15 @@ namespace WalletPayment.Models.DataObjects
     {
         public string sourceAccount { get; set; } = string.Empty;
         public string destinationAccount { get; set; } = string.Empty;
-        public decimal amount { get; set; } 
+        public decimal amount { get; set; }
+        public string pin { get; set; } = string.Empty;
     }
 
     public class LoginViewModel
     {
         public bool status { get; set; }
         public string result { get; set; } = string.Empty;
+        public string refreshedToken { get; set; } = string.Empty;
     }
 
     public class RefreshTokenViewModel
@@ -94,6 +96,43 @@ namespace WalletPayment.Models.DataObjects
         public DateTime ExpiresAt { get; set; }
     }
 
+    public class LoginRefreshModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+        public string token { get; set; } = string.Empty;
+        public string refreshToken { get; set; } = string.Empty;
+    }
+
+    public class UserBalanceViewModel
+    {
+        public string Balance { get; set; } = string.Empty;
+    }
+
+    public class EmailDto
+    {
+        public string to { get; set; } = string.Empty;
+        public string subject { get; set; } = string.Empty;
+        public string body { get; set; } = string.Empty;
+    }
+
+    public class UserUpdateDto
+    {
+        [Required]
+        [RegularExpression(@"^[0-9]{4}$", ErrorMessage = "Pin must not be more than 4 digits")]
+        public string oldPin { get; set; } = string.Empty;
+        
+        [Required]
+        [RegularExpression(@"^[0-9]{4}$", ErrorMessage = "Pin must not be more than 4 digits")]
+        public string newPin { get; set; } = string.Empty;
+    }
+
+    public class UserUpdateViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+
+    }
 
     public class CustomClaims
     {
@@ -101,7 +140,6 @@ namespace WalletPayment.Models.DataObjects
         public const string UserName = "http://schemas.microsoft.com/ws/2008/06/identity/claims/username";
         public const string AccountNumber = "http://schemas.microsoft.com/ws/2008/06/identity/claims/accountnumber";
         public const string FirstName = "http://schemas.microsoft.com/ws/2008/06/identity/claims/firstname";
-        public const string Balance = "http://schemas.microsoft.com/ws/2008/06/identity/claims/balance";
     }
 
    

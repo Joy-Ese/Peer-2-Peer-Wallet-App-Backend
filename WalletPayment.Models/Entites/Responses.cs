@@ -9,8 +9,8 @@ namespace WalletPayment.Models.Entites
     public class Responses
     {
         public string RequestId => $"{Guid.NewGuid().ToString()}";
-        public string ResponseCode { get; set; }
-        public string ResponseMessage { get; set; }
+        public bool status { get; set; }
+        public string responseMessage { get; set; }
         public object Data { get; set; }
     }
 }

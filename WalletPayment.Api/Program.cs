@@ -57,6 +57,7 @@ try
     builder.Services.AddScoped<IDashboard, DashboardService>();
     builder.Services.AddScoped<IAccount, AccountService>();
     builder.Services.AddScoped<ITransaction, TransactionService>();
+    builder.Services.AddScoped<IEmail, EmailService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddTransient<IValidator<UserSignUpDto>, UserValidator>();
 
