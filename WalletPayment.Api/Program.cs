@@ -53,11 +53,12 @@ try
     });
 
     // Services are injected here to be available app wide
-    builder.Services.AddScoped<IUser, UserService>();
+    builder.Services.AddScoped<IAuth, AuthService>();
     builder.Services.AddScoped<IDashboard, DashboardService>();
     builder.Services.AddScoped<IAccount, AccountService>();
     builder.Services.AddScoped<ITransaction, TransactionService>();
     builder.Services.AddScoped<IEmail, EmailService>();
+    builder.Services.AddScoped<IPaystack, PaystackService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddTransient<IValidator<UserSignUpDto>, UserValidator>();
 

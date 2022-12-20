@@ -12,13 +12,13 @@ namespace WalletPayment.Api.Controllers
     {
         private readonly DataContext _context;
         private ITransaction _transactionService;
-        private IUser _userService;
+        private IAuth _authService;
 
-        public TransactionController(DataContext context, ITransaction transactionService, IUser userService)
+        public TransactionController(DataContext context, ITransaction transactionService, IAuth authService)
         {
             _context = context;
             _transactionService = transactionService;
-            _userService = userService;
+            _authService = authService;
         }
 
         [HttpPost("CreateTransfer"), Authorize]

@@ -131,8 +131,46 @@ namespace WalletPayment.Models.DataObjects
     {
         public bool status { get; set; }
         public string message { get; set; } = string.Empty;
-
     }
+
+    public class WebHookViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class PayStackRequestDto
+    {
+        public string reference { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
+        public decimal amount { get; set; } 
+        public string secretKey { get; set; } = string.Empty;
+        public string callback_url { get; set; } = string.Empty;
+    }
+
+    public class PayStackResponseViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+        public Data data { get; set; }
+    }
+
+    public class Data
+    {
+        public string authorization_url { get; set; } = string.Empty;
+        public string access_code { get; set; } = string.Empty;
+        public string reference { get; set; } = string.Empty;
+    }
+
+    public class VerifyPayStackResponseModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+        public Data data { get; set; }
+    }
+
+
+
 
     public class CustomClaims
     {

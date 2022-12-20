@@ -35,7 +35,7 @@ namespace WalletPayment.Services.Services
             try
             {
                 var email = new MimeMessage();
-                email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EmailUsername").Value));
+                email.From.Add(MailboxAddress.Parse(_configuration.GetSection("EmailFrom").Value));
                 email.To.Add(MailboxAddress.Parse(request.to));
                 email.Subject = request.subject;
                 email.Body = new TextPart(TextFormat.Plain) { Text = request.body };

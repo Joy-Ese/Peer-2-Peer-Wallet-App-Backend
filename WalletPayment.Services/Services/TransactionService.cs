@@ -17,17 +17,17 @@ namespace WalletPayment.Services.Services
     public class TransactionService : ITransaction
     {
         private readonly DataContext _context;
-        private readonly IUser _userService;
+        private readonly IAuth _authService;
         private readonly IAccount _accountService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<TransactionService> _logger;
 
 
-        public TransactionService(DataContext context, IUser userService, IAccount accountService,
+        public TransactionService(DataContext context, IAuth authService, IAccount accountService,
             IHttpContextAccessor httpContextAccessor, ILogger<TransactionService> logger)
         {
             _context = context;
-            _userService = userService;
+            _authService = authService;
             _accountService = accountService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
@@ -65,7 +65,7 @@ namespace WalletPayment.Services.Services
                     .Where(uProfile => uProfile.Id == userID)
                     .FirstOrDefaultAsync();
 
-                if (!_userService.VerifyPinHash(request.pin, data.PinHash, data.PinSalt))
+                if (!_authService.VerifyPinHash(request.pin, data.PinHash, data.PinSalt))
                 {
                     response.responseMessage = "Invalid Pin";
                     return response;
