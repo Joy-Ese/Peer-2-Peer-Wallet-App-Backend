@@ -27,13 +27,15 @@ namespace WalletPayment.Services.Services
     {
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IEmail _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(DataContext context, IConfiguration configuration,
+        public AuthService(DataContext context,IEmail emailService, IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger)
         {
             _context = context;
+            _emailService = emailService;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
@@ -48,12 +50,16 @@ namespace WalletPayment.Services.Services
 
         public async Task<UserSignUpDto> Register(UserSignUpDto request)
         {
+            RegisterViewModel registerResponse = new RegisterViewModel();
             try
             {
-                var data = await _context.Users.AnyAsync(user => user.Username == request.username);
+                var data = await _context.Users
+                    .AnyAsync(user => user.Username == request.username || user.PhoneNumber == request.phoneNumber || user.Email == request.email);
+                
                 if (data)
                 {
                     _logger.LogWarning($"Duplicate username supplied {request.username}");
+                    registerResponse.message = "Duplicate username or phonenumber or email";
                     return null;
                 }
 
@@ -78,10 +84,9 @@ namespace WalletPayment.Services.Services
                     PinHash = pinHash,
                     PinSalt = pinSalt
                 };
-
                 var userResult = await _context.Users.AddAsync(newUser);
                 var result1 = await _context.SaveChangesAsync();
-
+                
                 Account newAccount = new Account
                 {
                     AccountNumber = generatedAcc,
@@ -92,6 +97,14 @@ namespace WalletPayment.Services.Services
 
                 await _context.Accounts.AddAsync(newAccount);
                 var result = await _context.SaveChangesAsync();
+                var token = new CancellationToken();
+
+                var sendEmail = new EmailDto
+                {
+                    to = request.email,
+                };
+                await _emailService.SendEmail(sendEmail, request.email, token);
+
 
                 if (!(result > 0)) return null;
 

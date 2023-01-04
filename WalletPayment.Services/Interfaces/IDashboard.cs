@@ -10,12 +10,11 @@ namespace WalletPayment.Services.Interfaces
     public interface IDashboard
     {
         Task<UserDashboardViewModel> GetUserDetails();
-
         Task<UserBalanceViewModel> GetUserAccountBalance();
-
         Task<UserDashboardViewModel> GetUserAccountNumber();
-
-        Task<UserUpdateViewModel> UpdateUserProfile(UserUpdateDto request);
+        Task<UserDashboardViewModel> GetUserEmail();
+        Task<UserUpdateViewModel> UpdateUserPin(UserUpdateDto request);
+        Task<UserProfileViewModel> GetUserProfile();
     }
 }
 

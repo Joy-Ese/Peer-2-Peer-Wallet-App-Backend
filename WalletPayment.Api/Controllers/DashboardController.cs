@@ -41,12 +41,26 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPut("UserProfile"), Authorize]
-        public async Task<IActionResult> UpdateUserProfile([FromBody]UserUpdateDto request)
+        [HttpGet("UserEmail"), Authorize]
+        public async Task<IActionResult> GetUserEmail()
         {
-            var result = await _dashboardService.UpdateUserProfile(request);
+            var result = await _dashboardService.GetUserEmail();
+            return Ok(result);
+        }
+
+        [HttpPut("UpdateUserPin"), Authorize]
+        public async Task<IActionResult> UpdateUserPin([FromBody]UserUpdateDto request)
+        {
+            var result = await _dashboardService.UpdateUserPin(request);
             if (!result.status) return BadRequest(result);
 
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserProfile"), Authorize]
+        public async Task<IActionResult> GetUserProfile()
+        {
+            var result = await _dashboardService.GetUserProfile();
             return Ok(result);
         }
     }

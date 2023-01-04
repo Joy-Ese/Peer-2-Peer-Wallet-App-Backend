@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WalletPayment.Models.DataObjects;
 using WalletPayment.Services.Interfaces;
@@ -18,10 +19,10 @@ namespace WalletPayment.Api.Controllers
             _emailService = emailService;
         }
 
-        [HttpPost("SendEmail")]
+        [HttpPost("SendEmail"), Authorize]
         public async Task<IActionResult> SendEmail(EmailDto request)
         {
-            bool result = await _emailService.SendEmail(request, new CancellationToken());
+            bool result = await _emailService.SendEmail(request, request.to, new CancellationToken());
             if (!result)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");

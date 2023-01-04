@@ -10,9 +10,10 @@ namespace WalletPayment.Services.Interfaces
 {
     public interface IPaystack
     {
-        Task<string> InitializePaystackPayment();
-        //Task WebHookPaystack(WebHookViewModel WebHookViewModel);
-
+        Task<PayStackResponseViewModel> InitializePaystackPayment(RequestDto req);
+        Task<WebHookEventViewModel> WebHookPaystack();
+        Task<VerifyPayStackResponseViewModel> VerifyPaystackPayment();
+        public string ReferenceGenerator();
     }
 }
 

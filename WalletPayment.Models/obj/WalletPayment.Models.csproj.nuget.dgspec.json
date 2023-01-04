@@ -48,6 +48,10 @@
               "target": "Package",
               "version": "[3.4.3, )"
             },
+            "Microsoft.AspNet.WebApi.Client": {
+              "target": "Package",
+              "version": "[5.2.9, )"
+            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[6.0.9, )"
@@ -79,6 +83,10 @@
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.2, )"
             },
             "Swashbuckle.AspNetCore.Filters": {
               "target": "Package",

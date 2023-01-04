@@ -21,26 +21,25 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPost("InitializePaystackPayment"), Authorize]
-        public async Task<IActionResult> InitializePaystackPayment()
+        public async Task<IActionResult> InitializePaystackPayment(RequestDto req)
         {
-            var result = await _paystackService.InitializePaystackPayment();
-            return Redirect(result);
+            var result = await _paystackService.InitializePaystackPayment(req);
+            return Ok(result);
         }
 
-        //[HttpPost("WebHook")]
-        //[ProducesResponseType(200)]
-        //[ProducesResponseType(400)]
-        //[ProducesResponseType(404)]
-        //public async Task<IActionResult> WebHookPaystack(WebHookViewModel WebHookViewModel)
-        //{
-        //    var result = await _paystackService.WebHookPaystack();
-        //    return Ok("hook reached");
-        //}
+        [HttpPost("WebHook")]
+        public async Task<IActionResult> WebHookPaystack()
+        {
+            await _paystackService.WebHookPaystack();
+            return Ok();
+        }
 
-        //[HttpGet("VerifyPaystackPayment"), Authorize]
-
-
-
+        [HttpGet("VerifyPaystackPayment"), Authorize]
+        public async Task<IActionResult> VerifyPaystackPayment()
+        {
+            var result = await _paystackService.VerifyPaystackPayment();
+            return Ok(result);
+        }
     }
 }
 

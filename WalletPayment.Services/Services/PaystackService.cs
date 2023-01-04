@@ -1,10 +1,19 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using WalletPayment.Services.Interfaces;
 using WalletPayment.Services.Data;
 using WalletPayment.Models.DataObjects;
+using Newtonsoft.Json;
 using System.Net;
+using System.Net.Http.Headers;
+using RestSharp;
+using Stripe;
+using Newtonsoft.Json.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WalletPayment.Services.Services
 {
@@ -31,53 +40,128 @@ namespace WalletPayment.Services.Services
             return referenceString;
         }
 
-        public async Task<string> InitializePaystackPayment()
+        public async Task<PayStackResponseViewModel> InitializePaystackPayment(RequestDto req)
         {
+            PayStackResponseViewModel model = new PayStackResponseViewModel();
             try
             {
-                PayStackRequestDto requestModel = new PayStackRequestDto();
-                PayStackResponseViewModel model = new PayStackResponseViewModel();
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return model;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+                var userInfo = await _context.Users.Where(u => u.Id == userID).FirstOrDefaultAsync();
 
                 string referenceString = ReferenceGenerator();
+                var secKey = _configuration.GetSection("SecretKey").Value;
 
-                requestModel.amount = requestModel.amount * 100;
-                var secKey = string.Format("Bearer", _configuration.GetSection("SecretKey").Value);
-                requestModel.email = //how to assign user email to this variable????;
+                if (req.amount <= 0)
+                {
+                    model.message = "Transfer amount cannot be zero or negative";
+                    return model;
+                }
 
-                requestModel.reference = referenceString;
+                int newAmt = (int)req.amount * 100;
 
-                var paystackApi = "https://api.paystack.co/transaction/initialize";
+                var postData = new
+                {
+                    email = userInfo.Email,
+                    amount = newAmt,
+                    currency = "NGN",
+                    reference = referenceString
+                };
 
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-                var http = (HttpWebRequest)WebRequest.Create(new Uri(paystackApi));
-                http.Headers.Add("Authorization", secKey);
-                http.Accept = "application/json";
-                http.ContentType = "application/json";
-                http.Method = "POST";
+                var client = new RestClient(_configuration.GetSection("PaystackInitializeApi").Value);
 
+                var request = new RestRequest();
+                request.Method = RestSharp.Method.Post;
+                request.AddJsonBody(JsonConvert.SerializeObject(postData));
+                request.AddHeader("Accept", "application/json");
+                request.AddHeader("Authorization", $"Bearer {secKey}");
 
+                RestResponse response = await client.ExecuteAsync(request);
 
-                return model.data.authorization_url;
+                var result = JsonConvert.DeserializeObject<PayStackResponseViewModel>(response.Content);
+                
+                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return string.Empty;
+                return model;
             }
         }
 
-        //public async Task WebHookPaystack(WebHookViewModel WebHookViewModel)
-        //{
-        //    try
-        //    {
-        //        Stream s = _httpContextAccessor.HttpContext.Request.Body;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-        //    }
-        //}
+        public async Task<WebHookEventViewModel> WebHookPaystack()
+        {
+            WebHookEventViewModel webHookEventViewModel = new WebHookEventViewModel();
+            try
+            {
+                String secKey = _configuration.GetSection("SecretKey").Value;
+                var jsonInput = JsonConvert.SerializeObject(_httpContextAccessor.HttpContext.Request.Body);
+                String result = "";
 
+                byte[] secretkeyBytes = Encoding.UTF8.GetBytes(secKey);
+                byte[] inputBytes = Encoding.UTF8.GetBytes(jsonInput);
+
+                using (var hmac = new HMACSHA512(secretkeyBytes))
+                {
+                    byte[] hashValue = hmac.ComputeHash(inputBytes);
+                    result = BitConverter.ToString(hashValue).Replace("-", string.Empty);
+                }
+                Console.WriteLine(result);
+
+                String xpaystackSignature = "x-paystack-signature";
+
+                var webHookEvent = JsonConvert.DeserializeObject<WebHookEventViewModel>(jsonInput);
+
+                if (result.ToLower().Equals(xpaystackSignature))
+                {
+                    if (!(webHookEvent.@event == "charge.success"))
+                    {
+                        return webHookEventViewModel;
+                    }
+                }
+
+                return webHookEvent;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return webHookEventViewModel;
+            }
+        }
+
+        public async Task<VerifyPayStackResponseViewModel> VerifyPaystackPayment()
+        {
+            VerifyPayStackResponseViewModel verifyModel = new VerifyPayStackResponseViewModel();
+            try
+            {
+                string referenceString = ReferenceGenerator();
+                var secKey = _configuration.GetSection("SecretKey").Value;
+
+                var client = new RestClient(_configuration.GetSection("PaystackVerifyApi").Value) + referenceString;
+
+                var request = new RestRequest();
+                request.Method = RestSharp.Method.Get;
+                request.AddHeader("Authorization", $"Bearer {secKey}");
+
+                //RestResponse response = await client.ExecuteAsync(request);
+
+                //var result = JsonConvert.DeserializeObject<VerifyPayStackResponseViewModel>(response.Content);
+
+                verifyModel.status = true;
+                verifyModel.message = "Payment Verified";
+                return verifyModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return verifyModel;
+            }
+        }
     }
 }
 

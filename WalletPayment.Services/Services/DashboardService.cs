@@ -122,7 +122,38 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<UserUpdateViewModel> UpdateUserProfile(UserUpdateDto request)
+        public async Task<UserDashboardViewModel> GetUserEmail()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new UserDashboardViewModel();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userEmail = await _context.Users
+                                .Where(uEmail => uEmail.Id == userID)
+                                .Select(uEmail => new UserDashboardViewModel
+                                {
+                                    Email = uEmail.Email,
+                                })
+                                .FirstOrDefaultAsync();
+
+                if (userEmail == null) return new UserDashboardViewModel();
+
+                return userEmail;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return new UserDashboardViewModel();
+            }
+        }
+
+        public async Task<UserUpdateViewModel> UpdateUserPin(UserUpdateDto request)
         {
             UserUpdateViewModel updatedUser = new UserUpdateViewModel();
             try
@@ -164,6 +195,42 @@ namespace WalletPayment.Services.Services
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 updatedUser.message = "An exception occured";
                 return updatedUser;
+            }
+        }
+
+        public async Task<UserProfileViewModel> GetUserProfile()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new UserProfileViewModel();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userPROFILE = await _context.Users
+                                .Where(p => p.Id == userID)
+                                .Select(p => new UserProfileViewModel
+                                {
+                                    firstName = p.FirstName,
+                                    lastName = p.LastName,
+                                    username = p.Username,
+                                    phoneNumber = p.PhoneNumber,
+                                    email = p.Email,
+                                    address = p.Address,
+                                })
+                                .FirstOrDefaultAsync();
+
+                if (userPROFILE == null) return new UserProfileViewModel();
+
+                return userPROFILE;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return new UserProfileViewModel();
             }
         }
     }

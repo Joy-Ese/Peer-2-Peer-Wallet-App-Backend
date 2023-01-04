@@ -29,6 +29,7 @@ namespace WalletPayment.Models.DataObjects
         public string LastName { get; set; } = string.Empty;
         public string AccountNumber { get; set; } = string.Empty;
         public string Balance { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
     }
 
     public class TransactionViewModel
@@ -89,6 +90,11 @@ namespace WalletPayment.Models.DataObjects
         public string refreshedToken { get; set; } = string.Empty;
     }
 
+    public class RegisterViewModel
+    {
+        public string message { get; set; } = string.Empty;
+    }
+
     public class RefreshTokenViewModel
     {
         public string Token { get; set; } = string.Empty;
@@ -112,8 +118,6 @@ namespace WalletPayment.Models.DataObjects
     public class EmailDto
     {
         public string to { get; set; } = string.Empty;
-        public string subject { get; set; } = string.Empty;
-        public string body { get; set; } = string.Empty;
     }
 
     public class UserUpdateDto
@@ -133,19 +137,27 @@ namespace WalletPayment.Models.DataObjects
         public string message { get; set; } = string.Empty;
     }
 
-    public class WebHookViewModel
+    public class UserProfileViewModel
     {
-        public bool status { get; set; }
-        public string message { get; set; } = string.Empty;
+        public string firstName { get; set; } = string.Empty;
+        public string lastName { get; set; } = string.Empty;
+        public string username { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
+        public string phoneNumber { get; set; } = string.Empty;
+        public string address { get; set; } = string.Empty;
+    }
+
+    public class RequestDto
+    {
+        public decimal amount { get; set; }
     }
 
     public class PayStackRequestDto
     {
         public string reference { get; set; } = string.Empty;
         public string email { get; set; } = string.Empty;
+        public string currency { get; set; } = string.Empty;
         public decimal amount { get; set; } 
-        public string secretKey { get; set; } = string.Empty;
-        public string callback_url { get; set; } = string.Empty;
     }
 
     public class PayStackResponseViewModel
@@ -161,14 +173,6 @@ namespace WalletPayment.Models.DataObjects
         public string access_code { get; set; } = string.Empty;
         public string reference { get; set; } = string.Empty;
     }
-
-    public class VerifyPayStackResponseModel
-    {
-        public bool status { get; set; }
-        public string message { get; set; } = string.Empty;
-        public Data data { get; set; }
-    }
-
 
 
 
