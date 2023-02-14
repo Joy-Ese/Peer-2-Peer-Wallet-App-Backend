@@ -18,6 +18,7 @@ namespace WalletPayment.Services.Data
         public DbSet<Transaction> Transactions { get; set; }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<PaystackDeposit> PaystackDeposits { get; set; }
 
     }
 }

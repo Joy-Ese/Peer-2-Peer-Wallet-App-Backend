@@ -33,7 +33,7 @@ namespace WalletPayment.Models.Entites
         public byte[] PinSalt { get; set; }
 
         public virtual Account UserAccount { get; set; }
-
         public virtual List<RefreshToken> RefreshTokens { get; set; }
+        public virtual List<PaystackDeposit> PaystackDeposits { get; set; }
     }
 }

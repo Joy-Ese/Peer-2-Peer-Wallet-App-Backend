@@ -92,6 +92,7 @@ namespace WalletPayment.Models.DataObjects
 
     public class RegisterViewModel
     {
+        public bool status { get; set; }
         public string message { get; set; } = string.Empty;
     }
 
@@ -118,6 +119,9 @@ namespace WalletPayment.Models.DataObjects
     public class EmailDto
     {
         public string to { get; set; } = string.Empty;
+        public string body { get; set; } = string.Empty;
+        public string subject { get; set; } = string.Empty;
+        public List<KeyValuePair<string, string>> placeHolders { get; set; }
     }
 
     public class UserUpdateDto

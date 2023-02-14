@@ -29,7 +29,7 @@ try
         options.AddDefaultPolicy(
             builder =>
             {
-                //builder.WithOrigins("");
+                //builder.WithOrigins("http://localhost:4200/");
                 builder.AllowAnyOrigin();
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();
@@ -58,7 +58,7 @@ try
     builder.Services.AddScoped<IAccount, AccountService>();
     builder.Services.AddScoped<ITransaction, TransactionService>();
     builder.Services.AddScoped<IEmail, EmailService>();
-    builder.Services.AddScoped<IPaystack, PaystackService>();
+    builder.Services.AddScoped<IPayment, PaymentService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddTransient<IValidator<UserSignUpDto>, UserValidator>();
 

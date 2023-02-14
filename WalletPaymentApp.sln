@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WalletPayment.Models", "Wal
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WalletPayment.Services", "WalletPayment.Services\WalletPayment.Services.csproj", "{8EEB02FC-6969-4671-AAE3-BDA172420C77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletPayment.Validation", "WalletPayment.Validation\WalletPayment.Validation.csproj", "{198E3718-E499-44B9-A497-8EA279221F5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WalletPayment.Validation", "WalletPayment.Validation\WalletPayment.Validation.csproj", "{198E3718-E499-44B9-A497-8EA279221F5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

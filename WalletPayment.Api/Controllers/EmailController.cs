@@ -22,7 +22,31 @@ namespace WalletPayment.Api.Controllers
         [HttpPost("SendEmail"), Authorize]
         public async Task<IActionResult> SendEmail(EmailDto request)
         {
-            bool result = await _emailService.SendEmail(request, request.to, new CancellationToken());
+            bool result = await _emailService.SendEmail(request, request.to);
+            if (!result)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
+        }
+
+        [HttpPost("SendCreditEmail"), Authorize]
+        public async Task<IActionResult> SendCreditEmail(EmailDto request)
+        {
+            bool result = await _emailService.SendCreditEmail(request, request.to);
+            if (!result)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
+        }
+
+        [HttpPost("SendDebitEmail"), Authorize]
+        public async Task<IActionResult> SendDebitEmail(EmailDto request)
+        {
+            bool result = await _emailService.SendDebitEmail(request, request.to);
             if (!result)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");

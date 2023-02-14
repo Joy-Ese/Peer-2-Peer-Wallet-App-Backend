@@ -52,6 +52,46 @@ namespace WalletPayment.Services.Migrations
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.PaystackDeposit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal>("PaystackAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PaystackCurrency")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaystackDepositStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaystackEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaystackReference")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StatusMessage")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PaystackDeposits");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -175,6 +215,17 @@ namespace WalletPayment.Services.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.PaystackDeposit", b =>
+                {
+                    b.HasOne("WalletPayment.Models.Entites.User", "User")
+                        .WithMany("PaystackDeposits")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.RefreshToken", b =>
                 {
                     b.HasOne("WalletPayment.Models.Entites.User", "User")
@@ -188,6 +239,8 @@ namespace WalletPayment.Services.Migrations
 
             modelBuilder.Entity("WalletPayment.Models.Entites.User", b =>
                 {
+                    b.Navigation("PaystackDeposits");
+
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("UserAccount")

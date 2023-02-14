@@ -14,7 +14,7 @@ namespace WalletPayment.Validation.Validators
         {
             RuleFor(x => x.username).NotEmpty().WithMessage("Username required").Length(3, 100);
             RuleFor(x => x.password).NotEmpty().Matches("^[a-zA-Z0-9]{6,}$")
-                .WithMessage("Minimum eight characters, at least one uppercase letter, one lowercase letter and one number");
+                .WithMessage("Minimum six characters, at least one uppercase letter, one lowercase letter and one number");
             RuleFor(x => x.email).EmailAddress().Matches("^[a-zA-Z0-9]+@[a-z]+.[a-z]{2,3}$")
                 .WithMessage("Input correct email syntax");
             RuleFor(x => x.phoneNumber).Matches("^[0-9]{11}$")

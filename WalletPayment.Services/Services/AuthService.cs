@@ -54,12 +54,13 @@ namespace WalletPayment.Services.Services
             try
             {
                 var data = await _context.Users
-                    .AnyAsync(user => user.Username == request.username || user.PhoneNumber == request.phoneNumber || user.Email == request.email);
-                
+                    .AnyAsync(user => user.Username == request.username);
+                //.AnyAsync(user => user.Username == request.username || user.PhoneNumber == request.phoneNumber || user.Email == request.email);
+
                 if (data)
                 {
                     _logger.LogWarning($"Duplicate username supplied {request.username}");
-                    registerResponse.message = "Duplicate username or phonenumber or email";
+                    registerResponse.message = "Duplicate username";
                     return null;
                 }
 
@@ -97,16 +98,19 @@ namespace WalletPayment.Services.Services
 
                 await _context.Accounts.AddAsync(newAccount);
                 var result = await _context.SaveChangesAsync();
-                var token = new CancellationToken();
+                //var token = new CancellationToken();
 
                 var sendEmail = new EmailDto
                 {
                     to = request.email,
                 };
-                await _emailService.SendEmail(sendEmail, request.email, token);
+                await _emailService.SendEmail(sendEmail, request.email);
 
 
-                if (!(result > 0)) return null;
+                if (!(result > 0))
+                {
+                    registerResponse.message = "Duplicate username";
+                }
 
                 return request;
             }

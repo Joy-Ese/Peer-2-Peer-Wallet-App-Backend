@@ -9,7 +9,9 @@ namespace WalletPayment.Services.Interfaces
 {
     public interface IEmail
     {
-        Task<bool> SendEmail(EmailDto request,string emailUser, CancellationToken ct);
+        Task<bool> SendEmail(EmailDto request,string emailUser);
+        Task<bool> SendCreditEmail(EmailDto request, string emailUser);
+        Task<bool> SendDebitEmail(EmailDto request,string emailUser);
     }
 }
 

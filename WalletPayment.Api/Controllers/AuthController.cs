@@ -24,7 +24,7 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> Register([FromBody] UserSignUpDto request)
         {
             var result = await _authService.Register(request);
-            return Ok("Registration Successful");
+            return Ok(result);
         }
 
         [HttpPost("Login")]
