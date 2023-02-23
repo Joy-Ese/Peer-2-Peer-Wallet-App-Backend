@@ -32,8 +32,13 @@ namespace WalletPayment.Models.Entites
 
         public byte[] PinSalt { get; set; }
 
+        public DateTime? PasswordResetTokenExpiresAt { get; set; }
+
+        public string? PasswordResetToken { get; set; } = string.Empty;
+
         public virtual Account UserAccount { get; set; }
         public virtual List<RefreshToken> RefreshTokens { get; set; }
-        public virtual List<PaystackDeposit> PaystackDeposits { get; set; }
+        public virtual List<Deposit> Deposits { get; set; }
+        public virtual List<Transaction> Transactions { get; set; }
     }
 }

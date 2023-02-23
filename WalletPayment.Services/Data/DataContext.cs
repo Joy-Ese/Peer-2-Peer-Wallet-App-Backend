@@ -5,9 +5,14 @@ namespace WalletPayment.Services.Data
 {
     public class DataContext : DbContext
     {
-        public DataContext()
-        {
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    if (!optionsBuilder.IsConfigured)
+        //    {
+        //        optionsBuilder
+        //            .UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Peer2PeerWalletPaymentdb;Trusted_Connection=True;");
+        //    }
+        //}
 
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
@@ -18,7 +23,8 @@ namespace WalletPayment.Services.Data
         public DbSet<Transaction> Transactions { get; set; }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<PaystackDeposit> PaystackDeposits { get; set; }
+
+        public DbSet<Deposit> Deposits { get; set; }
 
     }
 }

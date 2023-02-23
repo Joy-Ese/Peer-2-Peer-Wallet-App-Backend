@@ -11,15 +11,12 @@ namespace WalletPayment.Services.Services
     public class DashboardService : IDashboard
     {
         private readonly DataContext _context;
-        private readonly IAuth _authService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<DashboardService> _logger;
 
-        public DashboardService(DataContext context, IAuth authService, 
-            IHttpContextAccessor httpContextAccessor, ILogger<DashboardService> logger)
+        public DashboardService(DataContext context, IHttpContextAccessor httpContextAccessor, ILogger<DashboardService> logger)
         {
             _context = context;
-            _authService = authService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _logger.LogDebug(1, "Nlog injected into DashboardService");
@@ -172,13 +169,13 @@ namespace WalletPayment.Services.Services
 
                 if (updatedUserProfile == null) return updatedUser;
 
-                if (!_authService.VerifyPinHash(request.oldPin, updatedUserProfile.PinHash, updatedUserProfile.PinSalt))
+                if (!AuthService.VerifyPinHash(request.oldPin, updatedUserProfile.PinHash, updatedUserProfile.PinSalt))
                 {
                     updatedUser.message = "Old Pin does not match pin used during registration";
                     return updatedUser;
                 }
 
-                _authService.CreatePinHash(request.newPin, out byte[] pinHash, out byte[] pinSalt);
+                AuthService.CreatePinHash(request.newPin, out byte[] pinHash, out byte[] pinSalt);
 
                 updatedUserProfile.PinHash = pinHash;
                 updatedUserProfile.PinSalt = pinSalt;

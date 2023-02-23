@@ -2410,6 +2410,7 @@
           "FluentValidation.AspNetCore": "11.2.2",
           "MailKit": "3.4.3",
           "Microsoft.AspNet.WebApi.Client": "5.2.9",
+          "Microsoft.EntityFrameworkCore.SqlServer": "6.0.9",
           "NETCore.MailKit": "2.1.0",
           "NLog.Web.AspNetCore": "5.1.5",
           "Newtonsoft.Json": "13.0.2",

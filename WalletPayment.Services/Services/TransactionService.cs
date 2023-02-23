@@ -17,38 +17,24 @@ namespace WalletPayment.Services.Services
     public class TransactionService : ITransaction
     {
         private readonly DataContext _context;
-        private readonly IAuth _authService;
         private readonly IAccount _accountService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<TransactionService> _logger;
 
 
-        public TransactionService(DataContext context, IAuth authService, IAccount accountService,
+        public TransactionService(DataContext context, IAccount accountService,
             IHttpContextAccessor httpContextAccessor, ILogger<TransactionService> logger)
         {
             _context = context;
-            _authService = authService;
             _accountService = accountService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _logger.LogDebug(1, "Nlog injected into TransactionService");
         }
 
-        public async Task<Responses> FindTransactionByDate(DateTime date)
+        public async Task<TransactionResponseModel> TransferFund(TransactionDto request)
         {
-            Responses response = new Responses();
-            var transaction = _context.Transactions.Where(tran => tran.TransactionDate == date).ToList();
-
-            response.status = true;
-            response.responseMessage = "Transaction found successfully!";
-            response.Data = transaction;
-
-            return response;
-        }
-
-        public async Task<Responses> TransferFund(TransactionDto request)
-        {
-            Responses response = new Responses();
+            TransactionResponseModel transactionResponse = new TransactionResponseModel();
             Transaction transaction = new Transaction();
 
             try
@@ -56,7 +42,7 @@ namespace WalletPayment.Services.Services
                 int userID;
                 if (_httpContextAccessor.HttpContext == null)
                 {
-                    return new Responses();
+                    return transactionResponse;
                 }
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
@@ -65,16 +51,16 @@ namespace WalletPayment.Services.Services
                     .Where(uProfile => uProfile.Id == userID)
                     .FirstOrDefaultAsync();
 
-                if (!_authService.VerifyPinHash(request.pin, data.PinHash, data.PinSalt))
+                if (!AuthService.VerifyPinHash(request.pin, data.PinHash, data.PinSalt))
                 {
-                    response.responseMessage = "Invalid Pin";
-                    return response;
+                    transactionResponse.responseMessage = "Invalid Pin";
+                    return transactionResponse;
                 }
 
                 if (request.amount <= 0)
                 {
-                    response.responseMessage = "Transfer amount cannot be zero or negative";
-                    return response;
+                    transactionResponse.responseMessage = "Transfer amount cannot be zero or negative";
+                    return transactionResponse;
                 }
 
                 var sourceAccountData = await _accountService.GetByAccountNumber(request.sourceAccount);
@@ -85,8 +71,8 @@ namespace WalletPayment.Services.Services
 
                 if (sourceAccountData.Balance < request.amount)
                 {
-                    response.responseMessage = "Insufficient Funds";
-                    return response;
+                    transactionResponse.responseMessage = "Insufficient Funds";
+                    return transactionResponse;
                 }
 
                 using var dbTransaction = _context.Database.BeginTransaction();
@@ -97,46 +83,61 @@ namespace WalletPayment.Services.Services
                 var result = await _context.SaveChangesAsync();
                 if (!(result > 0))
                 {
-                    response.responseMessage = "Transaction failed";
-                    return response;
+                    transactionResponse.responseMessage = "Transaction failed";
+                    transaction.Status = StatusMessage.Failed.ToString();
+                    return transactionResponse;
                 }
 
                 transaction.TranSourceAccount = request.sourceAccount;
                 transaction.TranDestinationAccount = request.destinationAccount;
-                transaction.TransactionAmount = request.amount;
-                transaction.TransactionDate = DateTime.Now;
+                transaction.Amount = request.amount;
+                transaction.Date = DateTime.Now;
+                transaction.UserId = data.Id;
+                transaction.Status = StatusMessage.Successful.ToString();
 
                 await _context.Transactions.AddAsync(transaction);
                 await _context.SaveChangesAsync();
 
                 dbTransaction.Commit();
 
-                response.status = true;
-                response.responseMessage = "Transaction successful";
-                return response;
+                //var senderEmail = sourceAccountData.User.Email;
+                //var recepientEmail = destinationAccountData.User.Email;
+
+                transactionResponse.status = true;
+                transactionResponse.responseMessage = "Transaction successful";
+                return transactionResponse;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                response.responseMessage = "An exception occured";
-                return response;
+                transactionResponse.responseMessage = "An exception occured";
+                return transactionResponse;
 
             }
         }
 
-        public async Task<List<TransactionViewModel>> GetTransactionDetails(string AccountNumber)
+        public async Task<List<TransactionViewModel>> GetTransactionDetails()
         {
             List<TransactionViewModel> transactionsList = new List<TransactionViewModel>();
             try
             {
-                var data = await _context.Transactions.Where(a => a.TranSourceAccount == AccountNumber).ToListAsync();
-                data.ForEach(t => transactionsList.Add(new TransactionViewModel
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
                 {
-                    amount = t.TransactionAmount,
-                    sourceAccount = t.TranSourceAccount,
-                    destinationAccount = t.TranDestinationAccount,
-                    date = t.TransactionDate,
-                }));
+                    return transactionsList;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userTranList = await _context.Transactions
+                                    .Where(uId => uId.UserId == userID).ToListAsync();
+                        userTranList.ForEach(tranList => transactionsList.Add(new TransactionViewModel
+                        {
+                            amount = tranList.Amount,
+                            sourceAccount = tranList.TranSourceAccount,
+                            destinationAccount = tranList.TranDestinationAccount,
+                            date = tranList.Date
+                        }));
 
                 return transactionsList;
 
@@ -146,10 +147,64 @@ namespace WalletPayment.Services.Services
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 _logger.LogInformation("The error occurred at",
                     DateTime.UtcNow.ToLongTimeString());
-                return new List<TransactionViewModel>();
+                return transactionsList;
             }
         }
 
+        public async Task<List<TransactionCreditModel>> GetTransactionCreditDetails()
+        {
+            List<TransactionCreditModel> transactionsCreditList = new List<TransactionCreditModel>();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return transactionsCreditList;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                //var userLoggedInAcct = await _context.Users.Where(getID => getID.Id == userID).FirstOrDefaultAsync();
+
+                var userCreditTranList = await _context.Transactions
+                            .Where(uId => uId.Id == userID)
+                            .Select(uId => new TransactionCreditModel
+                            {
+                                amount = uId.Amount,
+                                sender = uId.User.Username,
+                                date = uId.Date
+                            })
+                            .ToListAsync();
+
+                        //userCreditTranList.ForEach(tranList => transactionsCreditList.Add(new TransactionCreditModel
+                        //{
+                        //    amount = tranList.Amount,
+                        //    sender = tranList.User.Username,
+                        //    date = tranList.Date
+                        //}));
+
+                                //await _context.Users
+                                //.Where(userInfo => userInfo.Id == userID)
+                                //.Select(userInfo => new UserDashboardViewModel
+                                //{
+                                //    Username = userInfo.Username,
+                                //    FirstName = userInfo.FirstName,
+                                //    LastName = userInfo.LastName,
+                                //    AccountNumber = userInfo.UserAccount.AccountNumber,
+                                //    Balance = userInfo.UserAccount.Balance.ToString(),
+                                //})
+                                //.FirstOrDefaultAsync();
+
+                return transactionsCreditList;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
+                return transactionsCreditList;
+            }
+        }
     }
 }
 

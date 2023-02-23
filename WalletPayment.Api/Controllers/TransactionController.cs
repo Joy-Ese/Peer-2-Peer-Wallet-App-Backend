@@ -29,12 +29,18 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpGet("TransactionDetails"), Authorize]
-        public async Task<IActionResult> GetTransactionDetails(string AccountNumber)
+        public async Task<IActionResult> GetTransactionDetails()
         {
-            var result = await _transactionService.GetTransactionDetails(AccountNumber);
+            var result = await _transactionService.GetTransactionDetails();
             return Ok(result);
         }
 
+        [HttpGet("TransactionCreditDetails"), Authorize]
+        public async Task<IActionResult> GetTransactionCreditDetails()
+        {
+            var result = await _transactionService.GetTransactionCreditDetails();
+            return Ok(result);
+        }
     }
 }
 

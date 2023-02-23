@@ -18,14 +18,17 @@ namespace WalletPayment.Api.Controllers
         private readonly IConfiguration _configuration;
         private readonly PaystackDetails? _gatewayDetails;
         private readonly DataContext _context;
+        private readonly ILogger<PaymentController> _logger;
         private IPayment _paymentService;
 
-        public PaymentController(DataContext context, IPayment paystackService, IConfiguration configuration)
+        public PaymentController(DataContext context, IPayment paystackService, IConfiguration configuration, ILogger<PaymentController> logger)
         {
             _configuration = configuration;
             _gatewayDetails = configuration.GetSection("PaystackDetails").Get<PaystackDetails>();
             _context = context;
             _paymentService = paystackService;
+            _logger = logger;
+            _logger.LogDebug(1, "Nlog injected into PaymentController");
 
         }
 
@@ -86,6 +89,7 @@ namespace WalletPayment.Api.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 return StatusCode(500);
             }
         }

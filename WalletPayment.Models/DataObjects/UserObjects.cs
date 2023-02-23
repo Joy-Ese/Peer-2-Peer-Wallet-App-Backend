@@ -35,9 +35,22 @@ namespace WalletPayment.Models.DataObjects
     public class TransactionViewModel
     {
         public decimal amount { get; set; }
-        public string sourceAccount { get; set; }
-        public string destinationAccount { get; set; }
+        public string sourceAccount { get; set; } = string.Empty;
+        public string destinationAccount { get; set; } = string.Empty;
         public DateTime date { get; set; }
+    }
+
+    public class TransactionCreditModel
+    {
+        public decimal amount { get; set; }
+        public string sender { get; set; } = string.Empty;
+        public DateTime date { get; set; }
+    }
+
+    public class TransactionResponseModel
+    {
+        public bool status { get; set; }
+        public string responseMessage { get; set; } = string.Empty;
     }
 
     public class UserSignUpDto
@@ -121,7 +134,36 @@ namespace WalletPayment.Models.DataObjects
         public string to { get; set; } = string.Empty;
         public string body { get; set; } = string.Empty;
         public string subject { get; set; } = string.Empty;
-        public List<KeyValuePair<string, string>> placeHolders { get; set; }
+    }
+
+    public class ForgetPasswordDto
+    {
+        public string email { get; set; } = string.Empty;
+    }
+
+    public class ForgetPasswordModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class GetResetPasswordModel
+    {
+        public string email { get; set; } = string.Empty;
+        public string token { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordDto
+    {
+        public string password { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
+        public string token { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
     }
 
     public class UserUpdateDto

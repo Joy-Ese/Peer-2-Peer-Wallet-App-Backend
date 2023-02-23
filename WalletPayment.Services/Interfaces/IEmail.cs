@@ -10,8 +10,12 @@ namespace WalletPayment.Services.Interfaces
     public interface IEmail
     {
         Task<bool> SendEmail(EmailDto request,string emailUser);
-        Task<bool> SendCreditEmail(EmailDto request, string emailUser);
-        Task<bool> SendDebitEmail(EmailDto request,string emailUser);
+        Task<bool> SendEmailPasswordReset(string Link, string emailUser);
+        Task<ForgetPasswordModel> ForgetPassword(ForgetPasswordDto emailReq);
+        Task<GetResetPasswordModel> GetResetPassword(string token, string email);
+        Task<ResetPasswordModel> ResetPassword(ResetPasswordDto resetPasswordReq);
+        Task<bool> SendCreditEmail(string senderEmail);
+        Task<bool> SendDebitEmail(string recepientEmail);
     }
 }
 

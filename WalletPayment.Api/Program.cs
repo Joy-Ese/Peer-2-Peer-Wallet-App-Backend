@@ -3,7 +3,6 @@ global using WalletPayment.Services.Data;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -42,11 +41,14 @@ try
 
     builder.Services.AddControllers();
 
-    builder.Services.AddFluentValidation(x =>
-    {
-        x.ImplicitlyValidateChildProperties = true;
-    });
+    //builder.Services.AddFluentValidation(x =>
+    //{
+    //    x.ImplicitlyValidateChildProperties = true;
+    //});
 
+    builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
+
+    // For EntityFramework
     builder.Services.AddDbContext<DataContext>(options =>
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

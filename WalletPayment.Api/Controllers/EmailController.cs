@@ -19,7 +19,7 @@ namespace WalletPayment.Api.Controllers
             _emailService = emailService;
         }
 
-        [HttpPost("SendEmail"), Authorize]
+        [HttpPost("SendEmail")]
         public async Task<IActionResult> SendEmail(EmailDto request)
         {
             bool result = await _emailService.SendEmail(request, request.to);
@@ -31,10 +31,10 @@ namespace WalletPayment.Api.Controllers
             return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
         }
 
-        [HttpPost("SendCreditEmail"), Authorize]
-        public async Task<IActionResult> SendCreditEmail(EmailDto request)
+        [HttpPost("SendEmailPasswordReset")]
+        public async Task<IActionResult> SendEmailPasswordReset(string Link, string emailUser)
         {
-            bool result = await _emailService.SendCreditEmail(request, request.to);
+            bool result = await _emailService.SendEmailPasswordReset(Link, emailUser);
             if (!result)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
@@ -43,10 +43,43 @@ namespace WalletPayment.Api.Controllers
             return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
         }
 
-        [HttpPost("SendDebitEmail"), Authorize]
-        public async Task<IActionResult> SendDebitEmail(EmailDto request)
+        [HttpPost("ForgetPassword")]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordDto emailReq)
         {
-            bool result = await _emailService.SendDebitEmail(request, request.to);
+            var result = await _emailService.ForgetPassword(emailReq);
+            return Ok(result);
+        }
+
+        [HttpGet("GetResetPassword")]
+        public async Task<IActionResult> GetResetPassword(string token, string email)
+        {
+            var result = await _emailService.GetResetPassword(token, email);
+            return Ok(result);
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordReq)
+        {
+            var result = await _emailService.ResetPassword(resetPasswordReq);
+            return Ok(result);
+        }
+
+        [HttpPost("SendCreditEmail")]
+        public async Task<IActionResult> SendCreditEmail(string senderEmail)
+        {
+            bool result = await _emailService.SendCreditEmail(senderEmail);
+            if (!result)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
+        }
+
+        [HttpPost("SendDebitEmail")]
+        public async Task<IActionResult> SendDebitEmail(string recepientEmail)
+        {
+            bool result = await _emailService.SendDebitEmail(recepientEmail);
             if (!result)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");

@@ -31,7 +31,7 @@ namespace WalletPayment.Services.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(DataContext context,IEmail emailService, IConfiguration configuration,
+        public AuthService(DataContext context, IEmail emailService, IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger)
         {
             _context = context;
@@ -54,8 +54,7 @@ namespace WalletPayment.Services.Services
             try
             {
                 var data = await _context.Users
-                    .AnyAsync(user => user.Username == request.username);
-                //.AnyAsync(user => user.Username == request.username || user.PhoneNumber == request.phoneNumber || user.Email == request.email);
+                .AnyAsync(user => user.Username == request.username || user.Email == request.email);
 
                 if (data)
                 {
@@ -98,7 +97,6 @@ namespace WalletPayment.Services.Services
 
                 await _context.Accounts.AddAsync(newAccount);
                 var result = await _context.SaveChangesAsync();
-                //var token = new CancellationToken();
 
                 var sendEmail = new EmailDto
                 {
@@ -216,7 +214,6 @@ namespace WalletPayment.Services.Services
                     userData.Id = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
                     userData.FirstName = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.FirstName)?.Value;
                     userData.Username = _httpContextAccessor.HttpContext?.User?.FindFirst(CustomClaims.UserName)?.Value;
-                    //userData.UserAccount.AccountNumber = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.AccountNumber)?.Value;
                 }
 
                 var tokenData = await _context.RefreshTokens
@@ -252,7 +249,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
             {
@@ -261,7 +258,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public void CreatePinHash(string pin, out byte[] pinHash, out byte[] pinSalt)
+        public static void CreatePinHash(string pin, out byte[] pinHash, out byte[] pinSalt)
         {
             using (var hmac = new HMACSHA512())
             {
@@ -277,7 +274,6 @@ namespace WalletPayment.Services.Services
                 new Claim(CustomClaims.UserId, user.Id.ToString()),
                 new Claim(CustomClaims.UserName, user.Username),
                 new Claim(CustomClaims.FirstName, user.FirstName),
-                //new Claim(CustomClaims.AccountNumber, user.UserAccount.AccountNumber),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
@@ -295,7 +291,7 @@ namespace WalletPayment.Services.Services
             return jwt;
         }
 
-        public bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        public static bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512(passwordSalt))
             {
@@ -304,7 +300,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public bool VerifyPinHash(string pin, byte[] pinHash, byte[] pinSalt)
+        public static bool VerifyPinHash(string pin, byte[] pinHash, byte[] pinSalt)
         {
             if (string.IsNullOrWhiteSpace(pin)) throw new ArgumentNullException("pin");
 

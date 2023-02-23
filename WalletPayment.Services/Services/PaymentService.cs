@@ -90,17 +90,17 @@ namespace WalletPayment.Services.Services
 
                 var result = JsonConvert.DeserializeObject<PayStackResponseViewModel>(response.Content);
 
-                PaystackDeposit paystackDepositDetails = new PaystackDeposit
+                Deposit depositDetails = new Deposit
                 {
-                    PaystackDepositStatus = StatusMessage.Pending.ToString(),
-                    PaystackReference = referenceString,
-                    PaystackEmail = userInfo.Email,
-                    PaystackAmount = req.amount,
-                    PaystackCurrency = "NGN",
-                    UserId = userInfo.Id
-                };
+                    Status = StatusMessage.Pending.ToString(),
+                    Reference = referenceString,
+                    Amount = req.amount,
+                    Currency = "NGN",
+                    UserId = userInfo.Id,
+                    Date = DateTime.Now
+            };
 
-                await _context.PaystackDeposits.AddAsync(paystackDepositDetails);
+                await _context.Deposits.AddAsync(depositDetails);
                 var resultPaystack = await _context.SaveChangesAsync();
 
                 return result;
@@ -124,20 +124,22 @@ namespace WalletPayment.Services.Services
                 }
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
-                var paystackDepositInfo = await _context.PaystackDeposits.
+                var depositInfo = await _context.Deposits.
                                             Where(pd => pd.Id == userID).FirstOrDefaultAsync();
                 var userBal = await _context.Accounts.
                                             Where(a => a.Id == userID).FirstOrDefaultAsync();
 
-                paystackDepositInfo.PaystackDepositStatus = StatusMessage.Successful.ToString();
+                depositInfo.Status = StatusMessage.Successful.ToString();
+                depositInfo.Date = DateTime.Now;
 
                 if (!(webHookEventViewModel.@event.ToLower() == "charge.success") || 
-                    !(webHookEventViewModel.data.reference == paystackDepositInfo.PaystackReference))
+                    !(webHookEventViewModel.data.reference == depositInfo.Reference))
                 {
-                    paystackDepositInfo.PaystackDepositStatus = StatusMessage.Failed.ToString();
+                    depositInfo.Status = StatusMessage.Failed.ToString();
+                    depositInfo.Date = DateTime.Now;
                 }
 
-                var newBal = userBal.Balance + paystackDepositInfo.PaystackAmount;
+                var newBal = userBal.Balance + depositInfo.Amount;
                 userBal.Balance = newBal;
                 await _context.SaveChangesAsync();
                    

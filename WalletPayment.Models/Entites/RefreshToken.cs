@@ -13,6 +13,7 @@ namespace WalletPayment.Models.Entites
         public string Token { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime ExpiresAt { get; set; }
+
         [ForeignKey("User")]
         public int UserId { get; set; }
         public virtual User User { get; set; }

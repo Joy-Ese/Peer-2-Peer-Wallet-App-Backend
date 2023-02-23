@@ -26,7 +26,7 @@ namespace WalletPayment.Services.Services
             AccountViewModel getAccountInfo = new AccountViewModel();
             try
             {
-                var account = _context.Accounts.Where(x => x.AccountNumber == AccountNumber).FirstOrDefault();
+                var account = await _context.Accounts.Where(x => x.AccountNumber == AccountNumber).FirstOrDefaultAsync();
                 if (account == null) return null;
 
                 return account;

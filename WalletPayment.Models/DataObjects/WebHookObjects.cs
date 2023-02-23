@@ -22,12 +22,12 @@ namespace WalletPayment.Models.DataObjects
         public string reference { get; set; } = string.Empty;
         public int amount { get; set; }
         public string message { get; set; } = string.Empty;
-        public string gateway_response { get; set; }
+        public string gateway_response { get; set; } = string.Empty;
         public DateTime paid_at { get; set; }
         public DateTime created_at { get; set; }
-        public string channel { get; set; }
-        public string currency { get; set; }
-        public string ip_address { get; set; }
+        public string channel { get; set; } = string.Empty;
+        public string currency { get; set; } = string.Empty;
+        public string ip_address { get; set; } = string.Empty;
         public int metadata { get; set; }
         public Log log { get; set; }
         public string fees { get; set; } = string.Empty;
@@ -73,7 +73,7 @@ namespace WalletPayment.Models.DataObjects
     {
         public int time_spent { get; set; }
         public int attempts { get; set; }
-        public string authentication { get; set; }
+        public string authentication { get; set; } = string.Empty;
         public int errors { get; set; }
         public bool success { get; set; }
         public bool mobile { get; set; }
