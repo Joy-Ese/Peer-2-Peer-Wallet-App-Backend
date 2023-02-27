@@ -283,7 +283,7 @@ namespace WalletPayment.Services.Services
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(60),
+                expires: DateTime.Now.AddMinutes(30),
                 signingCredentials: credential);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);

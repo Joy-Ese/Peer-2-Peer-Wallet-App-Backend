@@ -65,9 +65,9 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPost("SendCreditEmail")]
-        public async Task<IActionResult> SendCreditEmail(string senderEmail)
+        public async Task<IActionResult> SendCreditEmail(string senderEmail, string recipient, string amount, string balance, string date, string username)
         {
-            bool result = await _emailService.SendCreditEmail(senderEmail);
+            bool result = await _emailService.SendCreditEmail(senderEmail, recipient, amount, balance, date, username);
             if (!result)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
@@ -77,9 +77,9 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPost("SendDebitEmail")]
-        public async Task<IActionResult> SendDebitEmail(string recepientEmail)
+        public async Task<IActionResult> SendDebitEmail(string recepientEmail, string sender, string amount2, string balance2, string date2, string username2)
         {
-            bool result = await _emailService.SendDebitEmail(recepientEmail);
+            bool result = await _emailService.SendDebitEmail(recepientEmail, sender, amount2, balance2, date2, username2);
             if (!result)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");

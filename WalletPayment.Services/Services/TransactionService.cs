@@ -18,15 +18,17 @@ namespace WalletPayment.Services.Services
     {
         private readonly DataContext _context;
         private readonly IAccount _accountService;
+        private readonly IEmail _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<TransactionService> _logger;
 
 
-        public TransactionService(DataContext context, IAccount accountService,
+        public TransactionService(DataContext context, IEmail emailService, IAccount accountService,
             IHttpContextAccessor httpContextAccessor, ILogger<TransactionService> logger)
         {
             _context = context;
             _accountService = accountService;
+            _emailService = emailService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _logger.LogDebug(1, "Nlog injected into TransactionService");
@@ -98,10 +100,26 @@ namespace WalletPayment.Services.Services
                 await _context.Transactions.AddAsync(transaction);
                 await _context.SaveChangesAsync();
 
-                dbTransaction.Commit();
+                // Debit Email information
+                var senderEmail = sourceAccountData.User.Email;
+                var sender = sourceAccountData.User.FirstName;
+                var amount2 = transaction.Amount.ToString();
+                var balance2 = sourceAccountData.Balance.ToString();
+                var date2 = transaction.Date.ToLongDateString();
+                var username2 = destinationAccountData.User.Username;
 
-                //var senderEmail = sourceAccountData.User.Email;
-                //var recepientEmail = destinationAccountData.User.Email;
+                // Credit Email information
+                var recepientEmail = destinationAccountData.User.Email;
+                var recipient = destinationAccountData.User.FirstName;
+                var amount = transaction.Amount.ToString();
+                var balance = destinationAccountData.Balance.ToString();
+                var date = transaction.Date.ToLongDateString();
+                var username = sourceAccountData.User.Username;
+
+                await _emailService.SendDebitEmail(senderEmail, sender, amount2, balance2, date2, username2);
+                await _emailService.SendCreditEmail(recepientEmail, recipient, amount, balance, date, username);
+
+                dbTransaction.Commit();
 
                 transactionResponse.status = true;
                 transactionResponse.responseMessage = "Transaction successful";

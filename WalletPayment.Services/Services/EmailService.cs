@@ -196,25 +196,16 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendCreditEmail(string senderEmail)
+        public async Task<bool> SendCreditEmail(string senderEmail, string recipient, string amount, string balance, string date, string username)
         {
             try
             {
-                var userDetailFromDb = await _context.Users.FirstOrDefaultAsync(uE => uE.Email == senderEmail);
-                var userAcctDetail = await _context.Accounts.FirstOrDefaultAsync(uAcct => uAcct.User.Email == senderEmail);
-                var userTranDetail = await _context.Transactions.FirstOrDefaultAsync(uT => uT.User.Email == senderEmail);
-
-                if (userDetailFromDb == null || userAcctDetail == null || userTranDetail == null)
-                {
-                    return false;
-                }
-
                 MailMessage mail = new MailMessage();
 
                 mail.From = new MailAddress(_emailCredentials?.EmailFrom);
                 mail.To.Add(new MailAddress(senderEmail));
 
-                mail.Subject = $"Wallet App: NGN{userTranDetail.Amount} Credit transaction";
+                mail.Subject = $"Wallet App: NGN{amount} Credit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\CreditAlert.html");
                 if (!File.Exists(filePath))
@@ -227,11 +218,11 @@ namespace WalletPayment.Services.Services
                 StreamReader reader = new StreamReader(filePath);
                 mailbody = reader.ReadToEnd();
 
-                mailbody = mailbody.Replace("{FirstName}", userDetailFromDb.FirstName);
-                mailbody = mailbody.Replace("{transtime}", userTranDetail.Date.ToLongDateString());
-                mailbody = mailbody.Replace("{Amount}", userTranDetail.Amount.ToString());
-                mailbody = mailbody.Replace("{Username}", userDetailFromDb.Username);
-                mailbody = mailbody.Replace("{Balance}", userAcctDetail.Balance.ToString());
+                mailbody = mailbody.Replace("{FirstName}", recipient);
+                mailbody = mailbody.Replace("{transtime}", date);
+                mailbody = mailbody.Replace("{Amount}", amount);
+                mailbody = mailbody.Replace("{Username}", username);
+                mailbody = mailbody.Replace("{Balance}", balance);
 
                 mail.Body = mailbody;
                 mail.IsBodyHtml = true;
@@ -254,20 +245,16 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendDebitEmail(string recepientEmail)
+        public async Task<bool> SendDebitEmail(string recepientEmail, string sender, string amount2, string balance2, string date2, string username2)
         {
             try
             {
-                var userDetailFromDb = await _context.Users.FirstOrDefaultAsync(uE => uE.Email == recepientEmail);
-                var userTranDetail = await _context.Transactions.FirstOrDefaultAsync(uT => uT.User.Email == recepientEmail);
-                var userAcctDetail = await _context.Accounts.FirstOrDefaultAsync(uAcct => uAcct.User.Email == recepientEmail);
-
                 MailMessage mail = new MailMessage();
 
                 mail.From = new MailAddress(_emailCredentials?.EmailFrom);
                 mail.To.Add(new MailAddress(recepientEmail));
 
-                mail.Subject = $"Wallet App: NGN{userTranDetail.Amount} Debit transaction";
+                mail.Subject = $"Wallet App: NGN{amount2} Debit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\DebitAlert.html");
                 if (!File.Exists(filePath))
@@ -280,11 +267,11 @@ namespace WalletPayment.Services.Services
                 StreamReader reader = new StreamReader(filePath);
                 mailbody = reader.ReadToEnd();
 
-                mailbody = mailbody.Replace("{FirstName}", userDetailFromDb.FirstName);
-                mailbody = mailbody.Replace("{transtime}", userTranDetail.Date.ToLongDateString());
-                mailbody = mailbody.Replace("{Amount}", userTranDetail.Amount.ToString());
-                mailbody = mailbody.Replace("{Username}", userDetailFromDb.Username);
-                mailbody = mailbody.Replace("{Balance}", userAcctDetail.Balance.ToString());
+                mailbody = mailbody.Replace("{FirstName}", sender);
+                mailbody = mailbody.Replace("{transtime}", date2);
+                mailbody = mailbody.Replace("{Amount}", amount2);
+                mailbody = mailbody.Replace("{Username}", username2);
+                mailbody = mailbody.Replace("{Balance}", balance2);
 
                 mail.Body = mailbody;
                 mail.IsBodyHtml = true;
