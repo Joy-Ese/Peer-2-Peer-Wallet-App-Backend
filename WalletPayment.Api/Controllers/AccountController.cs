@@ -19,13 +19,6 @@ namespace WalletPayment.Api.Controllers
             _accountService = accountService;
         }
 
-        [HttpGet("GetByAccountNumber"), Authorize]
-        public async Task<IActionResult> GetByAccountNumber(string AccountNumber)
-        {
-            var result = await _accountService.GetByAccountNumber(AccountNumber);
-            return Ok(result);
-        }
-
         [HttpPost("AccountLookUp"), Authorize]
         public async Task<IActionResult> AccountLookUp(string AccountNumber)
         {

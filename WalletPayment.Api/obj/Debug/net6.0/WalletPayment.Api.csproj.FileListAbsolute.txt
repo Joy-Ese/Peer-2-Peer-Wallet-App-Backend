@@ -1,3 +1,10 @@
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.csproj.AssemblyReference.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.AssemblyInfoInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.AssemblyInfo.cs
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.csproj.CoreCompileInputs.cache
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\nlog.config
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\appsettings.Development.json
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\appsettings.json
@@ -86,13 +93,6 @@ C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debu
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Models.pdb
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Services.pdb
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Validation.pdb
-C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.csproj.AssemblyReference.cache
-C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.AssemblyInfoInputs.cache
-C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.AssemblyInfo.cs
-C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.csproj.CoreCompileInputs.cache
-C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\staticwebassets.build.json
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\staticwebassets.development.json
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\scopedcss\bundle\WalletPayment.Api.styles.css

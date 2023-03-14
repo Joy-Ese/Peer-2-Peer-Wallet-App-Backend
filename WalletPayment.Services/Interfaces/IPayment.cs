@@ -11,7 +11,7 @@ namespace WalletPayment.Services.Interfaces
     public interface IPayment
     {
         Task<PayStackResponseViewModel> InitializePaystackPayment(RequestDto req);
-        Task<WebHookEventViewModel> WebHookPaystack(WebHookEventViewModel eventData);
+        Task<WebhookDTO> WebHookPaystack(WebhookDTO eventData);
     }
 }
 

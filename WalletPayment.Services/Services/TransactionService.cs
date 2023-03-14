@@ -49,11 +49,11 @@ namespace WalletPayment.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
-                var data = await _context.Users
+                var userLoggedInDetails = await _context.Users
                     .Where(uProfile => uProfile.Id == userID)
                     .FirstOrDefaultAsync();
 
-                if (!AuthService.VerifyPinHash(request.pin, data.PinHash, data.PinSalt))
+                if (!AuthService.VerifyPinHash(request.pin, userLoggedInDetails.PinHash, userLoggedInDetails.PinSalt))
                 {
                     transactionResponse.responseMessage = "Invalid Pin";
                     return transactionResponse;
@@ -69,7 +69,10 @@ namespace WalletPayment.Services.Services
                 var destinationAccountData = await _accountService.GetByAccountNumber(request.destinationAccount);
 
                 if (sourceAccountData == null || destinationAccountData == null)
-                    throw new ApplicationException("Invalid source or desitnation account");
+                {
+                    transactionResponse.responseMessage = "Account Number does not exist";
+                    return transactionResponse;
+                }
 
                 if (sourceAccountData.Balance < request.amount)
                 {
@@ -94,7 +97,8 @@ namespace WalletPayment.Services.Services
                 transaction.TranDestinationAccount = request.destinationAccount;
                 transaction.Amount = request.amount;
                 transaction.Date = DateTime.Now;
-                transaction.UserId = data.Id;
+                transaction.SourceAccountUserId = userLoggedInDetails.Id;
+                transaction.DestinationAccountUserId = destinationAccountData.User.Id;
                 transaction.Status = StatusMessage.Successful.ToString();
 
                 await _context.Transactions.AddAsync(transaction);
@@ -134,44 +138,55 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<List<TransactionViewModel>> GetTransactionDetails()
+        //public async Task<List<TransactionViewModel>> GetTransactionDetails()
+        //{
+        //    List<TransactionViewModel> transactionsList = new List<TransactionViewModel>();
+        //    try
+        //    {
+        //        int userID;
+        //        if (_httpContextAccessor.HttpContext == null)
+        //        {
+        //            return transactionsList;
+        //        }
+
+        //        userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+        //        var userTran = await _context.Transactions.Include("User")
+        //                            .Where(uId => uId.UserId == userID).FirstOrDefaultAsync();
+
+        //        var userTranList = await _context.Transactions.Include("User")
+        //                            .Where(uId => uId.UserId == userID).ToListAsync();
+
+        //        //var acctNum = await _context.Accounts.Include("User").Where(acc => acc.UserId == userID).FirstOrDefaultAsync();
+
+        //        var getRecepient = await _context.Accounts.Include("User")
+        //                            .Where(gR => gR.AccountNumber == userTran.TranDestinationAccount).FirstOrDefaultAsync();
+
+        //        userTranList.ForEach(tranList => transactionsList.Add(new TransactionViewModel
+        //        {
+        //            amount = tranList.Amount,
+        //            sourceAccount = tranList.TranSourceAccount,
+        //            destinationAccount = tranList.TranDestinationAccount,
+        //            recepient = getRecepient.User.Username,
+        //            date = tranList.Date,
+        //            status = tranList.Status
+        //        }));
+
+        //        return transactionsList;
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+        //        _logger.LogInformation("The error occurred at",
+        //            DateTime.UtcNow.ToLongTimeString());
+        //        return transactionsList;
+        //    }
+        //}
+
+        public async Task<List<TransactionListCreditModel>> GetTransactionList()
         {
-            List<TransactionViewModel> transactionsList = new List<TransactionViewModel>();
-            try
-            {
-                int userID;
-                if (_httpContextAccessor.HttpContext == null)
-                {
-                    return transactionsList;
-                }
-
-                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
-
-                var userTranList = await _context.Transactions
-                                    .Where(uId => uId.UserId == userID).ToListAsync();
-                        userTranList.ForEach(tranList => transactionsList.Add(new TransactionViewModel
-                        {
-                            amount = tranList.Amount,
-                            sourceAccount = tranList.TranSourceAccount,
-                            destinationAccount = tranList.TranDestinationAccount,
-                            date = tranList.Date
-                        }));
-
-                return transactionsList;
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                _logger.LogInformation("The error occurred at",
-                    DateTime.UtcNow.ToLongTimeString());
-                return transactionsList;
-            }
-        }
-
-        public async Task<List<TransactionCreditModel>> GetTransactionCreditDetails()
-        {
-            List<TransactionCreditModel> transactionsCreditList = new List<TransactionCreditModel>();
+            List<TransactionListCreditModel> transactionsCreditList = new List<TransactionListCreditModel>();
             try
             {
                 int userID;
@@ -182,36 +197,22 @@ namespace WalletPayment.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
-                //var userLoggedInAcct = await _context.Users.Where(getID => getID.Id == userID).FirstOrDefaultAsync();
+                var loggedInUser = await _context.Accounts.Include("User").Where(senderID => senderID.Id == userID).FirstOrDefaultAsync();
 
-                var userCreditTranList = await _context.Transactions
-                            .Where(uId => uId.Id == userID)
-                            .Select(uId => new TransactionCreditModel
-                            {
-                                amount = uId.Amount,
-                                sender = uId.User.Username,
-                                date = uId.Date
-                            })
-                            .ToListAsync();
+                var userTranList = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
+                            .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber || txn.TranSourceAccount == loggedInUser.AccountNumber).ToListAsync();
 
-                        //userCreditTranList.ForEach(tranList => transactionsCreditList.Add(new TransactionCreditModel
-                        //{
-                        //    amount = tranList.Amount,
-                        //    sender = tranList.User.Username,
-                        //    date = tranList.Date
-                        //}));
 
-                                //await _context.Users
-                                //.Where(userInfo => userInfo.Id == userID)
-                                //.Select(userInfo => new UserDashboardViewModel
-                                //{
-                                //    Username = userInfo.Username,
-                                //    FirstName = userInfo.FirstName,
-                                //    LastName = userInfo.LastName,
-                                //    AccountNumber = userInfo.UserAccount.AccountNumber,
-                                //    Balance = userInfo.UserAccount.Balance.ToString(),
-                                //})
-                                //.FirstOrDefaultAsync();
+                userTranList.ForEach(tranCreditList => transactionsCreditList.Add(new TransactionListCreditModel
+                {
+                    amount = tranCreditList.Amount,
+                    sender = tranCreditList.SourceUser.Username,
+                    senderAccount = tranCreditList.TranSourceAccount,
+                    recepient = tranCreditList.DestinationUser.Username,
+                    recepientAccount = tranCreditList.TranDestinationAccount,
+                    status = tranCreditList.Status,
+                    date = tranCreditList.Date
+                }));
 
                 return transactionsCreditList;
             }
@@ -223,6 +224,8 @@ namespace WalletPayment.Services.Services
                 return transactionsCreditList;
             }
         }
+
+
     }
 }
 

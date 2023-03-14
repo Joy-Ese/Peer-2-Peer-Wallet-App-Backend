@@ -5,15 +5,6 @@ namespace WalletPayment.Services.Data
 {
     public class DataContext : DbContext
     {
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    if (!optionsBuilder.IsConfigured)
-        //    {
-        //        optionsBuilder
-        //            .UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Peer2PeerWalletPaymentdb;Trusted_Connection=True;");
-        //    }
-        //}
-
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
@@ -25,6 +16,20 @@ namespace WalletPayment.Services.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public DbSet<Deposit> Deposits { get; set; }
+
+        //protected override void OnModelCreating(ModelBuilder builder)
+        //{
+
+        //    // Transaction Table
+        //    //builder.Entity<Transaction>().ToTable("ucap_t_users");
+        //    //builder.Entity<Transaction>().Property(t => t.Reference).HasColumnType("varchar").HasMaxLength(20).IsRequired();
+        //    //builder.Entity<Transaction>().HasMany(x => x.DestinationUser)
+
+        //    //modelBuilder.Entity<EmploymentLog>()
+        //    //.HasOne(e => e.InitiatedBy) // reference
+        //    //.WithMany() // no collection
+        //    //.OnDelete(DeleteBehavior.NoAction);
+        //}
 
     }
 }

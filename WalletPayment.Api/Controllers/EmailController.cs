@@ -19,30 +19,6 @@ namespace WalletPayment.Api.Controllers
             _emailService = emailService;
         }
 
-        [HttpPost("SendEmail")]
-        public async Task<IActionResult> SendEmail(EmailDto request)
-        {
-            bool result = await _emailService.SendEmail(request, request.to);
-            if (!result)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
-            }
-
-            return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
-        }
-
-        [HttpPost("SendEmailPasswordReset")]
-        public async Task<IActionResult> SendEmailPasswordReset(string Link, string emailUser)
-        {
-            bool result = await _emailService.SendEmailPasswordReset(Link, emailUser);
-            if (!result)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
-            }
-
-            return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
-        }
-
         [HttpPost("ForgetPassword")]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordDto emailReq)
         {
@@ -64,29 +40,41 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("SendCreditEmail")]
-        public async Task<IActionResult> SendCreditEmail(string senderEmail, string recipient, string amount, string balance, string date, string username)
-        {
-            bool result = await _emailService.SendCreditEmail(senderEmail, recipient, amount, balance, date, username);
-            if (!result)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
-            }
+        //[HttpPost("SendCreditEmail")]
+        //public async Task<IActionResult> SendCreditEmail(string senderEmail, string recipient, string amount, string balance, string date, string username)
+        //{
+        //    bool result = await _emailService.SendCreditEmail(senderEmail, recipient, amount, balance, date, username);
+        //    if (!result)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
+        //    }
 
-            return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
-        }
+        //    return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
+        //}
 
-        [HttpPost("SendDebitEmail")]
-        public async Task<IActionResult> SendDebitEmail(string recepientEmail, string sender, string amount2, string balance2, string date2, string username2)
-        {
-            bool result = await _emailService.SendDebitEmail(recepientEmail, sender, amount2, balance2, date2, username2);
-            if (!result)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
-            }
+        //[HttpPost("SendDebitEmail")]
+        //public async Task<IActionResult> SendDebitEmail(string recepientEmail, string sender, string amount2, string balance2, string date2, string username2)
+        //{
+        //    bool result = await _emailService.SendDebitEmail(recepientEmail, sender, amount2, balance2, date2, username2);
+        //    if (!result)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
+        //    }
 
-            return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
-        }
+        //    return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
+        //}
+
+        //[HttpPost("SendDepositEmail")]
+        //public async Task<IActionResult> SendDepositEmail(string selfEmail, string selfName, string selfAmount, string selfBalance, string date3)
+        //{
+        //    bool result = await _emailService.SendDepositEmail(selfEmail, selfName, selfAmount, selfBalance, date3);
+        //    if (!result)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, "An error occured. The Mail could not be sent.");
+        //    }
+
+        //    return StatusCode(StatusCodes.Status200OK, "Mail has successfully been sent.");
+        //}
     }
 }
 

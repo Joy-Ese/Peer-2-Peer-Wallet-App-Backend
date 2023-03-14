@@ -6,7 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WalletPayment.Models.DataObjects
+namespace WalletPayment.Models.DataObjects.old
 {
     public class WebHookEventViewModel
     {

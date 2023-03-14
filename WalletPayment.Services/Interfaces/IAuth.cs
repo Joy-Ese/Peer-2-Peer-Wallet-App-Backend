@@ -10,7 +10,7 @@ namespace WalletPayment.Services.Interfaces
 {
     public interface IAuth
     {
-        Task<UserSignUpDto> Register(UserSignUpDto request);
+        Task<RegisterViewModel> Register(UserSignUpDto request);
         Task<LoginViewModel> Login(UserLoginDto request);
         Task<LoginRefreshModel> RefreshToken();
     }

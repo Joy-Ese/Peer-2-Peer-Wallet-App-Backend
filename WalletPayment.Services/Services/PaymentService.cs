@@ -22,15 +22,17 @@ namespace WalletPayment.Services.Services
     public class PaymentService : IPayment
     {
         private readonly DataContext _context;
+        private readonly IEmail _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<PaymentService> _logger;
         private readonly IConfiguration _configuration;
         private readonly PaystackDetails? _gatewayDetails;
 
-        public PaymentService(DataContext context, IConfiguration configuration,
+        public PaymentService(DataContext context, IEmail emailService, IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor, ILogger<PaymentService> logger)
         {
             _context = context;
+            _emailService = emailService;
             _configuration = configuration;
             _gatewayDetails = configuration.GetSection("PaystackDetails").Get<PaystackDetails>();
             _httpContextAccessor = httpContextAccessor;
@@ -112,37 +114,49 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<WebHookEventViewModel> WebHookPaystack(WebHookEventViewModel eventData)
+        public async Task<WebhookDTO> WebHookPaystack(WebhookDTO eventData)
         {
-            WebHookEventViewModel webHookEventViewModel = new WebHookEventViewModel();
+            WebhookDTO webHookEventViewModel = new WebhookDTO();
             try
             {
-                int userID;
-                if (_httpContextAccessor.HttpContext == null)
-                {
-                    return webHookEventViewModel;
-                }
+                var now = DateTime.Now;
+                
+                var depositInfo = await _context.Deposits.Include("User").
+                                            Where(dInfo => dInfo.Reference == eventData.data.reference).FirstOrDefaultAsync();
 
-                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
-                var depositInfo = await _context.Deposits.
-                                            Where(pd => pd.Id == userID).FirstOrDefaultAsync();
-                var userBal = await _context.Accounts.
-                                            Where(a => a.Id == userID).FirstOrDefaultAsync();
+                var user = await _context.Users.Include("UserAccount").
+                                            Where(uInfo => uInfo.Id == depositInfo.UserId).FirstOrDefaultAsync();
 
-                depositInfo.Status = StatusMessage.Successful.ToString();
-                depositInfo.Date = DateTime.Now;
+                //if (depositInfo.Status == StatusMessage.Successful.ToString())
+                //{
+                //    return HttpStatusCode.OK;
+                //}
 
-                if (!(webHookEventViewModel.@event.ToLower() == "charge.success") || 
-                    !(webHookEventViewModel.data.reference == depositInfo.Reference))
+
+                if (!(eventData.@event.ToLower() == "charge.success") || 
+                    !(eventData.data.reference == depositInfo.Reference))
                 {
                     depositInfo.Status = StatusMessage.Failed.ToString();
-                    depositInfo.Date = DateTime.Now;
+                    depositInfo.Date = now;
                 }
 
-                var newBal = userBal.Balance + depositInfo.Amount;
-                userBal.Balance = newBal;
+                depositInfo.Status = StatusMessage.Successful.ToString();
+                depositInfo.Date = now;
+
+
+                var newBalance = user.UserAccount.Balance + depositInfo.Amount;
+                user.UserAccount.Balance = newBalance;
                 await _context.SaveChangesAsync();
-                   
+
+                //Desposit Email information
+                var selfEmail = user.Email;
+                var selfName = user.FirstName;
+                var selfAmount = depositInfo.Amount.ToString();
+                var selfBalance = newBalance.ToString();
+                var date3 = depositInfo.Date.ToLongDateString();
+
+                await _emailService.SendDepositEmail(selfEmail, selfName, selfAmount, selfBalance, date3);
+
                 return webHookEventViewModel;
             }
             catch (Exception ex)

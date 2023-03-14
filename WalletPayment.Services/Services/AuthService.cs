@@ -44,11 +44,11 @@ namespace WalletPayment.Services.Services
 
         public string AccountNumberGenerator()
         {
-            var accountNumber = DateTime.Now.ToString("ffffMMddHH");
+            var accountNumber = DateTime.Now.ToString("HHffMMffdd");
             return accountNumber;
         }
 
-        public async Task<UserSignUpDto> Register(UserSignUpDto request)
+        public async Task<RegisterViewModel> Register(UserSignUpDto request)
         {
             RegisterViewModel registerResponse = new RegisterViewModel();
             try
@@ -59,11 +59,15 @@ namespace WalletPayment.Services.Services
                 if (data)
                 {
                     _logger.LogWarning($"Duplicate username supplied {request.username}");
-                    registerResponse.message = "Duplicate username";
-                    return null;
+                    registerResponse.message = "Duplicate username or email";
+                    return registerResponse;
                 }
 
-                if (!request.pin.Equals(request.confirmPin)) throw new ArgumentException("Pins do not match", "pin");
+                if (!request.pin.Equals(request.confirmPin))
+                {
+                    registerResponse.message = "Pins do not match";
+                    return registerResponse;
+                }
 
                 CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -107,17 +111,17 @@ namespace WalletPayment.Services.Services
 
                 if (!(result > 0))
                 {
-                    registerResponse.message = "Duplicate username";
+                    registerResponse.message = "Duplicate username or email";
                 }
 
-                return request;
+                return registerResponse;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 _logger.LogInformation("The error occurred at",
                     DateTime.UtcNow.ToLongTimeString());
-                return new UserSignUpDto();
+                return registerResponse;
             }
         }
 

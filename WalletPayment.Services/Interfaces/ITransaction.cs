@@ -11,8 +11,8 @@ namespace WalletPayment.Services.Interfaces
     public interface ITransaction
     {
         Task<TransactionResponseModel> TransferFund(TransactionDto request);
-        Task<List<TransactionViewModel>> GetTransactionDetails();
-        Task<List<TransactionCreditModel>> GetTransactionCreditDetails();
+        //Task<List<TransactionViewModel>> GetTransactionDetails();
+        Task<List<TransactionListCreditModel>> GetTransactionList();
     }
 }
 

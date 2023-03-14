@@ -8,6 +8,7 @@ using System.Net;
 using WalletPayment.Models.DataObjects.Common;
 using System.Text;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Primitives;
 
 namespace WalletPayment.Api.Controllers
 {
@@ -40,26 +41,19 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPost("WebHook")]
-        public async Task<IActionResult> WebHookPaystack()
+        public async Task<IActionResult> WebHookPaystack(object obj)
         {
             try
             {
-                if (_gatewayDetails?.WhitelistedPaystackIPs == null)
-                    return BadRequest();
-
-                var requestIp = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-                bool isAllowed = _gatewayDetails.WhitelistedPaystackIPs.Where(ip => IPAddress.Parse(ip).Equals(requestIp)).Any();
-
-                if (!isAllowed)
-                    return BadRequest();
-
-                String secKey = _gatewayDetails.SecretKey;
-                String result = "";
+                var webHookEvent = JsonConvert.DeserializeObject<WebhookDTO>(obj.ToString());
+                string secKey = _gatewayDetails.SecretKey;
+                string result = "";
 
                 var reqHeader = HttpContext.Request.Headers;
+                var bodyText = new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
 
                 byte[] secretkeyBytes = Encoding.UTF8.GetBytes(secKey);
-                byte[] inputBytes = Encoding.UTF8.GetBytes(reqHeader.AcceptCharset);
+                byte[] inputBytes = Encoding.UTF8.GetBytes(obj.ToString());
 
                 using (var hmac = new HMACSHA512(secretkeyBytes))
                 {
@@ -68,22 +62,11 @@ namespace WalletPayment.Api.Controllers
                 }
                 Console.WriteLine(result);
 
-                String xpaystackSignature = "x-paystack-signature";
+                reqHeader.TryGetValue("x-paystack-signature", out StringValues xpaystackSignature);
 
-                var webHookEvent = JsonConvert.DeserializeObject<WebHookEventViewModel>(reqHeader.ToString());
+                if (!result.ToLower().Equals(xpaystackSignature)) return BadRequest();
 
-                if (result.ToLower().Equals(xpaystackSignature))
-                {
-                    if (!(webHookEvent.@event == "charge.success"))
-                    {
-                        return BadRequest();
-                    }
-                }
-
-                var bodyText = new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-                var reqq = JsonConvert.DeserializeObject<WebHookEventViewModel>(bodyText.Result);
-
-                await _paymentService.WebHookPaystack(reqq);
+                await _paymentService.WebHookPaystack(webHookEvent);
                 return Ok();
 
             }

@@ -294,6 +294,54 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<bool> SendDepositEmail(string selfEmail, string selfName, string selfAmount, string selfBalance, string date3)
+        {
+            try
+            {
+                MailMessage mail = new MailMessage();
+
+                mail.From = new MailAddress(_emailCredentials?.EmailFrom);
+                mail.To.Add(new MailAddress(selfEmail));
+
+                mail.Subject = $"Wallet App: NGN{selfAmount} Deposit transaction";
+
+                string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\DepositAlert.html");
+                if (!File.Exists(filePath))
+                {
+                    return _httpContextAccessor.HttpContext.Response.StatusCode.Equals(404);
+                }
+
+                string mailbody = string.Empty;
+
+                StreamReader reader = new StreamReader(filePath);
+                mailbody = reader.ReadToEnd();
+
+                mailbody = mailbody.Replace("{FirstName}", selfName);
+                mailbody = mailbody.Replace("{transtime}", date3);
+                mailbody = mailbody.Replace("{Amount}", selfAmount);
+                mailbody = mailbody.Replace("{Balance}", selfBalance);
+
+                mail.Body = mailbody;
+                mail.IsBodyHtml = true;
+
+                using (SmtpClient smtp = new SmtpClient())
+                {
+                    smtp.Host = _emailCredentials?.EmailHost;
+                    smtp.Port = 587;
+                    smtp.Credentials = new NetworkCredential(_emailCredentials?.EmailUsername, _emailCredentials?.EmailPassword);
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
         private string CreatePasswordToken()
         {
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));

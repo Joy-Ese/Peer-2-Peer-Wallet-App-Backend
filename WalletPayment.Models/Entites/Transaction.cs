@@ -14,11 +14,17 @@ namespace WalletPayment.Models.Entites
 
         [Column(TypeName = "varchar(50)")]
         public string TranDestinationAccount { get; set; }
-        public DateTime Date { get; set; }
 
-        [ForeignKey("User")]
-        public int UserId { get; set; }
-        public virtual User User { get; set; }
+        public DateTime Date { get; set; }
+        public int? SourceAccountUserId { get; set; }
+        public int? DestinationAccountUserId { get; set; }
+
+        [ForeignKey("SourceAccountUserId")]
+        [InverseProperty("Transactions")]
+        public virtual User SourceUser { get; set; }
+
+        [ForeignKey("DestinationAccountUserId")]
+        public virtual User DestinationUser { get; set; }
 
         public Transaction()
         {

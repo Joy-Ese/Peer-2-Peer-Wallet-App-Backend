@@ -130,9 +130,15 @@ namespace WalletPayment.Services.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DestinationAccountUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Reference")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SourceAccountUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -146,12 +152,11 @@ namespace WalletPayment.Services.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("DestinationAccountUserId");
+
+                    b.HasIndex("SourceAccountUserId");
 
                     b.ToTable("Transactions");
                 });
@@ -250,13 +255,17 @@ namespace WalletPayment.Services.Migrations
 
             modelBuilder.Entity("WalletPayment.Models.Entites.Transaction", b =>
                 {
-                    b.HasOne("WalletPayment.Models.Entites.User", "User")
-                        .WithMany("Transactions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("WalletPayment.Models.Entites.User", "DestinationUser")
+                        .WithMany()
+                        .HasForeignKey("DestinationAccountUserId");
 
-                    b.Navigation("User");
+                    b.HasOne("WalletPayment.Models.Entites.User", "SourceUser")
+                        .WithMany("Transactions")
+                        .HasForeignKey("SourceAccountUserId");
+
+                    b.Navigation("DestinationUser");
+
+                    b.Navigation("SourceUser");
                 });
 
             modelBuilder.Entity("WalletPayment.Models.Entites.User", b =>

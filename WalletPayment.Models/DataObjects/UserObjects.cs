@@ -32,19 +32,25 @@ namespace WalletPayment.Models.DataObjects
         public string Email { get; set; } = string.Empty;
     }
 
-    public class TransactionViewModel
-    {
-        public decimal amount { get; set; }
-        public string sourceAccount { get; set; } = string.Empty;
-        public string destinationAccount { get; set; } = string.Empty;
-        public DateTime date { get; set; }
-    }
+    //public class TransactionViewModel
+    //{
+    //    public decimal amount { get; set; }
+    //    public string sourceAccount { get; set; } = string.Empty;
+    //    public string recepient { get; set; } = string.Empty;
+    //    public string destinationAccount { get; set; } = string.Empty;
+    //    public DateTime date { get; set; }
+    //    public string status { get; set; } = string.Empty;
+    //}
 
-    public class TransactionCreditModel
+    public class TransactionListCreditModel
     {
         public decimal amount { get; set; }
         public string sender { get; set; } = string.Empty;
+        public string senderAccount { get; set; } = string.Empty;
+        public string recepient { get; set; } = string.Empty;
+        public string recepientAccount { get; set; } = string.Empty;
         public DateTime date { get; set; }
+        public string status { get; set; } = string.Empty;
     }
 
     public class TransactionResponseModel

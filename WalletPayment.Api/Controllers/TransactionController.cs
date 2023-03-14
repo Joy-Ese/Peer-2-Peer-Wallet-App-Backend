@@ -28,19 +28,20 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("TransactionDetails"), Authorize]
-        public async Task<IActionResult> GetTransactionDetails()
+        //[HttpGet("TransactionDetails"), Authorize]
+        //public async Task<IActionResult> GetTransactionDetails()
+        //{
+        //    var result = await _transactionService.GetTransactionDetails();
+        //    return Ok(result);
+        //}
+
+        [HttpGet("GetTransactionList"), Authorize]
+        public async Task<IActionResult> GetTransactionList()
         {
-            var result = await _transactionService.GetTransactionDetails();
+            var result = await _transactionService.GetTransactionList();
             return Ok(result);
         }
 
-        [HttpGet("TransactionCreditDetails"), Authorize]
-        public async Task<IActionResult> GetTransactionCreditDetails()
-        {
-            var result = await _transactionService.GetTransactionCreditDetails();
-            return Ok(result);
-        }
     }
 }
 

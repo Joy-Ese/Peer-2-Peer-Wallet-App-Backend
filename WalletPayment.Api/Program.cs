@@ -41,11 +41,6 @@ try
 
     builder.Services.AddControllers();
 
-    //builder.Services.AddFluentValidation(x =>
-    //{
-    //    x.ImplicitlyValidateChildProperties = true;
-    //});
-
     builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
 
     // For EntityFramework
