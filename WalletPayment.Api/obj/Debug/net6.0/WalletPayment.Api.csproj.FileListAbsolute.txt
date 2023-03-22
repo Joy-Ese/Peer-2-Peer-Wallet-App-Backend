@@ -102,3 +102,13 @@ C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debu
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.pdb
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\WalletPayment.Api.genruntimeconfig.cache
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\obj\Debug\net6.0\ref\WalletPayment.Api.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.Connections.Abstractions.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.Http.Connections.Client.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.Http.Connections.Common.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Client.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Client.Core.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Common.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Protocols.Json.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\Microsoft.Extensions.Features.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.IO.Pipelines.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Threading.Channels.dll

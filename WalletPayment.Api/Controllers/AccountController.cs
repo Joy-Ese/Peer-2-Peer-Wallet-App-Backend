@@ -20,9 +20,9 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPost("AccountLookUp"), Authorize]
-        public async Task<IActionResult> AccountLookUp(string AccountNumber)
+        public async Task<IActionResult> AccountLookUp(string searchInfo)
         {
-            var result = await _accountService.AccountLookUp(AccountNumber);
+            var result = await _accountService.AccountLookUp(searchInfo);
             return Ok(result);
         }
     }

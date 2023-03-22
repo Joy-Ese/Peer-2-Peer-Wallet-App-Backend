@@ -21,9 +21,10 @@ namespace WalletPayment.Services.Services
         private readonly IEmail _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<TransactionService> _logger;
+        //private readonly INotificationHub _notificationHub;
 
 
-        public TransactionService(DataContext context, IEmail emailService, IAccount accountService,
+        public TransactionService(DataContext context, IEmail emailService, IAccount accountService, /*INotificationHub notificationHub,*/
             IHttpContextAccessor httpContextAccessor, ILogger<TransactionService> logger)
         {
             _context = context;
@@ -32,6 +33,7 @@ namespace WalletPayment.Services.Services
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _logger.LogDebug(1, "Nlog injected into TransactionService");
+            //_notificationHub = notificationHub;
         }
 
         public async Task<TransactionResponseModel> TransferFund(TransactionDto request)
@@ -123,6 +125,11 @@ namespace WalletPayment.Services.Services
                 await _emailService.SendDebitEmail(senderEmail, sender, amount2, balance2, date2, username2);
                 await _emailService.SendCreditEmail(recepientEmail, recipient, amount, balance, date, username);
 
+                // Notification Hub
+                var user = sourceAccountData.User.Username;
+                var message = $"You just sent money to {destinationAccountData.User.Username}.";
+                //await _notificationHub.SendNotificationToUser(user, message);
+
                 dbTransaction.Commit();
 
                 transactionResponse.status = true;
@@ -138,55 +145,9 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        //public async Task<List<TransactionViewModel>> GetTransactionDetails()
-        //{
-        //    List<TransactionViewModel> transactionsList = new List<TransactionViewModel>();
-        //    try
-        //    {
-        //        int userID;
-        //        if (_httpContextAccessor.HttpContext == null)
-        //        {
-        //            return transactionsList;
-        //        }
-
-        //        userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
-
-        //        var userTran = await _context.Transactions.Include("User")
-        //                            .Where(uId => uId.UserId == userID).FirstOrDefaultAsync();
-
-        //        var userTranList = await _context.Transactions.Include("User")
-        //                            .Where(uId => uId.UserId == userID).ToListAsync();
-
-        //        //var acctNum = await _context.Accounts.Include("User").Where(acc => acc.UserId == userID).FirstOrDefaultAsync();
-
-        //        var getRecepient = await _context.Accounts.Include("User")
-        //                            .Where(gR => gR.AccountNumber == userTran.TranDestinationAccount).FirstOrDefaultAsync();
-
-        //        userTranList.ForEach(tranList => transactionsList.Add(new TransactionViewModel
-        //        {
-        //            amount = tranList.Amount,
-        //            sourceAccount = tranList.TranSourceAccount,
-        //            destinationAccount = tranList.TranDestinationAccount,
-        //            recepient = getRecepient.User.Username,
-        //            date = tranList.Date,
-        //            status = tranList.Status
-        //        }));
-
-        //        return transactionsList;
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-        //        _logger.LogInformation("The error occurred at",
-        //            DateTime.UtcNow.ToLongTimeString());
-        //        return transactionsList;
-        //    }
-        //}
-
-        public async Task<List<TransactionListCreditModel>> GetTransactionList()
+        public async Task<List<TransactionListModel>> GetTransactionList()
         {
-            List<TransactionListCreditModel> transactionsCreditList = new List<TransactionListCreditModel>();
+            List<TransactionListModel> transactionsCreditList = new List<TransactionListModel>();
             try
             {
                 int userID;
@@ -197,22 +158,36 @@ namespace WalletPayment.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
+                var txnType = "";
+
                 var loggedInUser = await _context.Accounts.Include("User").Where(senderID => senderID.Id == userID).FirstOrDefaultAsync();
 
                 var userTranList = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
-                            .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber || txn.TranSourceAccount == loggedInUser.AccountNumber).ToListAsync();
+                            .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber 
+                            || txn.TranSourceAccount == loggedInUser.AccountNumber).ToListAsync();
 
-
-                userTranList.ForEach(tranCreditList => transactionsCreditList.Add(new TransactionListCreditModel
+                foreach (var txn in userTranList)
                 {
-                    amount = tranCreditList.Amount,
-                    sender = tranCreditList.SourceUser.Username,
-                    senderAccount = tranCreditList.TranSourceAccount,
-                    recepient = tranCreditList.DestinationUser.Username,
-                    recepientAccount = tranCreditList.TranDestinationAccount,
-                    status = tranCreditList.Status,
-                    date = tranCreditList.Date
-                }));
+                    if (txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    {
+                        txnType = "CREDIT";
+                    }
+                    else
+                    {
+                        txnType = "DEBIT";
+                    }
+
+                    transactionsCreditList.Add(new TransactionListModel
+                    {
+                        amount = txn.Amount,
+                        senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                        recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                        transactionType = txnType,
+                        currency = "NGN",
+                        status = txn.Status,
+                        date = txn.Date,
+                    });
+                }
 
                 return transactionsCreditList;
             }

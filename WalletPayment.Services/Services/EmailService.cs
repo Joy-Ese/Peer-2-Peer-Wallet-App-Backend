@@ -10,10 +10,12 @@ using Microsoft.Extensions.Configuration;
 using WalletPayment.Models.DataObjects.Common;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Mail;
-using System.Net;
+//using System.Net.Mail;
+//using System.Net;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Hosting;
+using MimeKit;
+using MailKit.Net.Smtp;
 
 namespace WalletPayment.Services.Services
 {
@@ -44,20 +46,23 @@ namespace WalletPayment.Services.Services
         {
             try
             {
-                MailMessage mail = new MailMessage();
-                mail.From = new MailAddress(_emailCredentials?.EmailFrom);
-                mail.To.Add(new MailAddress(request.to = emailUser));
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
+                email.To.Add(new MailboxAddress("WalletUser", request.to = emailUser));
 
-                mail.Subject = "Welcome to The Globus Wallet App";
-                mail.Body = "Thank You for registering with The Globus Wallet App. Enjoy a seamless experience! \u263A \ud83c\udf81";
+                email.Subject = "Welcome to The Globus Wallet App";
+                email.Body = new TextPart(MimeKit.Text.TextFormat.Plain)
+                {
+                    Text = "Thank You for registering with The Globus Wallet App. Enjoy a seamless experience! \u263A \ud83c\udf81"
+                };
 
-                SmtpClient smtp = new SmtpClient();
-
-                smtp.Host = _emailCredentials?.EmailHost;
-                smtp.Port = 587;
-                smtp.Credentials = new NetworkCredential(_emailCredentials?.EmailUsername, _emailCredentials?.EmailPassword);
-                smtp.EnableSsl = true;
-                smtp.Send(mail);
+                using (var smtp = new SmtpClient())
+                {
+                    smtp.Connect(_emailCredentials.EmailHost, 587, false);
+                    smtp.Authenticate(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
+                }
 
                 return true;
             }
@@ -72,21 +77,23 @@ namespace WalletPayment.Services.Services
         {
             try
             {
-                MailMessage mail = new MailMessage();
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
+                email.To.Add(new MailboxAddress("WalletUser", emailUser));
 
-                mail.From = new MailAddress(_emailCredentials?.EmailFrom);
-                mail.To.Add(new MailAddress(emailUser));
+                email.Subject = "Link to reset your password";
+                email.Body = new TextPart(MimeKit.Text.TextFormat.Plain)
+                {
+                    Text = Link
+                };
 
-                mail.Subject = "Link to reset your password";
-                mail.Body = Link;
-
-                SmtpClient smtp = new SmtpClient();
-
-                smtp.Host = _emailCredentials?.EmailHost;
-                smtp.Port = 587;
-                smtp.Credentials = new NetworkCredential(_emailCredentials?.EmailUsername, _emailCredentials?.EmailPassword);
-                smtp.EnableSsl = true;
-                smtp.Send(mail);
+                using (var smtp = new SmtpClient())
+                {
+                    smtp.Connect(_emailCredentials.EmailHost, 587, false);
+                    smtp.Authenticate(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
+                }
 
                 return true;
             }
@@ -106,6 +113,7 @@ namespace WalletPayment.Services.Services
 
                 if (userInDb == null)
                 {
+                    forgetPassword.status = false;
                     forgetPassword.message = "User not found";
                     return forgetPassword;
                 }
@@ -117,50 +125,28 @@ namespace WalletPayment.Services.Services
                 var token = userInDb.PasswordResetToken;
                 var email = userInDb.Email;
 
-                var callbackUrl = _linkGenerator.GetUriByAction("GetResetPassword", "Email", new { token, email }, 
-                    _httpContextAccessor.HttpContext.Request.Scheme, _httpContextAccessor.HttpContext.Request.Host);
+                //var callbackUrl = _linkGenerator.GetUriByAction("GetResetPassword", "Email", new { token, email }, 
+                //    _httpContextAccessor.HttpContext.Request.Scheme, _httpContextAccessor.HttpContext.Request.Host);
+
+                var callbackUrl = "http://127.0.0.1:5500/html/ResetPassword.html";
 
                 await SendEmailPasswordReset(callbackUrl, email);
 
+                if (forgetPassword.status)
+                {
+                    forgetPassword.status = false;
+                    forgetPassword.message = "Email could not be sent";
+                    return forgetPassword;
+                }
+
                 forgetPassword.status = true;
-                forgetPassword.message = $"Forget password link is sent on {email}. The link expires in 24 hours";
+                forgetPassword.message = $"Forget password link is sent on {email}.";
                 return forgetPassword;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 return forgetPassword;
-            }
-        }
-
-        public async Task<GetResetPasswordModel> GetResetPassword(string token, string email)
-        {
-            GetResetPasswordModel getResetPasswordModel = new GetResetPasswordModel();
-            try
-            {
-                getResetPasswordModel = new GetResetPasswordModel { token = token, email = email };
-
-                //string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\html\\Token.html");
-                //if (!File.Exists(filePath))
-                //{
-                //    return getResetPasswordModel;
-                //}
-
-                //string getbody = string.Empty;
-                //StreamReader reader = new StreamReader(filePath);
-                //getbody = reader.ReadToEnd();
-
-                //getbody = getbody.Replace("{email}", email);
-                //getbody = getbody.Replace("{token}", token);
-
-                //getbody = getResetPasswordModel.ToString();
-
-                return getResetPasswordModel;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return getResetPasswordModel;
             }
         }
 
@@ -169,11 +155,11 @@ namespace WalletPayment.Services.Services
             ResetPasswordModel resetPass = new ResetPasswordModel();
             try
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == resetPasswordReq.email && u.PasswordResetToken == resetPasswordReq.token);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == resetPasswordReq.email);
 
-                if (user == null || user.PasswordResetTokenExpiresAt < DateTime.Now)
+                if (user == null)
                 {
-                    resetPass.message = "Incorrect email/token or token has expired";
+                    resetPass.message = "Incorrect email";
                     return resetPass;
                 }
 
@@ -186,6 +172,7 @@ namespace WalletPayment.Services.Services
 
                 await _context.SaveChangesAsync();
 
+                resetPass.status = true;
                 resetPass.message = "Password sucsessfully reset, you can now login!";
                 return resetPass;
             }
@@ -200,12 +187,11 @@ namespace WalletPayment.Services.Services
         {
             try
             {
-                MailMessage mail = new MailMessage();
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
+                email.To.Add(new MailboxAddress("WalletUser", senderEmail));
 
-                mail.From = new MailAddress(_emailCredentials?.EmailFrom);
-                mail.To.Add(new MailAddress(senderEmail));
-
-                mail.Subject = $"Wallet App: NGN{amount} Credit transaction";
+                email.Subject = $"Wallet App: NGN{amount} Credit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\CreditAlert.html");
                 if (!File.Exists(filePath))
@@ -214,7 +200,7 @@ namespace WalletPayment.Services.Services
                 }
 
                 string mailbody = string.Empty;
-                
+
                 StreamReader reader = new StreamReader(filePath);
                 mailbody = reader.ReadToEnd();
 
@@ -224,16 +210,18 @@ namespace WalletPayment.Services.Services
                 mailbody = mailbody.Replace("{Username}", username);
                 mailbody = mailbody.Replace("{Balance}", balance);
 
-                mail.Body = mailbody;
-                mail.IsBodyHtml = true;
 
-                using (SmtpClient smtp = new SmtpClient())
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.HtmlBody = mailbody;
+                email.Body = bodyBuilder.ToMessageBody();
+
+
+                using (var smtp = new SmtpClient())
                 {
-                    smtp.Host = _emailCredentials?.EmailHost;
-                    smtp.Port = 587;
-                    smtp.Credentials = new NetworkCredential(_emailCredentials?.EmailUsername, _emailCredentials?.EmailPassword);
-                    smtp.EnableSsl = true;
-                    smtp.Send(mail);
+                    smtp.Connect(_emailCredentials.EmailHost, 587, false);
+                    smtp.Authenticate(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
                 }
 
                 return true;
@@ -249,12 +237,11 @@ namespace WalletPayment.Services.Services
         {
             try
             {
-                MailMessage mail = new MailMessage();
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
+                email.To.Add(new MailboxAddress("WalletUser", recepientEmail));
 
-                mail.From = new MailAddress(_emailCredentials?.EmailFrom);
-                mail.To.Add(new MailAddress(recepientEmail));
-
-                mail.Subject = $"Wallet App: NGN{amount2} Debit transaction";
+                email.Subject = $"Wallet App: NGN{amount2} Credit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\DebitAlert.html");
                 if (!File.Exists(filePath))
@@ -273,16 +260,18 @@ namespace WalletPayment.Services.Services
                 mailbody = mailbody.Replace("{Username}", username2);
                 mailbody = mailbody.Replace("{Balance}", balance2);
 
-                mail.Body = mailbody;
-                mail.IsBodyHtml = true;
 
-                using (SmtpClient smtp = new SmtpClient())
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.HtmlBody = mailbody;
+                email.Body = bodyBuilder.ToMessageBody();
+
+
+                using (var smtp = new SmtpClient())
                 {
-                    smtp.Host = _emailCredentials?.EmailHost;
-                    smtp.Port = 587;
-                    smtp.Credentials = new NetworkCredential(_emailCredentials?.EmailUsername, _emailCredentials?.EmailPassword);
-                    smtp.EnableSsl = true;
-                    smtp.Send(mail);
+                    smtp.Connect(_emailCredentials.EmailHost, 587, false);
+                    smtp.Authenticate(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
                 }
 
                 return true;
@@ -298,12 +287,11 @@ namespace WalletPayment.Services.Services
         {
             try
             {
-                MailMessage mail = new MailMessage();
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
+                email.To.Add(new MailboxAddress("WalletUser", selfEmail));
 
-                mail.From = new MailAddress(_emailCredentials?.EmailFrom);
-                mail.To.Add(new MailAddress(selfEmail));
-
-                mail.Subject = $"Wallet App: NGN{selfAmount} Deposit transaction";
+                email.Subject = $"Wallet App: NGN{selfAmount} Credit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\DepositAlert.html");
                 if (!File.Exists(filePath))
@@ -321,16 +309,18 @@ namespace WalletPayment.Services.Services
                 mailbody = mailbody.Replace("{Amount}", selfAmount);
                 mailbody = mailbody.Replace("{Balance}", selfBalance);
 
-                mail.Body = mailbody;
-                mail.IsBodyHtml = true;
 
-                using (SmtpClient smtp = new SmtpClient())
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.HtmlBody = mailbody;
+                email.Body = bodyBuilder.ToMessageBody();
+
+
+                using (var smtp = new SmtpClient())
                 {
-                    smtp.Host = _emailCredentials?.EmailHost;
-                    smtp.Port = 587;
-                    smtp.Credentials = new NetworkCredential(_emailCredentials?.EmailUsername, _emailCredentials?.EmailPassword);
-                    smtp.EnableSsl = true;
-                    smtp.Send(mail);
+                    smtp.Connect(_emailCredentials.EmailHost, 587, false);
+                    smtp.Authenticate(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
                 }
 
                 return true;

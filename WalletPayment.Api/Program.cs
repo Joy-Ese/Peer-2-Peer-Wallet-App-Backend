@@ -13,6 +13,7 @@ using WalletPayment.Services.Services;
 using WalletPayment.Validation.Validators;
 using NLog;
 using NLog.Web;
+using WalletPayment.Api.Hubs;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("init main");
@@ -86,6 +87,8 @@ try
             };
         });
 
+    builder.Services.AddSignalR();
+
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
@@ -101,7 +104,15 @@ try
 
     app.UseAuthentication();
 
+    app.UseRouting();
+
     app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+        endpoints.MapHub<NotificationHub>("/notifications");
+    });
 
     app.MapControllers();
 

@@ -100,7 +100,7 @@ namespace WalletPayment.Services.Services
                     Currency = "NGN",
                     UserId = userInfo.Id,
                     Date = DateTime.Now
-            };
+                };
 
                 await _context.Deposits.AddAsync(depositDetails);
                 var resultPaystack = await _context.SaveChangesAsync();

@@ -42,19 +42,20 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<AccountViewModel> AccountLookUp(string AccountNumber)
+        public async Task<AccountViewModel> AccountLookUp(string searchInfo)
         {
             AccountViewModel result = new AccountViewModel();
             try
             {
-                var userData = await _context.Users
-                    .Where(userAcc => userAcc.UserAccount.AccountNumber == AccountNumber)
+                var userData = await _context.Users.Include("UserAccount")
+                    .Where(x => x.UserAccount.AccountNumber == searchInfo || x.Email == searchInfo || x.Username == searchInfo)
                     .SingleOrDefaultAsync();
                 if (userData == null)
                     return result;
 
                 result.firstName = userData.FirstName;
                 result.lastName = userData.LastName;
+                result.acctNumber = userData.UserAccount.AccountNumber;
                 result.status = true;
 
                 return result;

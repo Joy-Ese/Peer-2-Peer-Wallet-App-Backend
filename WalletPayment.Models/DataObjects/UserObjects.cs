@@ -32,23 +32,13 @@ namespace WalletPayment.Models.DataObjects
         public string Email { get; set; } = string.Empty;
     }
 
-    //public class TransactionViewModel
-    //{
-    //    public decimal amount { get; set; }
-    //    public string sourceAccount { get; set; } = string.Empty;
-    //    public string recepient { get; set; } = string.Empty;
-    //    public string destinationAccount { get; set; } = string.Empty;
-    //    public DateTime date { get; set; }
-    //    public string status { get; set; } = string.Empty;
-    //}
-
-    public class TransactionListCreditModel
+    public class TransactionListModel
     {
         public decimal amount { get; set; }
-        public string sender { get; set; } = string.Empty;
-        public string senderAccount { get; set; } = string.Empty;
-        public string recepient { get; set; } = string.Empty;
-        public string recepientAccount { get; set; } = string.Empty;
+        public string senderInfo { get; set; } = string.Empty;
+        public string recepientInfo { get; set; } = string.Empty;
+        public string transactionType { get; set; } = string.Empty;
+        public string currency { get; set; } = string.Empty;
         public DateTime date { get; set; }
         public string status { get; set; } = string.Empty;
     }
@@ -91,6 +81,7 @@ namespace WalletPayment.Models.DataObjects
     {
         public string firstName { get; set; } = string.Empty;
         public string lastName { get; set; } = string.Empty;
+        public string acctNumber { get; set; } = string.Empty;
         public bool status { get; set; }
     }
 
@@ -163,7 +154,6 @@ namespace WalletPayment.Models.DataObjects
     {
         public string password { get; set; } = string.Empty;
         public string email { get; set; } = string.Empty;
-        public string token { get; set; } = string.Empty;
     }
 
     public class ResetPasswordModel
