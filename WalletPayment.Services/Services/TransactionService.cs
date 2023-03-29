@@ -21,10 +21,9 @@ namespace WalletPayment.Services.Services
         private readonly IEmail _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<TransactionService> _logger;
-        //private readonly INotificationHub _notificationHub;
 
 
-        public TransactionService(DataContext context, IEmail emailService, IAccount accountService, /*INotificationHub notificationHub,*/
+        public TransactionService(DataContext context, IEmail emailService, IAccount accountService,
             IHttpContextAccessor httpContextAccessor, ILogger<TransactionService> logger)
         {
             _context = context;
@@ -33,7 +32,6 @@ namespace WalletPayment.Services.Services
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _logger.LogDebug(1, "Nlog injected into TransactionService");
-            //_notificationHub = notificationHub;
         }
 
         public async Task<TransactionResponseModel> TransferFund(TransactionDto request)
@@ -125,11 +123,6 @@ namespace WalletPayment.Services.Services
                 await _emailService.SendDebitEmail(senderEmail, sender, amount2, balance2, date2, username2);
                 await _emailService.SendCreditEmail(recepientEmail, recipient, amount, balance, date, username);
 
-                // Notification Hub
-                var user = sourceAccountData.User.Username;
-                var message = $"You just sent money to {destinationAccountData.User.Username}.";
-                //await _notificationHub.SendNotificationToUser(user, message);
-
                 dbTransaction.Commit();
 
                 transactionResponse.status = true;
@@ -168,25 +161,48 @@ namespace WalletPayment.Services.Services
 
                 foreach (var txn in userTranList)
                 {
-                    if (txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
-                        txnType = "CREDIT";
-                    }
-                    else
-                    {
-                        txnType = "DEBIT";
+                        transactionsCreditList.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = "P2P Wallet",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
                     }
 
-                    transactionsCreditList.Add(new TransactionListModel
+                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
-                        amount = txn.Amount,
-                        senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
-                        recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
-                        transactionType = txnType,
-                        currency = "NGN",
-                        status = txn.Status,
-                        date = txn.Date,
-                    });
+                        transactionsCreditList.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                    if (txn.TranSourceAccount == loggedInUser.AccountNumber)
+                    {
+                        transactionsCreditList.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "DEBIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
                 }
 
                 return transactionsCreditList;

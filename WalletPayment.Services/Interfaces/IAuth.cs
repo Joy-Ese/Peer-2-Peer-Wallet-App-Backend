@@ -12,6 +12,8 @@ namespace WalletPayment.Services.Interfaces
     {
         Task<RegisterViewModel> Register(UserSignUpDto request);
         Task<LoginViewModel> Login(UserLoginDto request);
+        Task<ForgetPasswordModel> ForgetPassword(ForgetPasswordDto emailReq);
+        Task<ResetPasswordModel> ResetPassword(ResetPasswordDto resetPasswordReq);
         Task<LoginRefreshModel> RefreshToken();
     }
 }

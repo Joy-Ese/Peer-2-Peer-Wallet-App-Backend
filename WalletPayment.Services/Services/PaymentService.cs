@@ -127,10 +127,9 @@ namespace WalletPayment.Services.Services
                 var user = await _context.Users.Include("UserAccount").
                                             Where(uInfo => uInfo.Id == depositInfo.UserId).FirstOrDefaultAsync();
 
-                //if (depositInfo.Status == StatusMessage.Successful.ToString())
-                //{
-                //    return HttpStatusCode.OK;
-                //}
+                var sysAcct = await _context.SystemAccounts.FirstOrDefaultAsync();
+
+                //var txns = await _context.Transactions.FirstOrDefaultAsync();
 
 
                 if (!(eventData.@event.ToLower() == "charge.success") || 
@@ -143,9 +142,29 @@ namespace WalletPayment.Services.Services
                 depositInfo.Status = StatusMessage.Successful.ToString();
                 depositInfo.Date = now;
 
+                if (depositInfo.Status == StatusMessage.Successful.ToString())
+                {
+                    Transaction saveDepositInTxnDb = new Transaction
+                    {
+                        Reference = depositInfo.Reference,
+                        Status = StatusMessage.Successful.ToString(),
+                        Amount = depositInfo.Amount,
+                        TranSourceAccount = null,
+                        TranDestinationAccount = user.UserAccount.AccountNumber,
+                        Date = depositInfo.Date,
+                        SourceAccountUserId = null,
+                        DestinationAccountUserId = depositInfo.UserId,
+                    };
+
+                    await _context.Transactions.AddAsync(saveDepositInTxnDb);
+                }
+
+                sysAcct.SystemBalance -= depositInfo.Amount;
 
                 var newBalance = user.UserAccount.Balance + depositInfo.Amount;
                 user.UserAccount.Balance = newBalance;
+
+
                 await _context.SaveChangesAsync();
 
                 //Desposit Email information

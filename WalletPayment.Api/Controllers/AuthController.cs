@@ -37,6 +37,20 @@ namespace WalletPayment.Api.Controllers
 
         }
 
+        [HttpPost("ForgetPassword")]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordDto emailReq)
+        {
+            var result = await _authService.ForgetPassword(emailReq);
+            return Ok(result);
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordReq)
+        {
+            var result = await _authService.ResetPassword(resetPasswordReq);
+            return Ok(result);
+        }
+
         [HttpPost("RefreshToken"), Authorize]
         public async Task<IActionResult> RefreshToken()
         {

@@ -116,6 +116,30 @@ namespace WalletPayment.Services.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.SystemAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<string>("SystemAccountNumber")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("SystemBalance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemAccounts");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -145,11 +169,9 @@ namespace WalletPayment.Services.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TranDestinationAccount")
-                        .IsRequired()
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("TranSourceAccount")
-                        .IsRequired()
                         .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
@@ -188,12 +210,6 @@ namespace WalletPayment.Services.Migrations
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("PasswordResetToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PasswordResetTokenExpiresAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<byte[]>("PasswordSalt")
                         .IsRequired()

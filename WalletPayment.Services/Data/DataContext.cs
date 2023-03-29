@@ -17,6 +17,8 @@ namespace WalletPayment.Services.Data
 
         public DbSet<Deposit> Deposits { get; set; }
 
+        public DbSet<SystemAccount> SystemAccounts { get; set; }
+
         //protected override void OnModelCreating(ModelBuilder builder)
         //{
 

@@ -48,6 +48,30 @@ namespace WalletPayment.Services.Services
             return accountNumber;
         }
 
+        public string GenerateSystemAcctNumber()
+        {
+            Random rnd = new Random(10);
+            var sysAcctNumber = rnd.Next().ToString();
+            return sysAcctNumber;
+        }
+
+        public async Task<SystemAccount> CreateSystemAccount()
+        {
+            string generatedSysAcct = GenerateSystemAcctNumber();
+
+            SystemAccount sysAccount = new SystemAccount
+            {
+                SystemAccountNumber = generatedSysAcct,
+                SystemBalance = 0,
+                Currency = "NGN",
+            };
+
+            await _context.SystemAccounts.AddAsync(sysAccount);
+            await _context.SaveChangesAsync();
+
+            return sysAccount;
+        }
+
         public async Task<RegisterViewModel> Register(UserSignUpDto request)
         {
             RegisterViewModel registerResponse = new RegisterViewModel();
@@ -94,7 +118,7 @@ namespace WalletPayment.Services.Services
                 Account newAccount = new Account
                 {
                     AccountNumber = generatedAcc,
-                    Balance = 10000,
+                    Balance = 0,
                     Currency = "NGN",
                     UserId = newUser.Id
                 };
@@ -177,6 +201,78 @@ namespace WalletPayment.Services.Services
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 loginResponse.result = "An exception occured";
                 return loginResponse;
+            }
+        }
+
+        public async Task<ForgetPasswordModel> ForgetPassword(ForgetPasswordDto emailReq)
+        {
+            ForgetPasswordModel forgetPassword = new ForgetPasswordModel();
+            try
+            {
+                var userInDb = await _context.Users.FirstOrDefaultAsync(uE => uE.Email == emailReq.email);
+
+                if (userInDb == null)
+                {
+                    forgetPassword.status = false;
+                    forgetPassword.message = "User not found";
+                    return forgetPassword;
+                }
+
+                var email = userInDb.Email;
+
+                //var callbackUrl = _linkGenerator.GetUriByAction("GetResetPassword", "Email", new { token, email }, 
+                //    _httpContextAccessor.HttpContext.Request.Scheme, _httpContextAccessor.HttpContext.Request.Host);
+
+                var callbackUrl = "http://127.0.0.1:5500/html/ResetPassword.html";
+
+                await _emailService.SendEmailPasswordReset(callbackUrl, email);
+
+                if (forgetPassword.status)
+                {
+                    forgetPassword.status = false;
+                    forgetPassword.message = "Email could not be sent";
+                    return forgetPassword;
+                }
+
+                forgetPassword.status = true;
+                forgetPassword.message = $"Forget password link is sent on {email}.";
+                return forgetPassword;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return forgetPassword;
+            }
+        }
+
+        public async Task<ResetPasswordModel> ResetPassword(ResetPasswordDto resetPasswordReq)
+        {
+            ResetPasswordModel resetPass = new ResetPasswordModel();
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == resetPasswordReq.email);
+
+                if (user == null)
+                {
+                    resetPass.message = "Incorrect email";
+                    return resetPass;
+                }
+
+                CreatePasswordHash(resetPasswordReq.password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                user.PasswordHash = passwordHash;
+                user.PasswordSalt = passwordSalt;
+
+                await _context.SaveChangesAsync();
+
+                resetPass.status = true;
+                resetPass.message = "Password sucsessfully reset, you can now login!";
+                return resetPass;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return resetPass;
             }
         }
 

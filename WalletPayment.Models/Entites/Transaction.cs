@@ -10,10 +10,10 @@ namespace WalletPayment.Models.Entites
         public decimal Amount { get; set; }
 
         [Column(TypeName = "varchar(50)")]
-        public string TranSourceAccount { get; set; }
+        public string? TranSourceAccount { get; set; }
 
         [Column(TypeName = "varchar(50)")]
-        public string TranDestinationAccount { get; set; }
+        public string? TranDestinationAccount { get; set; }
 
         public DateTime Date { get; set; }
         public int? SourceAccountUserId { get; set; }

@@ -104,85 +104,6 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<ForgetPasswordModel> ForgetPassword(ForgetPasswordDto emailReq)
-        {
-            ForgetPasswordModel forgetPassword = new ForgetPasswordModel();
-            try
-            {
-                var userInDb = await _context.Users.FirstOrDefaultAsync(uE => uE.Email == emailReq.email);
-
-                if (userInDb == null)
-                {
-                    forgetPassword.status = false;
-                    forgetPassword.message = "User not found";
-                    return forgetPassword;
-                }
-
-                userInDb.PasswordResetToken = CreatePasswordToken();
-                userInDb.PasswordResetTokenExpiresAt = DateTime.Now.AddDays(1);
-                await _context.SaveChangesAsync();
-
-                var token = userInDb.PasswordResetToken;
-                var email = userInDb.Email;
-
-                //var callbackUrl = _linkGenerator.GetUriByAction("GetResetPassword", "Email", new { token, email }, 
-                //    _httpContextAccessor.HttpContext.Request.Scheme, _httpContextAccessor.HttpContext.Request.Host);
-
-                var callbackUrl = "http://127.0.0.1:5500/html/ResetPassword.html";
-
-                await SendEmailPasswordReset(callbackUrl, email);
-
-                if (forgetPassword.status)
-                {
-                    forgetPassword.status = false;
-                    forgetPassword.message = "Email could not be sent";
-                    return forgetPassword;
-                }
-
-                forgetPassword.status = true;
-                forgetPassword.message = $"Forget password link is sent on {email}.";
-                return forgetPassword;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return forgetPassword;
-            }
-        }
-
-        public async Task<ResetPasswordModel> ResetPassword(ResetPasswordDto resetPasswordReq)
-        {
-            ResetPasswordModel resetPass = new ResetPasswordModel();
-            try
-            {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == resetPasswordReq.email);
-
-                if (user == null)
-                {
-                    resetPass.message = "Incorrect email";
-                    return resetPass;
-                }
-
-                AuthService.CreatePasswordHash(resetPasswordReq.password, out byte[] passwordHash, out byte[] passwordSalt);
-
-                user.PasswordHash = passwordHash;
-                user.PasswordSalt = passwordSalt;
-                user.PasswordResetToken = null;
-                user.PasswordResetTokenExpiresAt = null;
-
-                await _context.SaveChangesAsync();
-
-                resetPass.status = true;
-                resetPass.message = "Password sucsessfully reset, you can now login!";
-                return resetPass;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return resetPass;
-            }
-        }
-
         public async Task<bool> SendCreditEmail(string senderEmail, string recipient, string amount, string balance, string date, string username)
         {
             try
@@ -241,7 +162,7 @@ namespace WalletPayment.Services.Services
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
                 email.To.Add(new MailboxAddress("WalletUser", recepientEmail));
 
-                email.Subject = $"Wallet App: NGN{amount2} Credit transaction";
+                email.Subject = $"Wallet App: NGN{amount2} Debit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\DebitAlert.html");
                 if (!File.Exists(filePath))
@@ -291,7 +212,7 @@ namespace WalletPayment.Services.Services
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
                 email.To.Add(new MailboxAddress("WalletUser", selfEmail));
 
-                email.Subject = $"Wallet App: NGN{selfAmount} Credit transaction";
+                email.Subject = $"Wallet App: NGN{selfAmount} Deposit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\DepositAlert.html");
                 if (!File.Exists(filePath))
@@ -332,10 +253,6 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        private string CreatePasswordToken()
-        {
-            return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
-        }
     }
 }
 
