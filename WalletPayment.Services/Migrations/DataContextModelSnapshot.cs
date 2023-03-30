@@ -88,6 +88,37 @@ namespace WalletPayment.Services.Migrations
                     b.ToTable("Deposits");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<byte[]>("FileData")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TimeUploaded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UserId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Images");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -258,6 +289,17 @@ namespace WalletPayment.Services.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.Image", b =>
+                {
+                    b.HasOne("WalletPayment.Models.Entites.User", "User")
+                        .WithOne("UserImage")
+                        .HasForeignKey("WalletPayment.Models.Entites.Image", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.RefreshToken", b =>
                 {
                     b.HasOne("WalletPayment.Models.Entites.User", "User")
@@ -293,6 +335,9 @@ namespace WalletPayment.Services.Migrations
                     b.Navigation("Transactions");
 
                     b.Navigation("UserAccount")
+                        .IsRequired();
+
+                    b.Navigation("UserImage")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

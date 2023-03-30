@@ -11,6 +11,8 @@ namespace WalletPayment.Services.Data
 
         public DbSet<Account> Accounts { get; set; }
 
+        public DbSet<Image> Images { get; set; }
+
         public DbSet<Transaction> Transactions { get; set; }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }

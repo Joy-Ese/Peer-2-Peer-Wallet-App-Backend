@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -8,6 +9,22 @@ using System.Threading.Tasks;
 
 namespace WalletPayment.Models.DataObjects
 {
+    public class ImageRequestViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class ImageRequestDTO
+    {
+        public IFormFile ImageDetails { get; set; }
+    }
+
+    public class ImageViewModel
+    {
+        public byte[] imageDetails { get; set; }
+    }
+
     public class UserViewModel
     {
         public int Id { get; set; }

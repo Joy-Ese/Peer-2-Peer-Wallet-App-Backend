@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,8 @@ namespace WalletPayment.Services.Interfaces
         Task<UserDashboardViewModel> GetUserEmail();
         Task<UserUpdateViewModel> UpdateUserPin(UserUpdateDto request);
         Task<UserProfileViewModel> GetUserProfile();
+        Task<ImageRequestViewModel> UploadNewImage(IFormFile fileData);
+        Task<ImageViewModel> GetUserImage();
     }
 }
 

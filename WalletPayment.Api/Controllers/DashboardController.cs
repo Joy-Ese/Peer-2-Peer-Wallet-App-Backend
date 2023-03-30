@@ -63,5 +63,29 @@ namespace WalletPayment.Api.Controllers
             var result = await _dashboardService.GetUserProfile();
             return Ok(result);
         }
+
+        [HttpPost("UploadNewImage"), Authorize]
+        public async Task<IActionResult> UploadNewImage([FromForm]ImageRequestDTO req)
+        {
+            if (req == null)
+            {
+                return BadRequest("Invalid post request");
+            }
+
+            var result = await _dashboardService.UploadNewImage(req.ImageDetails);
+
+            if (!result.status)
+            {
+                return NotFound(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserImage"), Authorize]
+        public async Task<IActionResult> GetUserImage()
+        {
+            var result = await _dashboardService.GetUserImage();
+            return Ok(result);
+        }
     }
 }

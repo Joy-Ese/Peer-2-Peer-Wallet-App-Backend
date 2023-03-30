@@ -230,6 +230,83 @@ namespace WalletPayment.Services.Services
                 return new UserProfileViewModel();
             }
         }
+
+        public async Task<ImageRequestViewModel> UploadNewImage(IFormFile fileData)
+        {
+            ImageRequestViewModel imageRequestViewModel = new ImageRequestViewModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return imageRequestViewModel;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                Image newImageUpload = new Image
+                {
+                    UserId = userID,
+                    FileName = fileData.FileName,
+                    TimeUploaded = DateTime.Now,
+                };
+
+                using (var stream = new MemoryStream())
+                {
+                    fileData.CopyTo(stream);
+                    newImageUpload.FileData = stream.ToArray();
+                }
+
+                await _context.Images.AddAsync(newImageUpload);
+                var result = await _context.SaveChangesAsync();
+
+                if (result < 0)
+                {
+                    imageRequestViewModel.status = false;
+                    imageRequestViewModel.message = "File could not be uploaded";
+                }
+
+                imageRequestViewModel.status = true;
+                imageRequestViewModel.message = "File uploaded successfully";
+                return imageRequestViewModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return imageRequestViewModel;
+            }
+        }
+
+        public async Task<ImageViewModel> GetUserImage()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new ImageViewModel();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var image = await _context.Images
+                                .Where(userImg => userImg.UserId == userID)
+                                .Select(userImg => new ImageViewModel
+                                {
+                                    imageDetails = userImg.FileData
+                                })
+                                .FirstOrDefaultAsync();
+
+                if (image == null) return new ImageViewModel();
+
+                return image;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return new ImageViewModel();
+            }
+        }
     }
 }
 
