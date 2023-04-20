@@ -15,6 +15,8 @@ namespace WalletPayment.Services.Data
 
         public DbSet<Transaction> Transactions { get; set; }
 
+        public DbSet<SecurityQuestion> SecurityQuestions { get; set; }
+
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public DbSet<Deposit> Deposits { get; set; }

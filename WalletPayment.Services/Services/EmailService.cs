@@ -22,22 +22,18 @@ namespace WalletPayment.Services.Services
     public class EmailService : IEmail
     {
         private readonly DataContext _context;
-        private readonly LinkGenerator _linkGenerator;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<EmailService> _logger;
         private readonly IConfiguration _configuration;
-        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly EmailCredentials? _emailCredentials;
 
-        public EmailService(DataContext context, IConfiguration configuration, LinkGenerator linkGenerator, 
-            IHttpContextAccessor httpContextAccessor, ILogger<EmailService> logger, IWebHostEnvironment webHostEnvironment)
+        public EmailService(DataContext context, IConfiguration configuration,  
+            IHttpContextAccessor httpContextAccessor, ILogger<EmailService> logger)
         {
             _emailCredentials = configuration.GetSection("EmailCredentials").Get<EmailCredentials>();
             _context = context;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
-            _linkGenerator = linkGenerator;
-            _webHostEnvironment = webHostEnvironment;
             _logger = logger;
             _logger.LogDebug(1, "Nlog injected into DashboardService");
         }
@@ -82,6 +78,37 @@ namespace WalletPayment.Services.Services
                 email.To.Add(new MailboxAddress("WalletUser", emailUser));
 
                 email.Subject = "Link to reset your password";
+                email.Body = new TextPart(MimeKit.Text.TextFormat.Plain)
+                {
+                    Text = Link
+                };
+
+                using (var smtp = new SmtpClient())
+                {
+                    smtp.Connect(_emailCredentials.EmailHost, 587, false);
+                    smtp.Authenticate(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> SendEmailVerifyUser(string Link, string emailUser)
+        {
+            try
+            {
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
+                email.To.Add(new MailboxAddress("WalletUser", emailUser));
+
+                email.Subject = "Link to verify your email";
                 email.Body = new TextPart(MimeKit.Text.TextFormat.Plain)
                 {
                     Text = Link

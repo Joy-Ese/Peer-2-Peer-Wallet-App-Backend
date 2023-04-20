@@ -150,51 +150,6 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<UserUpdateViewModel> UpdateUserPin(UserUpdateDto request)
-        {
-            UserUpdateViewModel updatedUser = new UserUpdateViewModel();
-            try
-            {
-                int userID;
-                if (_httpContextAccessor.HttpContext == null)
-                {
-                    return updatedUser;
-                }
-
-                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
-
-                var updatedUserProfile = await _context.Users
-                    .Where(uProfile => uProfile.Id == userID)
-                    .FirstOrDefaultAsync();
-
-                if (updatedUserProfile == null) return updatedUser;
-
-                if (!AuthService.VerifyPinHash(request.oldPin, updatedUserProfile.PinHash, updatedUserProfile.PinSalt))
-                {
-                    updatedUser.message = "Old Pin does not match pin used during registration";
-                    return updatedUser;
-                }
-
-                AuthService.CreatePinHash(request.newPin, out byte[] pinHash, out byte[] pinSalt);
-
-                updatedUserProfile.PinHash = pinHash;
-                updatedUserProfile.PinSalt = pinSalt;
-
-                
-                await _context.SaveChangesAsync();
-
-                updatedUser.status = true;
-                updatedUser.message = "Pin changed successfully";
-                return updatedUser;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                updatedUser.message = "An exception occured";
-                return updatedUser;
-            }
-        }
-
         public async Task<UserProfileViewModel> GetUserProfile()
         {
             try
@@ -228,6 +183,46 @@ namespace WalletPayment.Services.Services
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 return new UserProfileViewModel();
+            }
+        }
+
+        public async Task<UpdateUserInfoModel> UpdateUserInfo(UpdateUserInfoDto request)
+        {
+            UpdateUserInfoModel updateUserInfo = new UpdateUserInfoModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return updateUserInfo;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userUpdated = await _context.Users.FindAsync(userID);
+                if (userUpdated == null)
+                {
+                    updateUserInfo.message = "User's Information could not be updated";
+                    return updateUserInfo;
+                }
+
+                userUpdated.FirstName = request.firstName;
+                userUpdated.LastName = request.lastName;
+                userUpdated.Username = request.username;
+                userUpdated.Email = request.email;
+                userUpdated.PhoneNumber = request.phoneNumber;
+                userUpdated.Address = request.address;
+
+                await _context.SaveChangesAsync();
+
+                updateUserInfo.status = true;
+                updateUserInfo.message = "User Information successfully updated";
+                return updateUserInfo;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return updateUserInfo;
             }
         }
 
@@ -307,6 +302,160 @@ namespace WalletPayment.Services.Services
                 return new ImageViewModel();
             }
         }
+
+        public async Task<DeleteImageViewModel> DeleteUserImage()
+        {
+            DeleteImageViewModel deleteImage = new DeleteImageViewModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return deleteImage;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var image = await _context.Images.Where(userImg => userImg.UserId == userID).FirstOrDefaultAsync();
+
+                _context.Images.Remove(image);
+                await _context.SaveChangesAsync();
+
+                if (image == null)
+                {
+                    deleteImage.message = "Image could not be deleted";
+                    return deleteImage;
+                }
+
+                deleteImage.status = true;
+                deleteImage.message = "Image successfully deleted";
+                return deleteImage;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return deleteImage;
+            }
+        }
+
+        public async Task<SecurityQuestionViewModel> SetSecurityQuestion(SecurityQuestionDto request)
+        {
+            SecurityQuestionViewModel securityResponse = new SecurityQuestionViewModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return securityResponse;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                SecurityQuestion securityQuestion = new SecurityQuestion
+                {
+                    Question = request.question,
+                    Answer = request.answer,
+                    UserId = userID
+
+                };
+
+                await _context.SecurityQuestions.AddAsync(securityQuestion);
+                await _context.SaveChangesAsync();
+
+                securityResponse.status = true;
+                securityResponse.message = "Your answer has been saved";
+                return securityResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return securityResponse;
+            }
+        }
+
+        public async Task<GetSecurityQuestionViewModel> GetUserSecurityQuestion()
+        {
+            GetSecurityQuestionViewModel model = new GetSecurityQuestionViewModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return model;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userSecQuest = await _context.SecurityQuestions.Where(s => s.UserId == userID)
+                                        .Select(s => new GetSecurityQuestionViewModel
+                                        {
+                                            Question = s.Question
+                                        }).FirstOrDefaultAsync();
+
+                if (userSecQuest == null) return model;
+
+                return userSecQuest;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return model;
+            }
+        }
+
+        public async Task<bool> GetUserSecurityAnswer()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return false;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userSecAns = await _context.SecurityQuestions.Where(s => s.UserId == userID).FirstOrDefaultAsync();
+
+                //if (userSecAns.Answer == null) return false;
+                if (userSecAns == null) return false;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> GetUserPin()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return false;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userPin = await _context.Users.Where(s => s.Id == userID).FirstOrDefaultAsync();
+
+                //if (userSecAns.Answer == null) return false;
+                if (userPin.PinSalt == null) return false;
+                if (userPin.PinHash == null) return false;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
     }
 }
 

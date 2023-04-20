@@ -14,10 +14,15 @@ namespace WalletPayment.Services.Interfaces
         Task<UserBalanceViewModel> GetUserAccountBalance();
         Task<UserDashboardViewModel> GetUserAccountNumber();
         Task<UserDashboardViewModel> GetUserEmail();
-        Task<UserUpdateViewModel> UpdateUserPin(UserUpdateDto request);
         Task<UserProfileViewModel> GetUserProfile();
+        Task<UpdateUserInfoModel> UpdateUserInfo(UpdateUserInfoDto request);
         Task<ImageRequestViewModel> UploadNewImage(IFormFile fileData);
         Task<ImageViewModel> GetUserImage();
+        Task<DeleteImageViewModel> DeleteUserImage();
+        Task<SecurityQuestionViewModel> SetSecurityQuestion(SecurityQuestionDto request);
+        Task<GetSecurityQuestionViewModel> GetUserSecurityQuestion();
+        Task<bool> GetUserSecurityAnswer();
+        Task<bool> GetUserPin();
     }
 }
 

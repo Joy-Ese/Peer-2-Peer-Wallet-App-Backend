@@ -147,6 +147,33 @@ namespace WalletPayment.Services.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.SecurityQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("SecurityQuestions");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.SystemAccount", b =>
                 {
                     b.Property<int>("Id")
@@ -239,11 +266,12 @@ namespace WalletPayment.Services.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<byte[]>("PasswordSalt")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("PhoneNumber")
@@ -251,16 +279,23 @@ namespace WalletPayment.Services.Migrations
                         .HasColumnType("varchar(20)");
 
                     b.Property<byte[]>("PinHash")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<byte[]>("PinSalt")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime?>("ResetTokenExpiresAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("varchar(50)");
+
+                    b.Property<string>("VerificationToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -311,6 +346,17 @@ namespace WalletPayment.Services.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.SecurityQuestion", b =>
+                {
+                    b.HasOne("WalletPayment.Models.Entites.User", "User")
+                        .WithOne("SecurityQuestions")
+                        .HasForeignKey("WalletPayment.Models.Entites.SecurityQuestion", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.Transaction", b =>
                 {
                     b.HasOne("WalletPayment.Models.Entites.User", "DestinationUser")
@@ -331,6 +377,9 @@ namespace WalletPayment.Services.Migrations
                     b.Navigation("Deposits");
 
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("SecurityQuestions")
+                        .IsRequired();
 
                     b.Navigation("Transactions");
 

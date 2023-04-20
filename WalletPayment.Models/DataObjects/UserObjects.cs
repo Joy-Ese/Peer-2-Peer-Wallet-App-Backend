@@ -25,6 +25,29 @@ namespace WalletPayment.Models.DataObjects
         public byte[] imageDetails { get; set; }
     }
 
+    public class DeleteImageViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class SecurityQuestionDto
+    {
+        public string question { get; set; } = string.Empty;
+        public string answer { get; set; } = string.Empty;
+    }
+
+    public class GetSecurityQuestionViewModel
+    {
+        public string Question { get; set; } = string.Empty;
+    }
+
+    public class SecurityQuestionViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
     public class UserViewModel
     {
         public int Id { get; set; }
@@ -70,20 +93,12 @@ namespace WalletPayment.Models.DataObjects
     {
         public string username { get; set; } = string.Empty;
         public string password { get; set; } = string.Empty;
+        public string confirmPassword { get; set; } = string.Empty;
         public string email { get; set; } = string.Empty;
         public string phoneNumber { get; set; } = string.Empty;
         public string firstName { get; set; } = string.Empty;
         public string lastName { get; set; } = string.Empty;
         public string address { get; set; } = string.Empty;
-
-        [Required]
-        [RegularExpression(@"^[0-9]{4}$", ErrorMessage = "Pin must not be more than 4 digits")]
-        public string pin { get; set; } = string.Empty;
-        [Required]
-
-        [Compare("pin", ErrorMessage = "Pins do not match")]
-        public string confirmPin { get; set; } = string.Empty;
-
     }
 
     public class UserLoginDto
@@ -161,16 +176,12 @@ namespace WalletPayment.Models.DataObjects
         public string message { get; set; } = string.Empty;
     }
 
-    public class GetResetPasswordModel
+    public class ResetPasswordDto
     {
         public string email { get; set; } = string.Empty;
         public string token { get; set; } = string.Empty;
-    }
-
-    public class ResetPasswordDto
-    {
         public string password { get; set; } = string.Empty;
-        public string email { get; set; } = string.Empty;
+        public string conPassword { get; set; } = string.Empty;
     }
 
     public class ResetPasswordModel
@@ -179,8 +190,50 @@ namespace WalletPayment.Models.DataObjects
         public string message { get; set; } = string.Empty;
     }
 
-    public class UserUpdateDto
+    public class VerifyEmailDto
     {
+        public string email { get; set; } = string.Empty;
+        public string token { get; set; } = string.Empty;
+    }
+
+    public class VerifyEmailModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class ChangePasswordDto
+    {
+        public string answer { get; set; } = string.Empty;
+        public string password { get; set; } = string.Empty;
+        public string confirmPassword { get; set; } = string.Empty;
+    }
+
+    public class ChangePasswordModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class UpdateUserInfoDto
+    {
+        public string firstName { get; set; } = string.Empty;
+        public string lastName { get; set; } = string.Empty;
+        public string username { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
+        public string phoneNumber { get; set; } = string.Empty;
+        public string address { get; set; } = string.Empty;
+    }
+
+    public class UpdateUserInfoModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class UpdatePinDto
+    {
+        public string answer { get; set; } = string.Empty;
         [Required]
         [RegularExpression(@"^[0-9]{4}$", ErrorMessage = "Pin must not be more than 4 digits")]
         public string oldPin { get; set; } = string.Empty;
@@ -190,7 +243,19 @@ namespace WalletPayment.Models.DataObjects
         public string newPin { get; set; } = string.Empty;
     }
 
-    public class UserUpdateViewModel
+    public class CreatePinDto
+    {
+        public string pin { get; set; } = string.Empty;
+        public string confirmPin { get; set; } = string.Empty;
+    }
+
+    public class CreatePinViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class UpdatePinViewModel
     {
         public bool status { get; set; }
         public string message { get; set; } = string.Empty;

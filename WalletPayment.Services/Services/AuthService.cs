@@ -20,24 +20,34 @@ using WalletPayment.Models.DataObjects;
 using WalletPayment.Models.Entites;
 using WalletPayment.Services.Data;
 using WalletPayment.Services.Interfaces;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.WebUtilities;
+using WalletPayment.Models.DataObjects.Common;
 
 namespace WalletPayment.Services.Services
 {
     public class AuthService : IAuth
     {
         private readonly DataContext _context;
+        private readonly LinkGenerator _linkGenerator;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
         private readonly IEmail _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<AuthService> _logger;
+        private readonly FrontEndResetDetail? _resetLink;
 
         public AuthService(DataContext context, IEmail emailService, IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor, ILogger<AuthService> logger)
+            IHttpContextAccessor httpContextAccessor, LinkGenerator linkGenerator, ILogger<AuthService> logger, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _emailService = emailService;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _linkGenerator = linkGenerator;
+            _webHostEnvironment = webHostEnvironment;
+            _resetLink = configuration.GetSection("FrontEndResetDetails").Get<FrontEndResetDetail>();
             _logger = logger;
             _logger.LogDebug(1, "Nlog injected into AuthService");
         }
@@ -82,20 +92,18 @@ namespace WalletPayment.Services.Services
 
                 if (data)
                 {
-                    _logger.LogWarning($"Duplicate username supplied {request.username}");
+                    _logger.LogWarning($"Duplicate username/email supplied {request.username}/{request.email}");
                     registerResponse.message = "Duplicate username or email";
                     return registerResponse;
                 }
 
-                if (!request.pin.Equals(request.confirmPin))
+                if (!request.password.Equals(request.confirmPassword))
                 {
-                    registerResponse.message = "Pins do not match";
+                    registerResponse.message = "Passwords do not match";
                     return registerResponse;
                 }
 
                 CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
-
-                CreatePinHash(request.pin, out byte[] pinHash, out byte[] pinSalt);
 
                 string generatedAcc = AccountNumberGenerator();
 
@@ -109,12 +117,13 @@ namespace WalletPayment.Services.Services
                     FirstName = request.firstName,
                     LastName = request.lastName,
                     Address = request.address,
-                    PinHash = pinHash,
-                    PinSalt = pinSalt
+                    VerificationToken = CreateRandomToken(),
                 };
                 var userResult = await _context.Users.AddAsync(newUser);
                 var result1 = await _context.SaveChangesAsync();
-                
+
+                //await CreateSystemAccount();
+
                 Account newAccount = new Account
                 {
                     AccountNumber = generatedAcc,
@@ -138,6 +147,8 @@ namespace WalletPayment.Services.Services
                     registerResponse.message = "Duplicate username or email";
                 }
 
+                registerResponse.status = true;
+                registerResponse.message = "Registration successful";
                 return registerResponse;
             }
             catch (Exception ex)
@@ -168,6 +179,27 @@ namespace WalletPayment.Services.Services
                     return loginResponse;
                 }
 
+                if (data.VerifiedAt == null)
+                {
+                    loginResponse.result = "Check email to verify user's registration";
+
+                    var verifyToken = data.VerificationToken;
+                    var verifyEmail = data.Email;
+
+                    var queryParams = new Dictionary<string, string>()
+                    {
+                        {"email", verifyEmail },
+                        {"token", verifyToken },
+                    };
+                    // move to register
+
+                    var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndVerifyLink, queryParams);
+                    await _emailService.SendEmailVerifyUser(callbackUrl, verifyEmail);
+
+                    return loginResponse;
+                }
+
+                
                 string token = CreateToken(data);
 
                 var refreshToken = GenerateRefreshToken();
@@ -204,6 +236,187 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<VerifyEmailModel> VerifyEmail(VerifyEmailDto verifyReq)
+        {
+            VerifyEmailModel verifyEmailModel = new VerifyEmailModel();
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == verifyReq.email && u.VerificationToken == verifyReq.token);
+
+                if (user == null)
+                {
+                    verifyEmailModel.message = "User is not registered";
+                    return verifyEmailModel;
+                }
+
+                user.VerifiedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                verifyEmailModel.status = true;
+                verifyEmailModel.message = "User verified! :)";
+                return verifyEmailModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return verifyEmailModel;
+            }
+        }
+
+        public async Task<ChangePasswordModel> ChangePassword(ChangePasswordDto request)
+        {
+            ChangePasswordModel changePasswordModel = new ChangePasswordModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return changePasswordModel;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userID);
+
+                var userSecurityQuest = await _context.SecurityQuestions.Where(s => s.UserId == userID).FirstOrDefaultAsync();
+
+                if (!request.password.Equals(request.confirmPassword))
+                {
+                    changePasswordModel.message = "Passwords do not match";
+                    return changePasswordModel;
+                }
+
+                if (!(userSecurityQuest.Answer == request.answer))
+                {
+                    changePasswordModel.message = "Wrong answer";
+                    return changePasswordModel;
+                }
+
+                CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                user.PasswordHash = passwordHash;
+                user.PasswordSalt = passwordSalt;
+
+                await _context.SaveChangesAsync();
+
+                changePasswordModel.status = true;
+                changePasswordModel.message = "Password changed!";
+                return changePasswordModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return changePasswordModel;
+            }
+        }
+
+        public async Task<CreatePinViewModel> CreatePin(CreatePinDto request)
+        {
+            CreatePinViewModel createPinViewModel = new CreatePinViewModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return createPinViewModel;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userLoggedIn = await _context.Users.Where(u => u.Id == userID).FirstOrDefaultAsync();
+
+                var userSecurityQuest = await _context.SecurityQuestions.Where(s => s.UserId == userID).FirstOrDefaultAsync();
+
+                if (userLoggedIn == null) return createPinViewModel;
+
+                if (userSecurityQuest == null)
+                {
+                    createPinViewModel.message = "Please go to your profile and set a security question first";
+                    return createPinViewModel;
+                }
+
+                if (!request.pin.Equals(request.confirmPin))
+                {
+                    createPinViewModel.message = "Pins do not match";
+                    return createPinViewModel;
+                }
+
+                CreatePinHash(request.pin, out byte[] pinHash, out byte[] pinSalt);
+
+                userLoggedIn.PinHash = pinHash;
+                userLoggedIn.PinSalt = pinSalt;
+
+                await _context.SaveChangesAsync();
+
+                createPinViewModel.status = true;
+                createPinViewModel.message = "Pin created successfully";
+                return createPinViewModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return createPinViewModel;
+            }
+        }
+
+        public async Task<UpdatePinViewModel> UpdatePin(UpdatePinDto request)
+        {
+            UpdatePinViewModel updatePinViewModel = new UpdatePinViewModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return updatePinViewModel;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var updatedUserProfile = await _context.Users
+                    .Where(uProfile => uProfile.Id == userID)
+                    .FirstOrDefaultAsync();
+
+                var userSecurityQuest = await _context.SecurityQuestions.Where(s => s.UserId == userID).FirstOrDefaultAsync();
+
+                if (updatedUserProfile == null) return updatePinViewModel;
+
+                if (!(userSecurityQuest.Answer == request.answer))
+                {
+                    updatePinViewModel.message = "Wrong answer";
+                    return updatePinViewModel;
+                }
+
+                if (!VerifyPinHash(request.oldPin, updatedUserProfile.PinHash, updatedUserProfile.PinSalt))
+                {
+                    updatePinViewModel.message = "Old Pin does not match pin used during registration";
+                    return updatePinViewModel;
+                }
+
+                CreatePinHash(request.newPin, out byte[] pinHash, out byte[] pinSalt);
+
+                updatedUserProfile.PinHash = pinHash;
+                updatedUserProfile.PinSalt = pinSalt;
+
+
+                await _context.SaveChangesAsync();
+
+                updatePinViewModel.status = true;
+                updatePinViewModel.message = "Pin changed successfully";
+                return updatePinViewModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                updatePinViewModel.message = "An exception occured";
+                return updatePinViewModel;
+            }
+        }
+
+        private static string CreateRandomToken()
+        {
+            return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+        }
+
         public async Task<ForgetPasswordModel> ForgetPassword(ForgetPasswordDto emailReq)
         {
             ForgetPasswordModel forgetPassword = new ForgetPasswordModel();
@@ -219,11 +432,22 @@ namespace WalletPayment.Services.Services
                 }
 
                 var email = userInDb.Email;
+                string token = CreateRandomToken();
+                userInDb.PasswordResetToken = token;
+                userInDb.ResetTokenExpiresAt = DateTime.Now.AddDays(1);
+
+                await _context.SaveChangesAsync();
 
                 //var callbackUrl = _linkGenerator.GetUriByAction("GetResetPassword", "Email", new { token, email }, 
                 //    _httpContextAccessor.HttpContext.Request.Scheme, _httpContextAccessor.HttpContext.Request.Host);
 
-                var callbackUrl = "http://127.0.0.1:5500/html/ResetPassword.html";
+                var queryParams = new Dictionary<string, string>()
+                {
+                    {"email", email },
+                    {"token", token },
+                };
+
+                var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndResetLink, queryParams);
 
                 await _emailService.SendEmailPasswordReset(callbackUrl, email);
 
@@ -250,11 +474,23 @@ namespace WalletPayment.Services.Services
             ResetPasswordModel resetPass = new ResetPasswordModel();
             try
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == resetPasswordReq.email);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == resetPasswordReq.email && u.PasswordResetToken == resetPasswordReq.token);
 
                 if (user == null)
                 {
-                    resetPass.message = "Incorrect email";
+                    resetPass.message = "Incorrect email/token";
+                    return resetPass;
+                }
+
+                if (user.ResetTokenExpiresAt < DateTime.Now)
+                {
+                    resetPass.message = "Token expired. Do Forget Password again!";
+                    return resetPass;
+                }
+
+                if (!resetPasswordReq.password.Equals(resetPasswordReq.conPassword))
+                {
+                    resetPass.message = "Passwords do not match";
                     return resetPass;
                 }
 
@@ -262,11 +498,13 @@ namespace WalletPayment.Services.Services
 
                 user.PasswordHash = passwordHash;
                 user.PasswordSalt = passwordSalt;
+                user.PasswordResetToken = null;
+                user.ResetTokenExpiresAt = null;
 
                 await _context.SaveChangesAsync();
 
                 resetPass.status = true;
-                resetPass.message = "Password sucsessfully reset, you can now login!";
+                resetPass.message = "Password reset done, you can now login!";
                 return resetPass;
             }
             catch (Exception ex)

@@ -37,6 +37,25 @@ namespace WalletPayment.Api.Controllers
 
         }
 
+        [HttpPost("CreatePin"), Authorize]
+        public async Task<IActionResult> CreatePin(CreatePinDto request)
+        {
+            var result = await _authService.CreatePin(request);
+            if (!result.status) return BadRequest(result);
+
+            return Ok(result);
+
+        }
+
+        [HttpPut("UpdateUserPin"), Authorize]
+        public async Task<IActionResult> UpdatePin([FromBody] UpdatePinDto request)
+        {
+            var result = await _authService.UpdatePin(request);
+            if (!result.status) return BadRequest(result);
+
+            return Ok(result);
+        }
+
         [HttpPost("ForgetPassword")]
         public async Task<IActionResult> ForgetPassword(ForgetPasswordDto emailReq)
         {
@@ -48,6 +67,20 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordReq)
         {
             var result = await _authService.ResetPassword(resetPasswordReq);
+            return Ok(result);
+        }
+
+        [HttpPost("VerifyEmail")]
+        public async Task<IActionResult> VerifyEmail(VerifyEmailDto verifyReq)
+        {
+            var result = await _authService.VerifyEmail(verifyReq);
+            return Ok(result);
+        }
+
+        [HttpPost("ChangePassword"), Authorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto request)
+        {
+            var result = await _authService.ChangePassword(request);
             return Ok(result);
         }
 

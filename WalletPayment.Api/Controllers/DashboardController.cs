@@ -47,23 +47,21 @@ namespace WalletPayment.Api.Controllers
             var result = await _dashboardService.GetUserEmail();
             return Ok(result);
         }
-
-        [HttpPut("UpdateUserPin"), Authorize]
-        public async Task<IActionResult> UpdateUserPin([FromBody]UserUpdateDto request)
-        {
-            var result = await _dashboardService.UpdateUserPin(request);
-            if (!result.status) return BadRequest(result);
-
-            return Ok(result);
-        }
-
+        
         [HttpGet("GetUserProfile"), Authorize]
         public async Task<IActionResult> GetUserProfile()
         {
             var result = await _dashboardService.GetUserProfile();
             return Ok(result);
         }
-
+        
+        [HttpPut("UpdateUserInfo"), Authorize]
+        public async Task<IActionResult> UpdateUserInfo(UpdateUserInfoDto request)
+        {
+            var result = await _dashboardService.UpdateUserInfo(request);
+            return Ok(result);
+        }
+        
         [HttpPost("UploadNewImage"), Authorize]
         public async Task<IActionResult> UploadNewImage([FromForm]ImageRequestDTO req)
         {
@@ -87,5 +85,41 @@ namespace WalletPayment.Api.Controllers
             var result = await _dashboardService.GetUserImage();
             return Ok(result);
         }
+
+        [HttpDelete("DeleteUserImage"), Authorize]
+        public async Task<IActionResult> DeleteUserImage()
+        {
+            var result = await _dashboardService.DeleteUserImage();
+            return Ok(result);
+        }
+
+        [HttpPost("SetSecurityQuestion"), Authorize]
+        public async Task<IActionResult> SetSecurityQuestion(SecurityQuestionDto request)
+        {
+            var result = await _dashboardService.SetSecurityQuestion(request);
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserSecurityQuestion"), Authorize]
+        public async Task<IActionResult> GetUserSecurityQuestion()
+        {
+            var result = await _dashboardService.GetUserSecurityQuestion();
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserSecurityAnswer"), Authorize]
+        public async Task<IActionResult> GetUserSecurityAnswer()
+        {
+            var result = await _dashboardService.GetUserSecurityAnswer();
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserPin"), Authorize]
+        public async Task<IActionResult> GetUserPin()
+        {
+            var result = await _dashboardService.GetUserPin();
+            return Ok(result);
+        }
+
     }
 }
