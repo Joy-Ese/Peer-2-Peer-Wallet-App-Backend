@@ -216,6 +216,86 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<List<TransactionListModel>> GetLastThreeTransactions()
+        {
+            List<TransactionListModel> getLastThreeTxns = new List<TransactionListModel>();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return getLastThreeTxns;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var txnType = "";
+
+                var loggedInUser = await _context.Accounts.Include("User").Where(senderID => senderID.Id == userID).FirstOrDefaultAsync();
+
+                var last3Txns = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
+                                .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber
+                                || txn.TranSourceAccount == loggedInUser.AccountNumber)
+                                .OrderByDescending(txn => txn.Id).Take(3).ToListAsync();
+
+
+                foreach (var txn in last3Txns)
+                {
+                    if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    {
+                        getLastThreeTxns.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = "P2P Wallet",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    {
+                        getLastThreeTxns.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                    if (txn.TranSourceAccount == loggedInUser.AccountNumber)
+                    {
+                        getLastThreeTxns.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "DEBIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                }
+
+                return getLastThreeTxns;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
+                return getLastThreeTxns;
+            }
+        }
+
 
     }
 }

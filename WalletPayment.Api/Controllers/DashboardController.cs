@@ -20,28 +20,35 @@ namespace WalletPayment.Api.Controllers
             _dashboardService = dashboardService;
         }
 
-        [HttpGet("UserDetails"), Authorize]
+        [HttpGet("GetUserDetails"), Authorize]
         public async Task<IActionResult> GetUserDetails()
         {
             var result = await _dashboardService.GetUserDetails();
             return Ok(result);
         }
 
-        [HttpGet("AccountBalance"), Authorize]
+        [HttpGet("GetUserAccountBalance"), Authorize]
         public async Task<IActionResult> GetUserAccountBalance()
         {
             var result = await _dashboardService.GetUserAccountBalance();
             return Ok(result);
         }
 
-        [HttpGet("UserAccountNumber"), Authorize]
+        [HttpGet("GetUserAccountNumber"), Authorize]
         public async Task<IActionResult> GetUserAccountNumber()
         {
             var result = await _dashboardService.GetUserAccountNumber();
             return Ok(result);
         }
 
-        [HttpGet("UserEmail"), Authorize]
+        [HttpGet("GetUserAccountCurrency"), Authorize]
+        public async Task<IActionResult> GetUserAccountCurrency()
+        {
+            var result = await _dashboardService.GetUserAccountCurrency();
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserEmail"), Authorize]
         public async Task<IActionResult> GetUserEmail()
         {
             var result = await _dashboardService.GetUserEmail();

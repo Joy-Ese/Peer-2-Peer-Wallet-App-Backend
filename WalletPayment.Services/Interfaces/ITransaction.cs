@@ -12,6 +12,7 @@ namespace WalletPayment.Services.Interfaces
     {
         Task<TransactionResponseModel> TransferFund(TransactionDto request);
         Task<List<TransactionListModel>> GetTransactionList();
+        Task<List<TransactionListModel>> GetLastThreeTransactions();
     }
 }
 

@@ -88,34 +88,65 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<UserDashboardViewModel> GetUserAccountNumber()
+        public async Task<UserAcctNumViewModel> GetUserAccountNumber()
         {
             try
             {
                 int userID;
                 if (_httpContextAccessor.HttpContext == null)
                 {
-                    return new UserDashboardViewModel();
+                    return new UserAcctNumViewModel();
                 }
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
                 var acctNumber = await _context.Users
                                 .Where(userAccNum => userAccNum.Id == userID)
-                                .Select(userAccNum => new UserDashboardViewModel
+                                .Select(userAccNum => new UserAcctNumViewModel
                                 {
-                                    Balance = userAccNum.UserAccount.AccountNumber,
+                                    AccountNumber = userAccNum.UserAccount.AccountNumber,
                                 })
                                 .FirstOrDefaultAsync();
 
-                if (acctNumber == null) return new UserDashboardViewModel();
+                if (acctNumber == null) return new UserAcctNumViewModel();
 
                 return acctNumber;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return new UserDashboardViewModel();
+                return new UserAcctNumViewModel();
+            }
+        }
+
+        public async Task<UserAcctCurrencyModel> GetUserAccountCurrency()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new UserAcctCurrencyModel();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var acctCurr = await _context.Users
+                                .Where(userAccNum => userAccNum.Id == userID)
+                                .Select(userAccNum => new UserAcctCurrencyModel
+                                {
+                                    Currency = userAccNum.UserAccount.Currency,
+                                })
+                                .FirstOrDefaultAsync();
+
+                if (acctCurr == null) return new UserAcctCurrencyModel();
+
+                return acctCurr;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return new UserAcctCurrencyModel();
             }
         }
 

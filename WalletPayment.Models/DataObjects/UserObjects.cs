@@ -158,6 +158,16 @@ namespace WalletPayment.Models.DataObjects
         public string Balance { get; set; } = string.Empty;
     }
 
+    public class UserAcctNumViewModel
+    {
+        public string AccountNumber { get; set; } = string.Empty;
+    }
+
+    public class UserAcctCurrencyModel
+    {
+        public string Currency { get; set; } = string.Empty;
+    }
+
     public class EmailDto
     {
         public string to { get; set; } = string.Empty;

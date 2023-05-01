@@ -106,6 +106,7 @@ namespace WalletPayment.Services.Services
                 CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
 
                 string generatedAcc = AccountNumberGenerator();
+                string randomToken = CreateRandomToken();
 
                 User newUser = new User
                 {
@@ -117,10 +118,11 @@ namespace WalletPayment.Services.Services
                     FirstName = request.firstName,
                     LastName = request.lastName,
                     Address = request.address,
-                    VerificationToken = CreateRandomToken(),
+                    VerificationToken = randomToken,
                 };
-                var userResult = await _context.Users.AddAsync(newUser);
-                var result1 = await _context.SaveChangesAsync();
+                await _context.Users.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+
 
                 //await CreateSystemAccount();
 
@@ -133,22 +135,35 @@ namespace WalletPayment.Services.Services
                 };
 
                 await _context.Accounts.AddAsync(newAccount);
-                var result = await _context.SaveChangesAsync();
-
-                var sendEmail = new EmailDto
-                {
-                    to = request.email,
-                };
-                await _emailService.SendEmail(sendEmail, request.email);
+                await _context.SaveChangesAsync();
 
 
-                if (!(result > 0))
-                {
-                    registerResponse.message = "Duplicate username or email";
-                }
+                var verifyToken = randomToken;
+                var verifyEmail = request.email;
+
+                var queryParams = new Dictionary<string, string>()
+                    {
+                        {"email", verifyEmail },
+                        {"token", verifyToken },
+                    };
+
+                var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndVerifyLink, queryParams);
+                await _emailService.SendEmailVerifyUser(callbackUrl, verifyEmail);
+
+                //var sendEmail = new EmailDto
+                //{
+                //    to = request.email,
+                //};
+                //await _emailService.SendEmail(sendEmail, request.email);
+
+
+                //if (!(result > 0))
+                //{
+                //    registerResponse.message = "Duplicate username or email";
+                //}
 
                 registerResponse.status = true;
-                registerResponse.message = "Registration successful";
+                registerResponse.message = "Check email to verify your registration";
                 return registerResponse;
             }
             catch (Exception ex)
@@ -179,25 +194,25 @@ namespace WalletPayment.Services.Services
                     return loginResponse;
                 }
 
-                if (data.VerifiedAt == null)
-                {
-                    loginResponse.result = "Check email to verify user's registration";
+                //if (data.VerifiedAt == null)
+                //{
+                //    loginResponse.result = "Check email to verify user's registration";
 
-                    var verifyToken = data.VerificationToken;
-                    var verifyEmail = data.Email;
+                //    var verifyToken = data.VerificationToken;
+                //    var verifyEmail = data.Email;
 
-                    var queryParams = new Dictionary<string, string>()
-                    {
-                        {"email", verifyEmail },
-                        {"token", verifyToken },
-                    };
-                    // move to register
+                //    var queryParams = new Dictionary<string, string>()
+                //    {
+                //        {"email", verifyEmail },
+                //        {"token", verifyToken },
+                //    };
+                //    // move to register
 
-                    var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndVerifyLink, queryParams);
-                    await _emailService.SendEmailVerifyUser(callbackUrl, verifyEmail);
+                //    var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndVerifyLink, queryParams);
+                //    await _emailService.SendEmailVerifyUser(callbackUrl, verifyEmail);
 
-                    return loginResponse;
-                }
+                //    return loginResponse;
+                //}
 
                 
                 string token = CreateToken(data);

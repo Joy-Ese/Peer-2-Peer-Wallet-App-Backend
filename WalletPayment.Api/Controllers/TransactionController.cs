@@ -35,6 +35,13 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("GetLastThreeTransactions"), Authorize]
+        public async Task<IActionResult> GetLastThreeTransactions()
+        {
+            var result = await _transactionService.GetLastThreeTransactions();
+            return Ok(result);
+        }
+
     }
 }
 
