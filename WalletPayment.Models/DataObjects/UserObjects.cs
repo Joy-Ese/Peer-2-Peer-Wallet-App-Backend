@@ -70,6 +70,8 @@ namespace WalletPayment.Models.DataObjects
         public string AccountNumber { get; set; } = string.Empty;
         public string Balance { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
     }
 
     public class TransactionListModel
@@ -123,6 +125,12 @@ namespace WalletPayment.Models.DataObjects
         public string destinationAccount { get; set; } = string.Empty;
         public decimal amount { get; set; }
         public string pin { get; set; } = string.Empty;
+    }
+
+    public class TransactionDateDto
+    {
+        public string startDate { get; set; } = string.Empty;
+        public string endDate { get; set; } =  string.Empty;
     }
 
     public class LoginViewModel

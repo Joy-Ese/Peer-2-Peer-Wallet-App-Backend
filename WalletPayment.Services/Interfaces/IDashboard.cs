@@ -18,6 +18,7 @@ namespace WalletPayment.Services.Interfaces
         Task<UserProfileViewModel> GetUserProfile();
         Task<UpdateUserInfoModel> UpdateUserInfo(UpdateUserInfoDto request);
         Task<ImageRequestViewModel> UploadNewImage(IFormFile fileData);
+        Task<ImageRequestViewModel> UpdateImage(IFormFile fileData);
         Task<ImageViewModel> GetUserImage();
         Task<DeleteImageViewModel> DeleteUserImage();
         Task<SecurityQuestionViewModel> SetSecurityQuestion(SecurityQuestionDto request);

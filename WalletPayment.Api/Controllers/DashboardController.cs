@@ -72,17 +72,14 @@ namespace WalletPayment.Api.Controllers
         [HttpPost("UploadNewImage"), Authorize]
         public async Task<IActionResult> UploadNewImage([FromForm]ImageRequestDTO req)
         {
-            if (req == null)
-            {
-                return BadRequest("Invalid post request");
-            }
-
             var result = await _dashboardService.UploadNewImage(req.ImageDetails);
+            return Ok(result);
+        }
 
-            if (!result.status)
-            {
-                return NotFound(result);
-            }
+        [HttpPut("UpdateImage"), Authorize]
+        public async Task<IActionResult> UpdateImage([FromForm] ImageRequestDTO req)
+        {
+            var result = await _dashboardService.UpdateImage(req.ImageDetails);
             return Ok(result);
         }
 

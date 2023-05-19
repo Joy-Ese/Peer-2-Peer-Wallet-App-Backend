@@ -303,7 +303,7 @@ namespace WalletPayment.Services.Services
 
                 if (!(userSecurityQuest.Answer == request.answer))
                 {
-                    changePasswordModel.message = "Wrong answer";
+                    changePasswordModel.message = "Wrong answer to security question";
                     return changePasswordModel;
                 }
 
@@ -397,7 +397,7 @@ namespace WalletPayment.Services.Services
 
                 if (!(userSecurityQuest.Answer == request.answer))
                 {
-                    updatePinViewModel.message = "Wrong answer";
+                    updatePinViewModel.message = "Wrong answer to security question";
                     return updatePinViewModel;
                 }
 
@@ -416,7 +416,7 @@ namespace WalletPayment.Services.Services
                 await _context.SaveChangesAsync();
 
                 updatePinViewModel.status = true;
-                updatePinViewModel.message = "Pin changed successfully";
+                updatePinViewModel.message = "Pin updated successfully";
                 return updatePinViewModel;
             }
             catch (Exception ex)

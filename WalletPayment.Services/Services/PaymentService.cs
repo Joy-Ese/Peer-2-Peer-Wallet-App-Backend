@@ -66,6 +66,7 @@ namespace WalletPayment.Services.Services
 
                 if (req.amount <= 0)
                 {
+                    model.status = false;
                     model.message = "Transfer amount cannot be zero or negative";
                     return model;
                 }

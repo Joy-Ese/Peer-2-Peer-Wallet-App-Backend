@@ -43,6 +43,9 @@ namespace WalletPayment.Services.Services
                                     LastName = userInfo.LastName,
                                     AccountNumber = userInfo.UserAccount.AccountNumber,
                                     Balance = userInfo.UserAccount.Balance.ToString(),
+                                    Email = userInfo.Email,
+                                    PhoneNumber = userInfo.PhoneNumber,
+                                    Address = userInfo.Address,
                                 })
                                 .FirstOrDefaultAsync();
 
@@ -233,7 +236,7 @@ namespace WalletPayment.Services.Services
                 var userUpdated = await _context.Users.FindAsync(userID);
                 if (userUpdated == null)
                 {
-                    updateUserInfo.message = "User's Information could not be updated";
+                    updateUserInfo.message = "User's Information could not be updated!";
                     return updateUserInfo;
                 }
 
@@ -247,7 +250,7 @@ namespace WalletPayment.Services.Services
                 await _context.SaveChangesAsync();
 
                 updateUserInfo.status = true;
-                updateUserInfo.message = "User Information successfully updated";
+                updateUserInfo.message = "User Information successfully updated!";
                 return updateUserInfo;
             }
             catch (Exception ex)
@@ -289,11 +292,59 @@ namespace WalletPayment.Services.Services
                 if (result < 0)
                 {
                     imageRequestViewModel.status = false;
-                    imageRequestViewModel.message = "File could not be uploaded";
+                    imageRequestViewModel.message = "Image could not be uploaded";
                 }
 
                 imageRequestViewModel.status = true;
-                imageRequestViewModel.message = "File uploaded successfully";
+                imageRequestViewModel.message = "Image uploaded successfully";
+                return imageRequestViewModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return imageRequestViewModel;
+            }
+        }
+
+        public async Task<ImageRequestViewModel> UpdateImage(IFormFile fileData)
+        {
+            ImageRequestViewModel imageRequestViewModel = new ImageRequestViewModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return imageRequestViewModel;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userImageToUpdate = await _context.Images.Where(x => x.UserId == userID).FirstOrDefaultAsync();
+                if (userImageToUpdate == null)
+                {
+                    imageRequestViewModel.message = "User's Image could not be updated!";
+                    return imageRequestViewModel;
+                }
+
+                userImageToUpdate.FileName = fileData.FileName;
+                userImageToUpdate.TimeUploaded = DateTime.Now;
+                
+                using (var stream = new MemoryStream())
+                {
+                    fileData.CopyTo(stream);
+                    userImageToUpdate.FileData = stream.ToArray();
+                }
+
+                var result = await _context.SaveChangesAsync();
+
+                if (result < 0)
+                {
+                    imageRequestViewModel.status = false;
+                    imageRequestViewModel.message = "Image could not be updated!";
+                }
+
+                imageRequestViewModel.status = true;
+                imageRequestViewModel.message = "Image updated successfully!";
                 return imageRequestViewModel;
             }
             catch (Exception ex)

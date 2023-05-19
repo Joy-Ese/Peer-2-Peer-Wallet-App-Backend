@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -290,12 +291,95 @@ namespace WalletPayment.Services.Services
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                _logger.LogInformation("The error occurred at",
-                    DateTime.UtcNow.ToLongTimeString());
+                _logger.LogInformation("The error occurred at", DateTime.UtcNow.ToLongTimeString());
                 return getLastThreeTxns;
             }
         }
 
+        public async Task<List<TransactionListModel>> TransactionsByDateRange(TransactionDateDto request)
+        {
+            List<TransactionListModel> txnsByDate = new List<TransactionListModel>();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return txnsByDate;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var txnType = "";
+
+                var loggedInUser = await _context.Accounts.Include("User").Where(senderID => senderID.Id == userID).FirstOrDefaultAsync();
+
+                var startDate = Convert.ToDateTime(request.startDate);
+                var endDate = Convert.ToDateTime(request.endDate);
+
+                endDate = endDate.AddDays(1);
+
+                var txnsRange = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
+                               .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber
+                                || txn.TranSourceAccount == loggedInUser.AccountNumber)
+                               .ToListAsync();
+
+                var allRange = txnsRange.Where(txn => txn.Date >= startDate && txn.Date <= endDate).ToList();
+
+                foreach (var txn in allRange)
+                {
+                    if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    {
+                        txnsByDate.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = "P2P Wallet",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    {
+                        txnsByDate.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                    if (txn.TranSourceAccount == loggedInUser.AccountNumber)
+                    {
+                        txnsByDate.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "DEBIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                }
+
+                return txnsByDate;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at", DateTime.UtcNow.ToLongTimeString());
+                return txnsByDate;
+            }
+        }
 
     }
 }

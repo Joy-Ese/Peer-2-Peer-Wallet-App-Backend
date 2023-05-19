@@ -41,18 +41,14 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> CreatePin(CreatePinDto request)
         {
             var result = await _authService.CreatePin(request);
-            if (!result.status) return BadRequest(result);
-
             return Ok(result);
 
         }
 
         [HttpPut("UpdateUserPin"), Authorize]
-        public async Task<IActionResult> UpdatePin([FromBody] UpdatePinDto request)
+        public async Task<IActionResult> UpdatePin(UpdatePinDto request)
         {
             var result = await _authService.UpdatePin(request);
-            if (!result.status) return BadRequest(result);
-
             return Ok(result);
         }
 

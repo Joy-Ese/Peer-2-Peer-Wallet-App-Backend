@@ -42,6 +42,13 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPost("TransactionsByDateRange"), Authorize]
+        public async Task<IActionResult> TransactionsByDateRange(TransactionDateDto request)
+        {
+            var result = await _transactionService.TransactionsByDateRange(request);
+            return Ok(result);
+        }
+
     }
 }
 
