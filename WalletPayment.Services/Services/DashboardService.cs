@@ -525,9 +525,33 @@ namespace WalletPayment.Services.Services
 
                 var userPin = await _context.Users.Where(s => s.Id == userID).FirstOrDefaultAsync();
 
-                //if (userSecAns.Answer == null) return false;
                 if (userPin.PinSalt == null) return false;
                 if (userPin.PinHash == null) return false;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> DoesUserHaveImage()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return false;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userImg = await _context.Images.Where(s => s.UserId == userID).FirstOrDefaultAsync();
+
+                if (userImg == null) return false;
 
                 return true;
             }

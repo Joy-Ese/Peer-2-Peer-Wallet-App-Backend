@@ -125,5 +125,12 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("DoesUserHaveImage"), Authorize]
+        public async Task<IActionResult> DoesUserHaveImage()
+        {
+            var result = await _dashboardService.DoesUserHaveImage();
+            return Ok(result);
+        }
+
     }
 }

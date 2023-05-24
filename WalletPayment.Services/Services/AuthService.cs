@@ -156,12 +156,6 @@ namespace WalletPayment.Services.Services
                 //};
                 //await _emailService.SendEmail(sendEmail, request.email);
 
-
-                //if (!(result > 0))
-                //{
-                //    registerResponse.message = "Duplicate username or email";
-                //}
-
                 registerResponse.status = true;
                 registerResponse.message = "Check email to verify your registration";
                 return registerResponse;

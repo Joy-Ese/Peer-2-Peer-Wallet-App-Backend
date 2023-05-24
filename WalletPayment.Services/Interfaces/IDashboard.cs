@@ -25,6 +25,7 @@ namespace WalletPayment.Services.Interfaces
         Task<GetSecurityQuestionViewModel> GetUserSecurityQuestion();
         Task<bool> GetUserSecurityAnswer();
         Task<bool> GetUserPin();
+        Task<bool> DoesUserHaveImage();
     }
 }
 
