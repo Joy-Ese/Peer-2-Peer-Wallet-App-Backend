@@ -171,7 +171,7 @@ namespace WalletPayment.Services.Services
 
                 await _context.SaveChangesAsync();
 
-                //Desposit Email information
+                //Desposit Email information to user email
                 var selfEmail = user.Email;
                 var selfName = user.FirstName;
                 var selfAmount = depositInfo.Amount.ToString();

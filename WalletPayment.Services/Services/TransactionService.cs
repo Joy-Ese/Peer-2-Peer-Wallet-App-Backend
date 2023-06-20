@@ -601,8 +601,9 @@ namespace WalletPayment.Services.Services
                 var convertedPDF = _converter.Convert(pdf);
 
 
-                //var converter = new BasicConverter(new PdfTools());
-                //byte[] pdfBytes = converter.Convert(pdf);
+                var converter = new BasicConverter(new PdfTools());
+                byte[] pdfBytes = converter.Convert(pdf);
+                // How to send this pdf as email
 
                 ///////////////////////////////////////////////////////////////////////////////////////////////
                 // Send pdf to user email
