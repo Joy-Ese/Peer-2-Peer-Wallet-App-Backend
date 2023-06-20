@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v6.0": {
       "WalletPayment.Api/1.0.0": {
         "dependencies": {
+          "DinkToPdf": "1.0.8",
           "FluentValidation.AspNetCore": "11.2.2",
           "MailKit": "3.4.3",
           "Microsoft.AspNet.WebApi.Client": "5.2.9",
@@ -22,6 +23,7 @@
           "Microsoft.Extensions.Logging.Console": "7.0.0",
           "NETCore.MailKit": "2.1.0",
           "NLog.Web.AspNetCore": "5.1.5",
+          "NPOI": "2.6.0",
           "Newtonsoft.Json": "13.0.2",
           "Swashbuckle.AspNetCore": "6.2.3",
           "Swashbuckle.AspNetCore.Filters": "7.0.5",
@@ -32,6 +34,31 @@
         },
         "runtime": {
           "WalletPayment.Api.dll": {}
+        }
+      },
+      "DinkToPdf/1.0.8": {
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "System.Collections.Concurrent": "4.3.0",
+          "System.Globalization": "4.3.0",
+          "System.Reflection.TypeExtensions": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.InteropServices": "4.3.0",
+          "System.Threading.Thread": "4.0.0"
+        },
+        "runtime": {
+          "lib/netstandard1.6/DinkToPdf.dll": {
+            "assemblyVersion": "1.0.8.0",
+            "fileVersion": "1.0.8.0"
+          }
+        }
+      },
+      "Enums.NET/4.0.0": {
+        "runtime": {
+          "lib/netcoreapp3.0/Enums.NET.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.0.0.0"
+          }
         }
       },
       "FluentValidation/11.2.1": {
@@ -82,6 +109,14 @@
           "lib/net6.0/MailKit.dll": {
             "assemblyVersion": "3.4.0.0",
             "fileVersion": "3.4.3.0"
+          }
+        }
+      },
+      "MathNet.Numerics.Signed/4.15.0": {
+        "runtime": {
+          "lib/netstandard2.0/MathNet.Numerics.dll": {
+            "assemblyVersion": "4.15.0.0",
+            "fileVersion": "4.15.0.0"
           }
         }
       },
@@ -607,6 +642,14 @@
           }
         }
       },
+      "Microsoft.IO.RecyclableMemoryStream/2.2.0": {
+        "runtime": {
+          "lib/net5.0/Microsoft.IO.RecyclableMemoryStream.dll": {
+            "assemblyVersion": "2.2.0.0",
+            "fileVersion": "2.2.0.0"
+          }
+        }
+      },
       "Microsoft.Net.Http.Headers/2.2.0": {
         "dependencies": {
           "Microsoft.Extensions.Primitives": "7.0.0",
@@ -656,7 +699,7 @@
         "dependencies": {
           "Portable.BouncyCastle": "1.9.0",
           "System.Runtime.CompilerServices.Unsafe": "6.0.0",
-          "System.Security.Cryptography.Pkcs": "6.0.0",
+          "System.Security.Cryptography.Pkcs": "6.0.1",
           "System.Text.Encoding.CodePages": "6.0.0"
         },
         "runtime": {
@@ -778,6 +821,38 @@
           }
         }
       },
+      "NPOI/2.6.0": {
+        "dependencies": {
+          "Enums.NET": "4.0.0",
+          "MathNet.Numerics.Signed": "4.15.0",
+          "Microsoft.IO.RecyclableMemoryStream": "2.2.0",
+          "Portable.BouncyCastle": "1.9.0",
+          "SharpZipLib": "1.3.3",
+          "SixLabors.Fonts": "1.0.0-beta18",
+          "SixLabors.ImageSharp": "2.1.3",
+          "System.Configuration.ConfigurationManager": "6.0.0",
+          "System.Security.Cryptography.Xml": "6.0.1",
+          "System.Text.Encoding.CodePages": "6.0.0"
+        },
+        "runtime": {
+          "lib/net6.0/NPOI.OOXML.dll": {
+            "assemblyVersion": "2.6.0.0",
+            "fileVersion": "2.6.0.0"
+          },
+          "lib/net6.0/NPOI.OpenXml4Net.dll": {
+            "assemblyVersion": "2.6.0.0",
+            "fileVersion": "2.6.0.0"
+          },
+          "lib/net6.0/NPOI.OpenXmlFormats.dll": {
+            "assemblyVersion": "2.6.0.0",
+            "fileVersion": "2.6.0.0"
+          },
+          "lib/net6.0/NPOI.dll": {
+            "assemblyVersion": "2.6.0.0",
+            "fileVersion": "2.6.0.0"
+          }
+        }
+      },
       "Portable.BouncyCastle/1.9.0": {
         "runtime": {
           "lib/netstandard2.0/BouncyCastle.Crypto.dll": {
@@ -851,6 +926,34 @@
           "lib/netcoreapp3.1/Scrutor.dll": {
             "assemblyVersion": "3.0.2.0",
             "fileVersion": "3.0.2.0"
+          }
+        }
+      },
+      "SharpZipLib/1.3.3": {
+        "runtime": {
+          "lib/netstandard2.1/ICSharpCode.SharpZipLib.dll": {
+            "assemblyVersion": "1.3.3.11",
+            "fileVersion": "1.3.3.11"
+          }
+        }
+      },
+      "SixLabors.Fonts/1.0.0-beta18": {
+        "runtime": {
+          "lib/netcoreapp3.1/SixLabors.Fonts.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "SixLabors.ImageSharp/2.1.3": {
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0",
+          "System.Text.Encoding.CodePages": "6.0.0"
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/SixLabors.ImageSharp.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.1.3.0"
           }
         }
       },
@@ -1432,9 +1535,23 @@
           "runtime.native.System.Security.Cryptography.OpenSsl": "4.3.0"
         }
       },
-      "System.Security.Cryptography.Pkcs/6.0.0": {
+      "System.Security.Cryptography.Pkcs/6.0.1": {
         "dependencies": {
           "System.Formats.Asn1": "6.0.0"
+        },
+        "runtime": {
+          "lib/net6.0/System.Security.Cryptography.Pkcs.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.522.21309"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net6.0/System.Security.Cryptography.Pkcs.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.522.21309"
+          }
         }
       },
       "System.Security.Cryptography.Primitives/4.3.0": {
@@ -1491,6 +1608,18 @@
           "runtime.native.System": "4.3.0",
           "runtime.native.System.Net.Http": "4.3.0",
           "runtime.native.System.Security.Cryptography.OpenSsl": "4.3.0"
+        }
+      },
+      "System.Security.Cryptography.Xml/6.0.1": {
+        "dependencies": {
+          "System.Security.AccessControl": "6.0.0",
+          "System.Security.Cryptography.Pkcs": "6.0.1"
+        },
+        "runtime": {
+          "lib/net6.0/System.Security.Cryptography.Xml.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.822.36306"
+          }
         }
       },
       "System.Security.Permissions/6.0.0": {
@@ -1590,6 +1719,11 @@
           "System.Threading.Tasks": "4.3.0"
         }
       },
+      "System.Threading.Thread/4.0.0": {
+        "dependencies": {
+          "System.Runtime": "4.3.0"
+        }
+      },
       "System.Threading.Timer/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
@@ -1653,6 +1787,7 @@
       },
       "WalletPayment.Models/1.0.0": {
         "dependencies": {
+          "DinkToPdf": "1.0.8",
           "FluentValidation.AspNetCore": "11.2.2",
           "MailKit": "3.4.3",
           "Microsoft.AspNet.WebApi.Client": "5.2.9",
@@ -1662,6 +1797,7 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "6.0.9",
           "NETCore.MailKit": "2.1.0",
           "NLog.Web.AspNetCore": "5.1.5",
+          "NPOI": "2.6.0",
           "Newtonsoft.Json": "13.0.2",
           "Swashbuckle.AspNetCore.Filters": "7.0.5",
           "System.Linq.Dynamic.Core": "1.2.23"
@@ -1672,6 +1808,7 @@
       },
       "WalletPayment.Services/1.0.0": {
         "dependencies": {
+          "DinkToPdf": "1.0.8",
           "FluentValidation.AspNetCore": "11.2.2",
           "MailKit": "3.4.3",
           "Microsoft.AspNet.WebApi.Client": "5.2.9",
@@ -1681,6 +1818,7 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "6.0.9",
           "NETCore.MailKit": "2.1.0",
           "NLog.Web.AspNetCore": "5.1.5",
+          "NPOI": "2.6.0",
           "Newtonsoft.Json": "13.0.2",
           "RestSharp": "108.0.3",
           "Stripe.net": "41.3.0",
@@ -1695,6 +1833,7 @@
       },
       "WalletPayment.Validation/1.0.0": {
         "dependencies": {
+          "DinkToPdf": "1.0.8",
           "FluentValidation.AspNetCore": "11.2.2",
           "MailKit": "3.4.3",
           "Microsoft.AspNet.WebApi.Client": "5.2.9",
@@ -1702,6 +1841,7 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "6.0.9",
           "NETCore.MailKit": "2.1.0",
           "NLog.Web.AspNetCore": "5.1.5",
+          "NPOI": "2.6.0",
           "Newtonsoft.Json": "13.0.2",
           "System.Linq.Dynamic.Core": "1.2.23",
           "WalletPayment.Models": "1.0.0"
@@ -1717,6 +1857,20 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "DinkToPdf/1.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-wJDlcNXjQ+OnBFwh3LBeAXgrXqlKl0RsgN60XpxEFbyqzdaG9ASb5HTXQjXQPaBguSCOrGZZESPnpcng34TEkw==",
+      "path": "dinktopdf/1.0.8",
+      "hashPath": "dinktopdf.1.0.8.nupkg.sha512"
+    },
+    "Enums.NET/4.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-d47SgeuGxKpalKhYoHqFkDPmO9SoE3amSwVNDoUdy4d675/tX7bLyZFHdjfo3Tobth9Y80VnjfasQ/PD4LqUuA==",
+      "path": "enums.net/4.0.0",
+      "hashPath": "enums.net.4.0.0.nupkg.sha512"
     },
     "FluentValidation/11.2.1": {
       "type": "package",
@@ -1752,6 +1906,13 @@
       "sha512": "sha512-Iewef8mcE1B1LrVudxQjQ0LcriPPeTbxmWMoHQzFS+P6TpEY2eVDbdKdB0Qnbmqr/5w7WfK2mNWuoSX9pI470g==",
       "path": "mailkit/3.4.3",
       "hashPath": "mailkit.3.4.3.nupkg.sha512"
+    },
+    "MathNet.Numerics.Signed/4.15.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LFjukMRatkg9dgRM7U/gM4uKgaWAX7E0lt3fsVDTPdtBIVuh7uPlksDie290br1/tv1a4Ar/Bz9ywCPSL8PhHg==",
+      "path": "mathnet.numerics.signed/4.15.0",
+      "hashPath": "mathnet.numerics.signed.4.15.0.nupkg.sha512"
     },
     "Microsoft.AspNet.WebApi.Client/5.2.9": {
       "type": "package",
@@ -2082,6 +2243,13 @@
       "path": "microsoft.identitymodel.tokens/6.10.0",
       "hashPath": "microsoft.identitymodel.tokens.6.10.0.nupkg.sha512"
     },
+    "Microsoft.IO.RecyclableMemoryStream/2.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-uyjY/cqomw1irT4L7lDeg4sJ36MsjHg3wKqpGrBAdzvZaxo85yMF+sAA9RIzTV92fDxuUzjqksMqA0+SNMkMgA==",
+      "path": "microsoft.io.recyclablememorystream/2.2.0",
+      "hashPath": "microsoft.io.recyclablememorystream.2.2.0.nupkg.sha512"
+    },
     "Microsoft.Net.Http.Headers/2.2.0": {
       "type": "package",
       "serviceable": true,
@@ -2186,6 +2354,13 @@
       "sha512": "sha512-a7Pe6KdwIxPxcFYy6M7wLseU++tx1bBf/ROVNlcZPLfp40DPLA0KGOk1K9kvbcwPYKKLMikdSwiOyTRZZFlaXg==",
       "path": "nlog.web.aspnetcore/5.1.5",
       "hashPath": "nlog.web.aspnetcore.5.1.5.nupkg.sha512"
+    },
+    "NPOI/2.6.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Pwjo65CUH3MiRnBEbVo8ff31ZrDGdGyyFJyAEncmbTQ0/gYgDkBUnGKm20aLpdwCpPNLzvapZm8v5tx4S6qAWg==",
+      "path": "npoi/2.6.0",
+      "hashPath": "npoi.2.6.0.nupkg.sha512"
     },
     "Portable.BouncyCastle/1.9.0": {
       "type": "package",
@@ -2319,6 +2494,27 @@
       "sha512": "sha512-BwqCnFzp2/Z+pq17iztxlIkR/ZANyPRR4PdE57WL1w/JW4AM/2imoxBWTL3+G+YXA46ce4s9OUgwWqTXYrtI8A==",
       "path": "scrutor/3.3.0",
       "hashPath": "scrutor.3.3.0.nupkg.sha512"
+    },
+    "SharpZipLib/1.3.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-N8+hwhsKZm25tDJfWpBSW7EGhH/R7EMuiX+KJ4C4u+fCWVc1lJ5zg1u3S1RPPVYgTqhx/C3hxrqUpi6RwK5+Tg==",
+      "path": "sharpziplib/1.3.3",
+      "hashPath": "sharpziplib.1.3.3.nupkg.sha512"
+    },
+    "SixLabors.Fonts/1.0.0-beta18": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-evykNmy/kEE9EAEKgZm3MNUYXuMHFfmcLUNPw7Ho5q7OI96GFkkIxBm+QaKOTPBKw+L0AjKOs+ArVg8P40Ac9g==",
+      "path": "sixlabors.fonts/1.0.0-beta18",
+      "hashPath": "sixlabors.fonts.1.0.0-beta18.nupkg.sha512"
+    },
+    "SixLabors.ImageSharp/2.1.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-8yonNRWX3vUE9k29ta0Hbfa0AEc0hbDjSH/nZ3vOTJEXmY6hLnGsjDKoz96Z+AgOsrdkAu6PdL/Ebaf70aitzw==",
+      "path": "sixlabors.imagesharp/2.1.3",
+      "hashPath": "sixlabors.imagesharp.2.1.3.nupkg.sha512"
     },
     "Stripe.net/41.3.0": {
       "type": "package",
@@ -2733,12 +2929,12 @@
       "path": "system.security.cryptography.openssl/4.3.0",
       "hashPath": "system.security.cryptography.openssl.4.3.0.nupkg.sha512"
     },
-    "System.Security.Cryptography.Pkcs/6.0.0": {
+    "System.Security.Cryptography.Pkcs/6.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-elM3x+xSRhzQysiqo85SbidJJ2YbZlnvmh+53TuSZHsD7dNuuEWser+9EFtY+rYupBwkq2avc6ZCO3/6qACgmg==",
-      "path": "system.security.cryptography.pkcs/6.0.0",
-      "hashPath": "system.security.cryptography.pkcs.6.0.0.nupkg.sha512"
+      "sha512": "sha512-ynmbW2GjIGg9K1wXmVIRs4IlyDolf0JXNpzFQ8JCVgwM+myUC2JeUggl2PwQig2PNVMegKmN1aAx7WPQ8tI3vA==",
+      "path": "system.security.cryptography.pkcs/6.0.1",
+      "hashPath": "system.security.cryptography.pkcs.6.0.1.nupkg.sha512"
     },
     "System.Security.Cryptography.Primitives/4.3.0": {
       "type": "package",
@@ -2760,6 +2956,13 @@
       "sha512": "sha512-t2Tmu6Y2NtJ2um0RtcuhP7ZdNNxXEgUm2JeoA/0NvlMjAhKCnM1NX07TDl3244mVp3QU6LPEhT3HTtH1uF7IYw==",
       "path": "system.security.cryptography.x509certificates/4.3.0",
       "hashPath": "system.security.cryptography.x509certificates.4.3.0.nupkg.sha512"
+    },
+    "System.Security.Cryptography.Xml/6.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5e5bI28T0x73AwTsbuFP4qSRzthmU2C0Gqgg3AZ3KTxmSyA+Uhk31puA3srdaeWaacVnHhLdJywCzqOiEpbO/w==",
+      "path": "system.security.cryptography.xml/6.0.1",
+      "hashPath": "system.security.cryptography.xml.6.0.1.nupkg.sha512"
     },
     "System.Security.Permissions/6.0.0": {
       "type": "package",
@@ -2844,6 +3047,13 @@
       "sha512": "sha512-npvJkVKl5rKXrtl1Kkm6OhOUaYGEiF9wFbppFRWSMoApKzt2PiPHT2Bb8a5sAWxprvdOAtvaARS9QYMznEUtug==",
       "path": "system.threading.tasks.extensions/4.3.0",
       "hashPath": "system.threading.tasks.extensions.4.3.0.nupkg.sha512"
+    },
+    "System.Threading.Thread/4.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-gIdJqDXlOr5W9zeqFErLw3dsOsiShSCYtF9SEHitACycmvNvY8odf9kiKvp6V7aibc8C4HzzNBkWXjyfn7plbQ==",
+      "path": "system.threading.thread/4.0.0",
+      "hashPath": "system.threading.thread.4.0.0.nupkg.sha512"
     },
     "System.Threading.Timer/4.3.0": {
       "type": "package",

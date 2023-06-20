@@ -11,6 +11,8 @@ namespace WalletPayment.Models.Entites
     public class Image
     {
         public int Id { get; set; }
+
+        [Column(TypeName = "varchar(30)")]
         public string FileName { get; set; } = string.Empty;
         public byte[] FileData { get; set; }
         public DateTime TimeUploaded { get; set; }

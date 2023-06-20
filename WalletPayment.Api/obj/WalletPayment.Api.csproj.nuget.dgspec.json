@@ -50,6 +50,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "DinkToPdf": {
+              "target": "Package",
+              "version": "[1.0.8, )"
+            },
             "FluentValidation.AspNetCore": {
               "target": "Package",
               "version": "[11.2.2, )"
@@ -109,6 +113,10 @@
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.6.0, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",
@@ -185,6 +193,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "DinkToPdf": {
+              "target": "Package",
+              "version": "[1.0.8, )"
+            },
             "FluentValidation.AspNetCore": {
               "target": "Package",
               "version": "[11.2.2, )"
@@ -232,6 +244,10 @@
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.6.0, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",
@@ -308,6 +324,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "DinkToPdf": {
+              "target": "Package",
+              "version": "[1.0.8, )"
+            },
             "FluentValidation.AspNetCore": {
               "target": "Package",
               "version": "[11.2.2, )"
@@ -355,6 +375,10 @@
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.6.0, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",
@@ -436,6 +460,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "DinkToPdf": {
+              "target": "Package",
+              "version": "[1.0.8, )"
+            },
             "FluentValidation.AspNetCore": {
               "target": "Package",
               "version": "[11.2.2, )"
@@ -463,6 +491,10 @@
             "NLog.Web.AspNetCore": {
               "target": "Package",
               "version": "[5.1.5, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.6.0, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",

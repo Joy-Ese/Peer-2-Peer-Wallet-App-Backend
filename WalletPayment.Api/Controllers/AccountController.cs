@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WalletPayment.Models.DataObjects;
 using WalletPayment.Models.Entites;
 using WalletPayment.Services.Interfaces;
 
@@ -10,12 +11,10 @@ namespace WalletPayment.Api.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly DataContext _context;
         private IAccount _accountService;
 
-        public AccountController(DataContext context, IAccount accountService)
+        public AccountController(IAccount accountService)
         {
-            _context = context;
             _accountService = accountService;
         }
 

@@ -20,6 +20,13 @@ namespace WalletPayment.Api.Controllers
             _authService = authService;
         }
 
+        [HttpPost("CreateAdmin"), Authorize]
+        public async Task<IActionResult> CreateAdmin([FromBody] CreateAdminDTO request)
+        {
+            var result = await _authService.CreateAdmin(request);
+            return Ok(result);
+        }
+
         [HttpPost("SignUp")]
         public async Task<IActionResult> Register([FromBody] UserSignUpDto request)
         {
@@ -34,7 +41,15 @@ namespace WalletPayment.Api.Controllers
             if (!result.status) return BadRequest(result);
 
             return Ok(result);
+        }
 
+        [HttpPost("AdminLogin")]
+        public async Task<IActionResult> AdminLogin(AdminLoginDTO request)
+        {
+            var result = await _authService.AdminLogin(request);
+            if (!result.status) return BadRequest(result);
+
+            return Ok(result);
         }
 
         [HttpPost("CreatePin"), Authorize]

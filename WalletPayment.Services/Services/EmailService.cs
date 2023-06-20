@@ -280,6 +280,63 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<bool> SendStatementAsAttachment(string userName, string userEmail, IFormFile attachments)
+        {
+            try
+            {
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
+                email.To.Add(new MailboxAddress("WalletUser", userEmail));
+                email.Subject = "Account Statemnet Request";
+
+                string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\EmailTemplatesForAngularWallet\\emailAccountStatement.html");
+                if (!File.Exists(filePath))
+                {
+                    return _httpContextAccessor.HttpContext.Response.StatusCode.Equals(404);
+                }
+
+                string mailbody = string.Empty;
+
+                StreamReader reader = new StreamReader(filePath);
+                mailbody = reader.ReadToEnd();
+
+                mailbody = mailbody.Replace("{Username}", userName);
+
+                var bodyBuilder = new BodyBuilder();
+
+                bodyBuilder.HtmlBody = mailbody;
+
+                if (attachments != null )
+                {
+                    byte[] fileBytes;
+                   
+                    using (var ms = new MemoryStream())
+                    {
+                        attachments.CopyTo(ms);
+                        fileBytes = ms.ToArray();
+                    }
+                    bodyBuilder.Attachments.Add(attachments.FileName, fileBytes, ContentType.Parse(attachments.ContentType));
+                }
+
+                email.Body = bodyBuilder.ToMessageBody();
+
+                using (var smtp = new SmtpClient())
+                {
+                    smtp.Connect(_emailCredentials.EmailHost, 587, false);
+                    smtp.Authenticate(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
     }
 }
 

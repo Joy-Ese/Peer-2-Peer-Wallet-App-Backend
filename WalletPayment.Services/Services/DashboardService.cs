@@ -34,15 +34,27 @@ namespace WalletPayment.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
-                var userData = await _context.Users
+                var getAcctList = new List<AccountDetails>();
+                var accountDetails = new AccountDetails();
+                var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
+
+
+                foreach (var item in acctData)
+                {
+                    accountDetails.AccountNumber = item.AccountNumber;
+                    accountDetails.Balance = item.Balance;
+                    accountDetails.Currency = item.Currency;
+                    getAcctList.Add(accountDetails);
+                }
+
+                var userData = await _context.Users.Include("UserAccount")
                                 .Where(userInfo => userInfo.Id == userID)
                                 .Select(userInfo => new UserDashboardViewModel
                                 {
                                     Username = userInfo.Username,
                                     FirstName = userInfo.FirstName,
                                     LastName = userInfo.LastName,
-                                    AccountNumber = userInfo.UserAccount.AccountNumber,
-                                    Balance = userInfo.UserAccount.Balance.ToString(),
+                                    AccountDetails = getAcctList,
                                     Email = userInfo.Email,
                                     PhoneNumber = userInfo.PhoneNumber,
                                     Address = userInfo.Address,
@@ -72,11 +84,24 @@ namespace WalletPayment.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
+                var getAcctList = new List<AccountDetails>();
+                var accountDetails = new AccountDetails();
+                var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
+
+
+                foreach (var item in acctData)
+                {
+                    accountDetails.AccountNumber = item.AccountNumber;
+                    accountDetails.Balance = item.Balance;
+                    accountDetails.Currency = item.Currency;
+                    getAcctList.Add(accountDetails);
+                }
+
                 var acctBalance = await _context.Users
                                 .Where(userAccBal => userAccBal.Id == userID)
                                 .Select(userAccBal => new UserBalanceViewModel
                                 {
-                                    Balance = userAccBal.UserAccount.Balance.ToString()
+                                    AccountDetails = getAcctList
                                 })
                                 .FirstOrDefaultAsync();
 
@@ -103,11 +128,24 @@ namespace WalletPayment.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
+                var getAcctList = new List<AccountDetails>();
+                var accountDetails = new AccountDetails();
+                var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
+
+
+                foreach (var item in acctData)
+                {
+                    accountDetails.AccountNumber = item.AccountNumber;
+                    accountDetails.Balance = item.Balance;
+                    accountDetails.Currency = item.Currency;
+                    getAcctList.Add(accountDetails);
+                }
+
                 var acctNumber = await _context.Users
                                 .Where(userAccNum => userAccNum.Id == userID)
                                 .Select(userAccNum => new UserAcctNumViewModel
                                 {
-                                    AccountNumber = userAccNum.UserAccount.AccountNumber,
+                                    AccountDetails = getAcctList
                                 })
                                 .FirstOrDefaultAsync();
 
@@ -134,11 +172,24 @@ namespace WalletPayment.Services.Services
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
+                var getAcctList = new List<AccountDetails>();
+                var accountDetails = new AccountDetails();
+                var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
+
+
+                foreach (var item in acctData)
+                {
+                    accountDetails.AccountNumber = item.AccountNumber;
+                    accountDetails.Balance = item.Balance;
+                    accountDetails.Currency = item.Currency;
+                    getAcctList.Add(accountDetails);
+                }
+
                 var acctCurr = await _context.Users
                                 .Where(userAccNum => userAccNum.Id == userID)
                                 .Select(userAccNum => new UserAcctCurrencyModel
                                 {
-                                    Currency = userAccNum.UserAccount.Currency,
+                                    AccountDetails = getAcctList
                                 })
                                 .FirstOrDefaultAsync();
 
@@ -432,6 +483,12 @@ namespace WalletPayment.Services.Services
                 }
 
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                if (string.IsNullOrEmpty(request.question) || string.IsNullOrEmpty(request.answer))
+                {
+                    securityResponse.message = "Question or Answer cannot be empty";
+                    return securityResponse;
+                }
 
                 SecurityQuestion securityQuestion = new SecurityQuestion
                 {

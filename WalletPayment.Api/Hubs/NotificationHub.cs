@@ -1,23 +1,27 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using WalletPayment.Models.DataObjects;
 
 namespace WalletPayment.Api.Hubs
 {
     public class NotificationHub : Hub
     {
-        private readonly DataContext _context;
+        //private readonly DataContext _context;
 
-        public NotificationHub(DataContext context)
+        public NotificationHub()
         {
-            _context = context;
         }
 
-        public async Task SendNotification(string user, string message)
+        public async Task RegisterNotification(string user, string message)
         {
-            if (string.IsNullOrEmpty(user))
-            {
-                await Clients.All.SendAsync("ReceiveNotification", user, message);
-            }
-            await Clients.User(user).SendAsync("ReceiveNotification", user, message);
+            //var users = await _context.Users.FirstOrDefaultAsync();
+
+            await Clients.All.SendAsync("GetNotification", user, message);
+
+            //if (true)
+            //{
+            //    await Clients.All.SendAsync("GetNotification", user, message);
+            //}
+            //await Clients.User(user).SendAsync("GetNotification", user, message);
         }
     }
 }

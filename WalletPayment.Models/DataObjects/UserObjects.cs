@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using WalletPayment.Models.Entites;
 
 namespace WalletPayment.Models.DataObjects
 {
@@ -67,8 +68,7 @@ namespace WalletPayment.Models.DataObjects
         public string Username { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-        public string AccountNumber { get; set; } = string.Empty;
-        public string Balance { get; set; } = string.Empty;
+        public List<AccountDetails> AccountDetails { get; set; }
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
@@ -115,7 +115,7 @@ namespace WalletPayment.Models.DataObjects
     {
         public string firstName { get; set; } = string.Empty;
         public string lastName { get; set; } = string.Empty;
-        public string acctNumber { get; set; } = string.Empty;
+        public List<AccountDetails> accountDetails { get; set; }
         public bool status { get; set; }
     }
 
@@ -163,17 +163,17 @@ namespace WalletPayment.Models.DataObjects
 
     public class UserBalanceViewModel
     {
-        public string Balance { get; set; } = string.Empty;
+        public List<AccountDetails> AccountDetails { get; set; }
     }
 
     public class UserAcctNumViewModel
     {
-        public string AccountNumber { get; set; } = string.Empty;
+        public List<AccountDetails> AccountDetails { get; set; }
     }
 
     public class UserAcctCurrencyModel
     {
-        public string Currency { get; set; } = string.Empty;
+        public List<AccountDetails> AccountDetails { get; set; }
     }
 
     public class EmailDto
@@ -294,6 +294,13 @@ namespace WalletPayment.Models.DataObjects
         public decimal amount { get; set; }
     }
 
+    public class Notification
+    {
+        public string Id { get; set; } = string.Empty;
+        public string NotificationInfo { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+    }
+
     public class PayStackRequestDto
     {
         public string reference { get; set; } = string.Empty;
@@ -316,6 +323,50 @@ namespace WalletPayment.Models.DataObjects
         public string reference { get; set; } = string.Empty;
     }
 
+    public class CreateStatementViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class CreateStatementRequestDTO
+    {
+        public string accountCurrency { get; set; } = string.Empty;
+        public string startDate { get; set; } = string.Empty;
+        public string endDate { get; set; } = string.Empty;
+    }
+
+    public class AccountDetails
+    {
+        public string AccountNumber { get; set; } = string.Empty;
+        public decimal Balance { get; set; }
+        public string Currency { get; set; } = string.Empty;
+    }
+
+    public class AdminViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class CreateAdminDTO
+    {
+        public string password { get; set; } = string.Empty;
+    }
+
+    public class AdminLoginDTO
+    {
+        public string username { get; set; } = string.Empty;
+        public string password { get; set; } = string.Empty;
+    }
+
+    public class AdminLoginViewModel
+    {
+        public bool status { get; set; }
+        public string result { get; set; } = string.Empty;
+        public string refreshedToken { get; set; } = string.Empty;
+    }
+
 
 
     public class CustomClaims
@@ -324,7 +375,13 @@ namespace WalletPayment.Models.DataObjects
         public const string UserName = "http://schemas.microsoft.com/ws/2008/06/identity/claims/username";
         public const string AccountNumber = "http://schemas.microsoft.com/ws/2008/06/identity/claims/accountnumber";
         public const string FirstName = "http://schemas.microsoft.com/ws/2008/06/identity/claims/firstname";
+        public const string Role = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
     }
 
+    public class AdminCustomClaims
+    {
+        public const string UserName = "http://schemas.microsoft.com/ws/2008/06/identity/claims/username";
+        public const string Role = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+    }
    
 }

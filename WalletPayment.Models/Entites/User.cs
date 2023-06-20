@@ -34,13 +34,15 @@ namespace WalletPayment.Models.Entites
 
         public string? VerificationToken { get; set; }
 
+        public bool? IsUserLocked { get; set; }
+
         public DateTime? VerifiedAt { get; set; }
 
         public string? PasswordResetToken { get; set; }
 
         public DateTime? ResetTokenExpiresAt { get; set; }
 
-        public virtual Account UserAccount { get; set; }
+        public virtual List<Account> UserAccount { get; set; }
         public virtual Image UserImage { get; set; }
         public virtual SecurityQuestion SecurityQuestions { get; set; }
         public virtual List<RefreshToken> RefreshTokens { get; set; }

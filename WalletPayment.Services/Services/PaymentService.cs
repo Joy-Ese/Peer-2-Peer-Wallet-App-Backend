@@ -126,7 +126,10 @@ namespace WalletPayment.Services.Services
                                             Where(dInfo => dInfo.Reference == eventData.data.reference).FirstOrDefaultAsync();
 
                 var user = await _context.Users.Include("UserAccount").
-                                            Where(uInfo => uInfo.Id == depositInfo.UserId).FirstOrDefaultAsync();
+                                            Where(uInfo => uInfo.Id == depositInfo.UserId)
+                                            .FirstOrDefaultAsync();
+
+                var acctInfo = await _context.Accounts.Where(x => x.UserId == depositInfo.UserId && x.Currency == "NGN").FirstOrDefaultAsync();
 
                 var sysAcct = await _context.SystemAccounts.FirstOrDefaultAsync();
 
@@ -151,7 +154,7 @@ namespace WalletPayment.Services.Services
                         Status = StatusMessage.Successful.ToString(),
                         Amount = depositInfo.Amount,
                         TranSourceAccount = null,
-                        TranDestinationAccount = user.UserAccount.AccountNumber,
+                        TranDestinationAccount = acctInfo.AccountNumber,
                         Date = depositInfo.Date,
                         SourceAccountUserId = null,
                         DestinationAccountUserId = depositInfo.UserId,
@@ -162,8 +165,8 @@ namespace WalletPayment.Services.Services
 
                 sysAcct.SystemBalance -= depositInfo.Amount;
 
-                var newBalance = user.UserAccount.Balance + depositInfo.Amount;
-                user.UserAccount.Balance = newBalance;
+                var newBalance = acctInfo.Balance + depositInfo.Amount;
+                acctInfo.Balance = newBalance;
 
 
                 await _context.SaveChangesAsync();

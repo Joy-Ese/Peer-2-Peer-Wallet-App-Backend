@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using WalletPayment.Api.Hubs;
 using WalletPayment.Models.DataObjects;
 using WalletPayment.Services.Interfaces;
 
@@ -10,21 +12,20 @@ namespace WalletPayment.Api.Controllers
     [ApiController]
     public class TransactionController : ControllerBase
     {
-        private readonly DataContext _context;
         private ITransaction _transactionService;
-        private IAuth _authService;
+        private readonly IHubContext<NotificationHub> _notificationHubContext;
 
-        public TransactionController(DataContext context, ITransaction transactionService, IAuth authService)
+        public TransactionController(ITransaction transactionService, IHubContext<NotificationHub> notificationHubContext)
         {
-            _context = context;
             _transactionService = transactionService;
-            _authService = authService;
+            _notificationHubContext = notificationHubContext;
         }
 
         [HttpPost("CreateTransfer"), Authorize]
         public async Task<IActionResult> TransferFund(TransactionDto request)
         {
             var result = await _transactionService.TransferFund(request);
+            //await _notificationHubContext.Clients.Clients;
             return Ok(result);
         }
 
@@ -46,6 +47,20 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> TransactionsByDateRange(TransactionDateDto request)
         {
             var result = await _transactionService.TransactionsByDateRange(request);
+            return Ok(result);
+        }
+
+        [HttpPost("GeneratePDFStatement"), Authorize]
+        public async Task<IActionResult> GeneratePDFStatement(CreateStatementRequestDTO request)
+        {
+            var result = await _transactionService.GeneratePDFStatement(request);
+            return Ok(result);
+        }
+
+        [HttpPost("GenerateExcelStatement"), Authorize]
+        public async Task<IActionResult> GenerateExcelStatement(CreateStatementRequestDTO request)
+        {
+            var result = await _transactionService.GenerateExcelStatement(request);
             return Ok(result);
         }
 

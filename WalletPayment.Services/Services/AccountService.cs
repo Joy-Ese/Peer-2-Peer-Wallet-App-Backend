@@ -47,16 +47,46 @@ namespace WalletPayment.Services.Services
             AccountViewModel result = new AccountViewModel();
             try
             {
-                var userData = await _context.Users.Include("UserAccount")
-                    .Where(x => x.UserAccount.AccountNumber == searchInfo || x.Email == searchInfo || x.Username == searchInfo)
-                    .SingleOrDefaultAsync();
-                if (userData == null)
-                    return result;
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new AccountViewModel();
+                }
 
-                result.firstName = userData.FirstName;
-                result.lastName = userData.LastName;
-                result.acctNumber = userData.UserAccount.AccountNumber;
-                result.status = true;
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var getAcctList = new List<AccountDetails>();
+                var accountDetails = new AccountDetails();
+                var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
+
+
+                foreach (var item in acctData)
+                {
+                    accountDetails.AccountNumber = item.AccountNumber;
+                    accountDetails.Balance = item.Balance;
+                    accountDetails.Currency = item.Currency;
+                    getAcctList.Add(accountDetails);
+                }
+
+
+                var userData = await _context.Users.Include("UserAccount")
+                    .Where(x => x.Email == searchInfo || x.Username == searchInfo).SingleOrDefaultAsync();
+
+                if (userData == null)
+                {
+                    var acctInfo = await _context.Accounts.Include("User").Where(x => x.AccountNumber == searchInfo).FirstOrDefaultAsync();
+                    result.status = true;
+                    result.accountDetails = getAcctList;
+                    result.firstName = acctInfo.User.FirstName;
+                    result.lastName = acctInfo.User.LastName;
+                }
+                else
+                {
+                    result.status = true;
+                    result.accountDetails = getAcctList;
+                    result.firstName = userData.FirstName;
+                    result.lastName = userData.LastName;
+                }
 
                 return result;
             }

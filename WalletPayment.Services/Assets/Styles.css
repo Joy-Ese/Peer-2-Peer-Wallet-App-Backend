@@ -1,0 +1,42 @@
+﻿.imgLogo {
+    width: 180px;
+    height: 90px;
+    margin-top: 10px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 20px;
+    padding: 30px;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 30px;
+    font-weight: 500;
+    font-size: 20px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+.tableDiv {
+    width: 38%;
+}
+
+.crediT {
+    background-color: green;
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.debiT {
+    background-color: #FF0033;
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+}

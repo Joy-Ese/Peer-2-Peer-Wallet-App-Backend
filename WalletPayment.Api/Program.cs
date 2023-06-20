@@ -14,6 +14,9 @@ using WalletPayment.Validation.Validators;
 using NLog;
 using NLog.Web;
 using WalletPayment.Api.Hubs;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("init main");
@@ -24,17 +27,19 @@ try
 
     // Add services to the container.
 
-    builder.Services.AddCors(options =>
+    builder.Services.AddCors((options) =>
     {
-        options.AddDefaultPolicy(
-            builder =>
-            {
-                //builder.WithOrigins("http://localhost:4200/");
-                builder.AllowAnyOrigin();
-                builder.AllowAnyMethod();
-                builder.AllowAnyHeader();
-            });
+        options.AddPolicy("NotificationClientApp",
+            new CorsPolicyBuilder()
+            .WithOrigins("http://localhost:4200")
+            //.WithOrigins("http://127.0.0.1:5500") 
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .SetIsOriginAllowed(origin => true)
+            .AllowCredentials()
+            .Build());
     });
+
 
     // NLog: Setup NLog for Dependency injection
     builder.Logging.ClearProviders();
@@ -59,6 +64,9 @@ try
     builder.Services.AddScoped<IPayment, PaymentService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddTransient<IValidator<UserSignUpDto>, UserValidator>();
+    builder.Services.AddSignalR();
+    builder.Services.AddLogging();
+    builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
@@ -87,7 +95,6 @@ try
             };
         });
 
-    builder.Services.AddSignalR();
 
     var app = builder.Build();
 
@@ -98,7 +105,14 @@ try
         app.UseSwaggerUI();
     }
 
-    app.UseCors();
+    // Migrate latest database changes during startup
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+        dbContext.Database.Migrate();
+    }
+
+    app.UseCors("NotificationClientApp");
 
     app.UseHttpsRedirection();
 
@@ -108,11 +122,7 @@ try
 
     app.UseAuthorization();
 
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-        endpoints.MapHub<NotificationHub>("/notifications");
-    });
+    app.MapHub<NotificationHub>("/notification");
 
     app.MapControllers();
 

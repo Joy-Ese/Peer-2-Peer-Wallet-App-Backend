@@ -8,9 +8,6 @@ namespace WalletPayment.Models.Entites
     {
         public int Id { get; set; }
 
-        [Column(TypeName = "varchar(50)")]
-        public string SystemAccountNumber { get; set; } = string.Empty;
-
         public decimal SystemBalance { get; set; } = 0;
 
         [Column(TypeName = "varchar(10)")]

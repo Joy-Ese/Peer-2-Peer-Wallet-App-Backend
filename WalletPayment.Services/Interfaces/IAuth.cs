@@ -10,8 +10,10 @@ namespace WalletPayment.Services.Interfaces
 {
     public interface IAuth
     {
+        Task<AdminViewModel> CreateAdmin(CreateAdminDTO request);
         Task<RegisterViewModel> Register(UserSignUpDto request);
         Task<LoginViewModel> Login(UserLoginDto request);
+        Task<AdminLoginViewModel> AdminLogin(AdminLoginDTO request);
         Task<CreatePinViewModel> CreatePin(CreatePinDto request);
         Task<UpdatePinViewModel> UpdatePin(UpdatePinDto request);
         Task<ForgetPasswordModel> ForgetPassword(ForgetPasswordDto emailReq);

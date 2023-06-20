@@ -58,28 +58,60 @@ namespace WalletPayment.Services.Services
             return accountNumber;
         }
 
-        public string GenerateSystemAcctNumber()
+        public async Task<AdminViewModel> CreateAdmin(CreateAdminDTO request)
         {
-            Random rnd = new Random(10);
-            var sysAcctNumber = rnd.Next().ToString();
-            return sysAcctNumber;
-        }
-
-        public async Task<SystemAccount> CreateSystemAccount()
-        {
-            string generatedSysAcct = GenerateSystemAcctNumber();
-
-            SystemAccount sysAccount = new SystemAccount
+            AdminViewModel createAdminResponse = new AdminViewModel();
+            try
             {
-                SystemAccountNumber = generatedSysAcct,
-                SystemBalance = 0,
-                Currency = "NGN",
-            };
+                string getRole;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return createAdminResponse;
+                }
 
-            await _context.SystemAccounts.AddAsync(sysAccount);
-            await _context.SaveChangesAsync();
+                getRole = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.Role)?.Value;
 
-            return sysAccount;
+                if (getRole != "Admin")
+                {
+                    createAdminResponse.message = "Sorry!!Only an authourized Admin can create another Admin";
+                    return createAdminResponse;
+                }
+
+
+                CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                var adminUsername = "GlobusWalletAdmin";
+
+                Admin newAdmin = new Admin
+                {
+                    Username = adminUsername,
+                    PasswordHash = passwordHash,
+                    PasswordSalt = passwordSalt,
+                };
+
+                await _context.Admins.AddAsync(newAdmin);
+                await _context.SaveChangesAsync();
+
+                //SystemAccount sysAccount = new SystemAccount
+                //{
+                //    SystemBalance = 0,
+                //    Currency = "NGN",
+                //};
+
+                //await _context.SystemAccounts.AddAsync(sysAccount);
+                //await _context.SaveChangesAsync();
+
+                createAdminResponse.status = true;
+                createAdminResponse.message = $"Admin successfully created!!! Admin can login with username:{adminUsername} and set their password";
+                return createAdminResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
+                return createAdminResponse;
+            }
         }
 
         public async Task<RegisterViewModel> Register(UserSignUpDto request)
@@ -124,8 +156,6 @@ namespace WalletPayment.Services.Services
                 await _context.SaveChangesAsync();
 
 
-                //await CreateSystemAccount();
-
                 Account newAccount = new Account
                 {
                     AccountNumber = generatedAcc,
@@ -150,11 +180,12 @@ namespace WalletPayment.Services.Services
                 var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndVerifyLink, queryParams);
                 await _emailService.SendEmailVerifyUser(callbackUrl, verifyEmail);
 
-                //var sendEmail = new EmailDto
-                //{
-                //    to = request.email,
-                //};
-                //await _emailService.SendEmail(sendEmail, request.email);
+
+                var sendEmail = new EmailDto
+                {
+                    to = request.email,
+                };
+                await _emailService.SendEmail(sendEmail, request.email);
 
                 registerResponse.status = true;
                 registerResponse.message = "Check email to verify your registration";
@@ -179,6 +210,7 @@ namespace WalletPayment.Services.Services
                 if (data == null)
                 {
                     loginResponse.result = "Invalid Username or Password";
+                    _logger.LogWarning("Invalid Username or Password");
                     return loginResponse;
                 }
 
@@ -188,28 +220,18 @@ namespace WalletPayment.Services.Services
                     return loginResponse;
                 }
 
-                //if (data.VerifiedAt == null)
-                //{
-                //    loginResponse.result = "Check email to verify user's registration";
+                string getRole;
 
-                //    var verifyToken = data.VerificationToken;
-                //    var verifyEmail = data.Email;
-
-                //    var queryParams = new Dictionary<string, string>()
-                //    {
-                //        {"email", verifyEmail },
-                //        {"token", verifyToken },
-                //    };
-                //    // move to register
-
-                //    var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndVerifyLink, queryParams);
-                //    await _emailService.SendEmailVerifyUser(callbackUrl, verifyEmail);
-
-                //    return loginResponse;
-                //}
-
+                if (request.username.Contains("Admin"))
+                {
+                    getRole = "Admin";
+                }
+                else
+                {
+                    getRole = "User";
+                }
                 
-                string token = CreateToken(data);
+                string token = CreateToken(data, getRole);
 
                 var refreshToken = GenerateRefreshToken();
                 SetRefreshToken(refreshToken);
@@ -234,6 +256,7 @@ namespace WalletPayment.Services.Services
                 loginResponse.status = true;
                 loginResponse.result = token;
                 loginResponse.refreshedToken = refreshToken.Token;
+                _logger.LogInformation($"User successfully logged in with {data.Email}");
                 return loginResponse;
 
             }
@@ -242,6 +265,73 @@ namespace WalletPayment.Services.Services
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 loginResponse.result = "An exception occured";
                 return loginResponse;
+            }
+        }
+
+        public async Task<AdminLoginViewModel> AdminLogin(AdminLoginDTO request)
+        {
+            AdminLoginViewModel adminLoginResponse = new AdminLoginViewModel();
+            try
+            {
+                var data = await _context.Admins.FirstOrDefaultAsync(x => x.Username == request.username);
+
+                if (data == null)
+                {
+                    adminLoginResponse.result = "Invalid Admin Username or Password. Contact Admin if you've made a mistake!!!";
+                    _logger.LogWarning("Invalid Admin Username or Password");
+                    return adminLoginResponse;
+                }
+
+                if (!VerifyPasswordHash(request.password, data.PasswordHash, data.PasswordSalt))
+                {
+                    adminLoginResponse.result = "Invalid Admin Username or Password";
+                    return adminLoginResponse;
+                }
+
+                string getRole;
+
+                if (request.username.Contains("Admin"))
+                {
+                    getRole = "Admin";
+                }
+                else
+                {
+                    getRole = "User";
+                }
+
+                string token = CreateAdminToken(data, getRole);
+
+                var refreshToken = GenerateRefreshToken();
+                SetRefreshToken(refreshToken);
+
+                RefreshToken addRefreshTokenToDb = new RefreshToken
+                {
+                    Token = refreshToken.Token,
+                    CreatedAt = refreshToken.CreatedAt,
+                    ExpiresAt = refreshToken.ExpiresAt,
+                    UserId = data.Id
+                };
+
+                await _context.RefreshTokens.AddAsync(addRefreshTokenToDb);
+                await _context.SaveChangesAsync();
+
+                if (token == null || token == "" || refreshToken == null)
+                {
+                    adminLoginResponse.result = "Login failed";
+                    return adminLoginResponse;
+                }
+
+                adminLoginResponse.status = true;
+                adminLoginResponse.result = token;
+                adminLoginResponse.refreshedToken = refreshToken.Token;
+                _logger.LogInformation($"Admin successfully logged in with {data.Username}");
+                return adminLoginResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                adminLoginResponse.result = "An exception occured";
+                return adminLoginResponse;
             }
         }
 
@@ -340,7 +430,7 @@ namespace WalletPayment.Services.Services
 
                 if (userSecurityQuest == null)
                 {
-                    createPinViewModel.message = "Please go to your profile and set a security question first";
+                    createPinViewModel.message = "Please set a security question first";
                     return createPinViewModel;
                 }
 
@@ -579,7 +669,19 @@ namespace WalletPayment.Services.Services
                     return loginRefreshResponse;
                 }
 
-                string token = CreateToken(userData);
+                string getRole;
+
+                if (userData.Username.Contains("Admin"))
+                {
+                    getRole = "Admin";
+                }
+                else
+                {
+                    getRole = "User";
+                }
+
+                string token = CreateToken(userData, getRole);
+
                 var newRefreshT = GenerateRefreshToken();
                 SetRefreshToken(newRefreshT);
 
@@ -614,17 +716,41 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        private string CreateToken(User user)
+        private string CreateToken(User user, string role)
         {
             List<Claim> claims = new List<Claim>
             {
                 new Claim(CustomClaims.UserId, user.Id.ToString()),
                 new Claim(CustomClaims.UserName, user.Username),
                 new Claim(CustomClaims.FirstName, user.FirstName),
+                new Claim(CustomClaims.Role, role),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
                 _configuration.GetSection("AppSettings:Token").Value));
+
+            var credential = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: credential);
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
+        }
+
+        private string CreateAdminToken(Admin adminUser, string role)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(AdminCustomClaims.UserName, adminUser.Username),
+                new Claim(AdminCustomClaims.Role, role),
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
+                _configuration.GetSection("AdminAppSettings:Token").Value));
 
             var credential = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
