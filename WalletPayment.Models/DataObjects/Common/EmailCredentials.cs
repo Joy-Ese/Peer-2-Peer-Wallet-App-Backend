@@ -12,5 +12,6 @@ namespace WalletPayment.Models.DataObjects.Common
         public string EmailPassword { get; set; } = string.Empty;
         public string EmailHost { get; set; } = string.Empty;
         public string EmailFrom { get; set; } = string.Empty;
+        public bool enableSSL { get; set; }
     }
 }

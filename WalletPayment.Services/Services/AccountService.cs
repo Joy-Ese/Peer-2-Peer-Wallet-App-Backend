@@ -47,18 +47,14 @@ namespace WalletPayment.Services.Services
             AccountViewModel result = new AccountViewModel();
             try
             {
-                int userID;
-                if (_httpContextAccessor.HttpContext == null)
-                {
-                    return new AccountViewModel();
-                }
+                var userData = await _context.Users.Include("UserAccount")
+                    .Where(x => x.Email == searchInfo || x.Username == searchInfo).SingleOrDefaultAsync();
 
-                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
                 var getAcctList = new List<AccountDetails>();
                 var accountDetails = new AccountDetails();
-                var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
-
+                var acctData = await _context.Accounts.Include("User").Where(x => x.AccountNumber == searchInfo 
+                            || x.User.Username == searchInfo || x.User.Email == searchInfo).ToListAsync();
 
                 foreach (var item in acctData)
                 {
@@ -69,11 +65,10 @@ namespace WalletPayment.Services.Services
                 }
 
 
-                var userData = await _context.Users.Include("UserAccount")
-                    .Where(x => x.Email == searchInfo || x.Username == searchInfo).SingleOrDefaultAsync();
-
                 if (userData == null)
                 {
+                    
+
                     var acctInfo = await _context.Accounts.Include("User").Where(x => x.AccountNumber == searchInfo).FirstOrDefaultAsync();
                     result.status = true;
                     result.accountDetails = getAcctList;

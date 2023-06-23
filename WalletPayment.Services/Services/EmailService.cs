@@ -1,19 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using System.Text;
 using WalletPayment.Models.DataObjects;
-using WalletPayment.Models.Entites;
 using WalletPayment.Services.Data;
 using WalletPayment.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using WalletPayment.Models.DataObjects.Common;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Mvc;
-//using System.Net.Mail;
-//using System.Net;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Hosting;
 using MimeKit;
 using MailKit.Net.Smtp;
 
@@ -280,13 +271,51 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendStatementAsAttachment(string userName, string userEmail, IFormFile attachments)
+        public async Task<bool> SendStatementAsAttachment(string userName, string userEmail, IFormFile attachment)
         {
             try
             {
+                //var email = new MailMessage();
+                //email.IsBodyHtml = true;
+                //email.From = new MailAddress(_emailCredentials.EmailFrom, "no-reply");
+                //email.To.Add(userEmail);
+                //email.Subject = "Account Statemnet Request";
+
+                //string mailbody = string.Empty;
+
+                //email.Body = mailbody;
+
+                //string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\EmailTemplatesForAngularWallet\\emailAccountStatement.html");
+                //if (!File.Exists(filePath))
+                //{
+                //    return _httpContextAccessor.HttpContext.Response.StatusCode.Equals(404);
+                //}
+
+
+                //StreamReader reader = new StreamReader(filePath);
+                //mailbody = reader.ReadToEnd();
+                //mailbody = mailbody.Replace("{Username}", userName);
+
+                //if (attachment != null)
+                //{
+                //    email.Attachments.Add(new Attachment(attachment.OpenReadStream(), attachment.FileName));
+                //}
+
+                //using (var smtp = new System.Net.Mail.SmtpClient())
+                //{
+                //    smtp.EnableSsl = _emailCredentials.enableSSL ? true : false;
+                //    smtp.Host = _emailCredentials.EmailHost;
+                //    smtp.Port = 587;
+                //    smtp.Credentials = new NetworkCredential(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                //    smtp.UseDefaultCredentials = false;
+                //    smtp.Send(email);
+                //}
+
+
                 var email = new MimeMessage();
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
                 email.To.Add(new MailboxAddress("WalletUser", userEmail));
+
                 email.Subject = "Account Statemnet Request";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\EmailTemplatesForAngularWallet\\emailAccountStatement.html");
@@ -299,24 +328,24 @@ namespace WalletPayment.Services.Services
 
                 StreamReader reader = new StreamReader(filePath);
                 mailbody = reader.ReadToEnd();
-
                 mailbody = mailbody.Replace("{Username}", userName);
 
-                var bodyBuilder = new BodyBuilder();
 
+                var bodyBuilder = new BodyBuilder();
                 bodyBuilder.HtmlBody = mailbody;
 
-                if (attachments != null )
+                if (attachment != null)
                 {
-                    byte[] fileBytes;
-                   
-                    using (var ms = new MemoryStream())
-                    {
-                        attachments.CopyTo(ms);
-                        fileBytes = ms.ToArray();
-                    }
-                    bodyBuilder.Attachments.Add(attachments.FileName, fileBytes, ContentType.Parse(attachments.ContentType));
+                    //byte[] fileBytes;
+
+                    //using (var ms = new MemoryStream())
+                    //{
+                    //    attachment.CopyTo(ms);
+                    //    fileBytes = ms.ToArray();
+                    //}
+                    bodyBuilder.Attachments.Add($"C:\\Users\\joyihama\\Desktop\\StatementReport\\{userName}_GlobusWallet_Statement.pdf", ContentType.Parse(attachment.ContentType));
                 }
+
 
                 email.Body = bodyBuilder.ToMessageBody();
 

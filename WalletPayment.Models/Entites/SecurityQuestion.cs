@@ -14,6 +14,7 @@ namespace WalletPayment.Models.Entites
         public string Question { get; set; } = string.Empty;
 
         public string Answer { get; set; } = string.Empty;
+        public int Attempts { get; set; } = 3;
 
         [ForeignKey("User")]
         public int UserId { get; set; }

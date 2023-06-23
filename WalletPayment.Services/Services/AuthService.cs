@@ -150,6 +150,7 @@ namespace WalletPayment.Services.Services
                     FirstName = request.firstName,
                     LastName = request.lastName,
                     Address = request.address,
+                    IsUserLocked = false,
                     VerificationToken = randomToken,
                 };
                 await _context.Users.AddAsync(newUser);
@@ -217,6 +218,12 @@ namespace WalletPayment.Services.Services
                 if (!VerifyPasswordHash(request.password, data.PasswordHash, data.PasswordSalt))
                 {
                     loginResponse.result = "Invalid Username or Password";
+                    return loginResponse;
+                }
+
+                if (data.IsUserLocked == true)
+                {
+                    loginResponse.result = "Your account has been locked!!! Please contact Admin";
                     return loginResponse;
                 }
 
@@ -299,6 +306,12 @@ namespace WalletPayment.Services.Services
                     getRole = "User";
                 }
 
+                if (getRole != "Admin")
+                {
+                    adminLoginResponse.result = "Sorry!!Only an authourized Admin can login";
+                    return adminLoginResponse;
+                }
+
                 string token = CreateAdminToken(data, getRole);
 
                 var refreshToken = GenerateRefreshToken();
@@ -322,8 +335,10 @@ namespace WalletPayment.Services.Services
                 }
 
                 adminLoginResponse.status = true;
+                adminLoginResponse.isAdmin = true;
                 adminLoginResponse.result = token;
-                adminLoginResponse.refreshedToken = refreshToken.Token;
+                adminLoginResponse.adminUsername = data.Username;
+                adminLoginResponse.adminRefreshedToken = refreshToken.Token;
                 _logger.LogInformation($"Admin successfully logged in with {data.Username}");
                 return adminLoginResponse;
             }
@@ -377,17 +392,36 @@ namespace WalletPayment.Services.Services
 
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userID);
 
-                var userSecurityQuest = await _context.SecurityQuestions.Where(s => s.UserId == userID).FirstOrDefaultAsync();
+                var userSecurityQuest = await _context.SecurityQuestions.FirstOrDefaultAsync(u => u.UserId == userID);
+
+                int tries = userSecurityQuest.Attempts;
+                int failedTries;
+
+                if (!(userSecurityQuest.Answer == request.answer))
+                {
+                    tries--;
+                    failedTries = tries--;
+
+                    userSecurityQuest.Attempts = failedTries;
+                    await _context.SaveChangesAsync();
+
+                    if (failedTries == 0)
+                    {
+                        user.IsUserLocked = true;
+                        await _context.SaveChangesAsync();
+
+                        changePasswordModel.message = $"You have exhausted all attempts. " +
+                            $"You will be redirected to the login page. Please contact Admin for help!!!";
+                        return changePasswordModel;
+                    }
+
+                    changePasswordModel.message = $"Wrong answer to security question!! You have {failedTries} tries left";
+                    return changePasswordModel;
+                }
 
                 if (!request.password.Equals(request.confirmPassword))
                 {
                     changePasswordModel.message = "Passwords do not match";
-                    return changePasswordModel;
-                }
-
-                if (!(userSecurityQuest.Answer == request.answer))
-                {
-                    changePasswordModel.message = "Wrong answer to security question";
                     return changePasswordModel;
                 }
 
@@ -479,9 +513,28 @@ namespace WalletPayment.Services.Services
 
                 if (updatedUserProfile == null) return updatePinViewModel;
 
+                int tries = userSecurityQuest.Attempts;
+                int failedTries;
+
                 if (!(userSecurityQuest.Answer == request.answer))
                 {
-                    updatePinViewModel.message = "Wrong answer to security question";
+                    tries--;
+                    failedTries = tries--;
+
+                    userSecurityQuest.Attempts = failedTries;
+                    await _context.SaveChangesAsync();
+
+                    if (failedTries == 0)
+                    {
+                        updatedUserProfile.IsUserLocked = true;
+                        await _context.SaveChangesAsync();
+
+                        updatePinViewModel.message = $"You have exhausted all attempts. " +
+                            $"You will be redirected to the login page. Please contact Admin for help!!!";
+                        return updatePinViewModel;
+                    }
+
+                    updatePinViewModel.message = $"Wrong answer to security question!! You have {failedTries} tries left";
                     return updatePinViewModel;
                 }
 

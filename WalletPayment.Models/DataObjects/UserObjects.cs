@@ -230,6 +230,7 @@ namespace WalletPayment.Models.DataObjects
     public class ChangePasswordModel
     {
         public bool status { get; set; }
+        public bool isLocked { get; set; }
         public string message { get; set; } = string.Empty;
     }
 
@@ -276,6 +277,7 @@ namespace WalletPayment.Models.DataObjects
     public class UpdatePinViewModel
     {
         public bool status { get; set; }
+        public bool isLocked { get; set; }
         public string message { get; set; } = string.Empty;
     }
 
@@ -363,8 +365,10 @@ namespace WalletPayment.Models.DataObjects
     public class AdminLoginViewModel
     {
         public bool status { get; set; }
+        public bool isAdmin { get; set; }
         public string result { get; set; } = string.Empty;
-        public string refreshedToken { get; set; } = string.Empty;
+        public string adminUsername { get; set; } = string.Empty;
+        public string adminRefreshedToken { get; set; } = string.Empty;
     }
 
 

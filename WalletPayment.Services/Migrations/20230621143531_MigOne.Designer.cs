@@ -12,8 +12,8 @@ using WalletPayment.Services.Data;
 namespace WalletPayment.Services.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230619180223_MigThree")]
-    partial class MigThree
+    [Migration("20230621143531_MigOne")]
+    partial class MigOne
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -205,6 +205,9 @@ namespace WalletPayment.Services.Migrations
                     b.Property<string>("Answer")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int");
 
                     b.Property<string>("Question")
                         .IsRequired()

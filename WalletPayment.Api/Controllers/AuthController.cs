@@ -47,8 +47,6 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> AdminLogin(AdminLoginDTO request)
         {
             var result = await _authService.AdminLogin(request);
-            if (!result.status) return BadRequest(result);
-
             return Ok(result);
         }
 

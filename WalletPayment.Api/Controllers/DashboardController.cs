@@ -132,5 +132,12 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("NoSecurityAttemptsLeft"), Authorize]
+        public async Task<IActionResult> NoSecurityAttemptsLeft()
+        {
+            var result = await _dashboardService.NoSecurityAttemptsLeft();
+            return Ok(result);
+        }
+
     }
 }

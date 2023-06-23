@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NPOI.HSSF.UserModel;
+using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
@@ -422,7 +425,7 @@ namespace WalletPayment.Services.Services
                 var allRange = txnsRange.Where(txn => txn.Date >= startDate && txn.Date <= endDate 
                 && currencyType == request.accountCurrency).ToList();
 
-                CultureInfo culture = CultureInfo.InvariantCulture;
+                CultureInfo culture = new CultureInfo("ig-NG");
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 // String builder
@@ -547,10 +550,12 @@ namespace WalletPayment.Services.Services
                     </body>
                 </html>");
 
+                var refNO = DateTime.Now.ToString("YYYYMMHHffdd");
+
                 // Info to find and replace
                 var dateTime = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
                 var acctNO = loggedInUser.AccountNumber;
-                var reference = $"{Guid.NewGuid().ToString().Replace("-", "").Substring(1, 15)}";
+                var reference = $"REF-{refNO}";
                 var totalCr = await _context.Transactions.Where(x => x.TranDestinationAccount == loggedInUser.AccountNumber).Select(x => x.Amount).SumAsync();
                 var totalDr = await _context.Transactions.Where(x => x.TranSourceAccount == loggedInUser.AccountNumber).Select(x => x.Amount).SumAsync();
                 var name = $"{loggedInUser.User.FirstName} {loggedInUser.User.LastName}";
@@ -598,29 +603,36 @@ namespace WalletPayment.Services.Services
                     Objects = { objectSettings }
                 };
 
-                var convertedPDF = _converter.Convert(pdf);
+                byte[] convertedPDFToBytes = _converter.Convert(pdf);
 
 
-                var converter = new BasicConverter(new PdfTools());
-                byte[] pdfBytes = converter.Convert(pdf);
-                // How to send this pdf as email
+                var stream = new MemoryStream(convertedPDFToBytes);
+                var copiedStream = new MemoryStream();
+
+                stream.CopyTo(copiedStream);
+                copiedStream.Position = 0;
+
 
                 ///////////////////////////////////////////////////////////////////////////////////////////////
                 // Send pdf to user email
-                // Attachement Email information
                 var userName = loggedInUser.User.Username;
                 var userEmail = loggedInUser.User.Email;
 
-                IFormFile formFileAttachment = new FormFile(new MemoryStream(convertedPDF), 0, convertedPDF.Length, $"{loggedInUser.User.Username}_GlobusWallet_Statement", $"{loggedInUser.User.Username}_GlobusWallet_Statement.pdf");
-
-                var result = await _emailService.SendStatementAsAttachment(userName, userEmail, formFileAttachment);
-
-                if (result == false)
+                IFormFile formFileAttachment = new FormFile(copiedStream, 0, copiedStream.Length, null, $"{loggedInUser.User.Username}_GlobusWallet_Statement.pdf")
                 {
-                    createPDFViewModel.status = false;
-                    createPDFViewModel.message = "An error occured. Could not send to email!";
-                    return createPDFViewModel;
-                }
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/pdf"
+                };
+
+
+                //var result = await _emailService.SendStatementAsAttachment(userName, userEmail, formFileAttachment);
+
+                //if (result == false)
+                //{
+                //    createPDFViewModel.status = false;
+                //    createPDFViewModel.message = "An error occured. Could not send to email!";
+                //    return createPDFViewModel;
+                //}
 
                 /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -635,6 +647,14 @@ namespace WalletPayment.Services.Services
                     DateTime.UtcNow.ToLongTimeString());
                 return createPDFViewModel;
             }
+        }
+
+
+        private void CreateCell(IRow CurrentRow, int CellIndex, string Value, HSSFCellStyle Style)
+        {
+            ICell Cell = CurrentRow.CreateCell(CellIndex);
+            Cell.SetCellValue(Value);
+            Cell.CellStyle = Style;
         }
 
         public async Task<CreateStatementViewModel> GenerateExcelStatement(CreateStatementRequestDTO request)
@@ -669,67 +689,120 @@ namespace WalletPayment.Services.Services
                 var allRange = txnsRange.Where(txn => txn.Date >= startDate && txn.Date <= endDate
                 && currencyType == request.accountCurrency).ToList();
 
-                CultureInfo culture = CultureInfo.InvariantCulture;
+                CultureInfo culture = new CultureInfo("ig-NG");
 
-                ////////////////////////////////////////////////////////////////////////////////////////////////
-                // Excel document
-                IWorkbook workbook = new XSSFWorkbook();
+                //////////////////////////////////////////////////////////////////////////////////////////////////
+
+                HSSFWorkbook workbook = new HSSFWorkbook();
+                HSSFFont myFont = (HSSFFont)workbook.CreateFont();
+                myFont.FontHeightInPoints = 12;
+                myFont.FontName = "Poppins";
+                myFont.Color = HSSFColor.DarkBlue.Index;
+
                 ISheet sheet = workbook.CreateSheet($"{loggedInUser.User.Username}_GlobusWallet_Sheet1");
 
+                // Defining a border
+                HSSFCellStyle borderedCellStyle = (HSSFCellStyle)workbook.CreateCellStyle();
+                borderedCellStyle.SetFont(myFont);
+                borderedCellStyle.BorderLeft = BorderStyle.Medium;
+                borderedCellStyle.BorderTop = BorderStyle.Medium;
+                borderedCellStyle.BorderRight = BorderStyle.Medium;
+                borderedCellStyle.BorderBottom = BorderStyle.Medium;
+                borderedCellStyle.VerticalAlignment = VerticalAlignment.Center;
+                borderedCellStyle.LeftBorderColor = HSSFColor.DarkRed.Index;
+                borderedCellStyle.TopBorderColor = HSSFColor.DarkRed.Index;
+                borderedCellStyle.RightBorderColor = HSSFColor.DarkRed.Index;
+                borderedCellStyle.BottomBorderColor = HSSFColor.DarkRed.Index;
+                borderedCellStyle.FillBackgroundColor = HSSFColor.White.Index;
+                borderedCellStyle.FillForegroundColor = HSSFColor.White.Index;
+                borderedCellStyle.FillPattern = FillPattern.SolidForeground;
 
-                IRow headerRow = sheet.CreateRow(0);
-                headerRow.CreateCell(0).SetCellValue("AMOUNT");
-                headerRow.CreateCell(1).SetCellValue("SENDER INFO");
-                headerRow.CreateCell(2).SetCellValue("RECEPIENT INFO");
-                headerRow.CreateCell(3).SetCellValue("TYPE");
-                headerRow.CreateCell(4).SetCellValue("CURRENCY");
-                headerRow.CreateCell(5).SetCellValue("STATUS");
-                headerRow.CreateCell(6).SetCellValue("DATE");
+                IRow headerRow = sheet.CreateRow(7);
+                CreateCell(headerRow, 0, "AMOUNT", borderedCellStyle);
+                CreateCell(headerRow, 1, "SENDER INFO", borderedCellStyle);
+                CreateCell(headerRow, 2, "RECEPIENT INFO", borderedCellStyle);
+                CreateCell(headerRow, 3, "TYPE", borderedCellStyle);
+                CreateCell(headerRow, 4, "CURRENCY", borderedCellStyle);
+                CreateCell(headerRow, 5, "STATUS", borderedCellStyle);
+                CreateCell(headerRow, 6, "DATE", borderedCellStyle);
 
-                
-                int rowIncr = 1;
+
+                int rowIncr = 8;
 
                 foreach (var txn in allRange)
                 {
                     if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
-                        IRow dataRow1 = sheet.CreateRow(rowIncr++);
-                        dataRow1.CreateCell(0).SetCellValue($"{txn.Amount.ToString("C", culture)}");
-                        dataRow1.CreateCell(1).SetCellValue("P2P Wallet");
-                        dataRow1.CreateCell(2).SetCellValue($"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}");
-                        dataRow1.CreateCell(3).SetCellValue("CREDIT");
-                        dataRow1.CreateCell(4).SetCellValue($"{request.accountCurrency}");
-                        dataRow1.CreateCell(5).SetCellValue($"{txn.Status}");
-                        dataRow1.CreateCell(6).SetCellValue($"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}");
+                        IRow dataRow = sheet.CreateRow(rowIncr++);
+                        CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
+                        CreateCell(dataRow, 1, "P2P Wallet", borderedCellStyle);
+                        CreateCell(dataRow, 2, $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 3, "CREDIT", borderedCellStyle);
+                        CreateCell(dataRow, 4, $"{request.accountCurrency}", borderedCellStyle);
+                        CreateCell(dataRow, 5, $"{txn.Status}", borderedCellStyle);
+                        CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
                     }
 
                     if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
-                        IRow dataRow2 = sheet.CreateRow(rowIncr++);
-                        dataRow2.CreateCell(0).SetCellValue($"{txn.Amount.ToString("C", culture)}");
-                        dataRow2.CreateCell(1).SetCellValue($"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}");
-                        dataRow2.CreateCell(2).SetCellValue($"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}");
-                        dataRow2.CreateCell(3).SetCellValue("CREDIT");
-                        dataRow2.CreateCell(4).SetCellValue($"{request.accountCurrency}");
-                        dataRow2.CreateCell(5).SetCellValue($"{txn.Status}");
-                        dataRow2.CreateCell(6).SetCellValue($"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}");
+                        IRow dataRow = sheet.CreateRow(rowIncr++);
+                        CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
+                        CreateCell(dataRow, 1, $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 2, $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 3, "CREDIT", borderedCellStyle);
+                        CreateCell(dataRow, 4, $"{request.accountCurrency}", borderedCellStyle);
+                        CreateCell(dataRow, 5, $"{txn.Status}", borderedCellStyle);
+                        CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
                     }
 
                     if (txn.TranSourceAccount == loggedInUser.AccountNumber)
                     {
-                        IRow dataRow3 = sheet.CreateRow(rowIncr++);
-                        dataRow3.CreateCell(0).SetCellValue($"{txn.Amount.ToString("C", culture)}");
-                        dataRow3.CreateCell(1).SetCellValue($"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}");
-                        dataRow3.CreateCell(2).SetCellValue($"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}");
-                        dataRow3.CreateCell(3).SetCellValue("DEBIT");
-                        dataRow3.CreateCell(4).SetCellValue($"{request.accountCurrency}");
-                        dataRow3.CreateCell(5).SetCellValue($"{txn.Status}");
-                        dataRow3.CreateCell(6).SetCellValue($"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}");
+                        IRow dataRow = sheet.CreateRow(rowIncr++);
+                        CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
+                        CreateCell(dataRow, 1, $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 2, $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 3, "DEBIT", borderedCellStyle);
+                        CreateCell(dataRow, 4, $"{request.accountCurrency}", borderedCellStyle);
+                        CreateCell(dataRow, 5, $"{txn.Status}", borderedCellStyle);
+                        CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
                     }
                 }
 
+
+                var getImagePath = Path.GetFullPath("C:\\Users\\joyihama\\Desktop\\logo.png");
+                byte[] imageBytes;
+                //byte[] imageBytes = File.ReadAllBytes(getImagePath);
+
+                using (FileStream fileStream = new FileStream(getImagePath, FileMode.Open, FileAccess.Read))
+                {
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        fileStream.CopyTo(memoryStream);
+                        imageBytes = memoryStream.ToArray();
+                    }
+                }
+
+                int pictureIndex = workbook.AddPicture(imageBytes, PictureType.PNG);
+                HSSFPatriarch patriarch = (HSSFPatriarch)sheet.CreateDrawingPatriarch();
+                IClientAnchor anchor = workbook.GetCreationHelper().CreateClientAnchor();
+
+                anchor.Row1 = 0;
+                anchor.Col1 = 0;
+                anchor.Dx1 = 0;
+                anchor.Dy1 = 0;
+
+                anchor.Dx2 = 500;
+                anchor.Dy2 = 500;
+
+                IPicture picture = patriarch.CreatePicture(anchor, pictureIndex);
+                //picture.Resize();
+
+                CellRangeAddress mergedRegion = new CellRangeAddress(0, 6, 0, 6);
+                sheet.AddMergedRegion(mergedRegion);
+
+
                 // Save the workbook to a file
-                using (FileStream fileStream = new FileStream($"C:/Users/joyihama/Desktop/StatementReport/{loggedInUser.User.Username}_GlobusWallet_Sheet.xlsx", FileMode.Create))
+                using (FileStream fileStream = new FileStream($"C:/Users/joyihama/Desktop/StatementReport/{loggedInUser.User.Username}_GlobusWallet_Sheet.xls", FileMode.Create))
                 {
                     workbook.Write(fileStream, false);
                 }
@@ -750,6 +823,10 @@ namespace WalletPayment.Services.Services
                 return createExcelViewModel;
             }
         }
+
+
+
+
     }
 }
 

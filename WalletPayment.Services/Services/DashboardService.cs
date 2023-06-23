@@ -619,6 +619,34 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<bool> NoSecurityAttemptsLeft()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return false;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userSec = await _context.SecurityQuestions.Where(x => x.UserId == userID).FirstOrDefaultAsync();
+
+                if (userSec.Attempts == 0)
+                {
+                    return true;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
     }
 }
 

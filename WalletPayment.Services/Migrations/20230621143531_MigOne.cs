@@ -25,6 +25,35 @@ namespace WalletPayment.Services.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Currencies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Currencies = table.Column<string>(type: "varchar(10)", nullable: false),
+                    CurrencyCharge = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ConversionRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Currencies", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SystemAccounts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SystemBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Currency = table.Column<string>(type: "varchar(10)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemAccounts", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -149,6 +178,7 @@ namespace WalletPayment.Services.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Question = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Answer = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Attempts = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -156,29 +186,6 @@ namespace WalletPayment.Services.Migrations
                     table.PrimaryKey("PK_SecurityQuestions", x => x.Id);
                     table.ForeignKey(
                         name: "FK_SecurityQuestions_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SystemAccounts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SystemAccountNumber = table.Column<string>(type: "varchar(50)", nullable: false),
-                    SystemBalance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "varchar(10)", nullable: false),
-                    ChargeNarration = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SystemAccounts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SystemAccounts_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -243,12 +250,6 @@ namespace WalletPayment.Services.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_SystemAccounts_UserId",
-                table: "SystemAccounts",
-                column: "UserId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_DestinationAccountUserId",
                 table: "Transactions",
                 column: "DestinationAccountUserId");
@@ -266,6 +267,9 @@ namespace WalletPayment.Services.Migrations
 
             migrationBuilder.DropTable(
                 name: "Admins");
+
+            migrationBuilder.DropTable(
+                name: "Currencies");
 
             migrationBuilder.DropTable(
                 name: "Deposits");
