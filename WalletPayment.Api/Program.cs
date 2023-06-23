@@ -17,6 +17,7 @@ using WalletPayment.Api.Hubs;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using DinkToPdf.Contracts;
 using DinkToPdf;
+using WalletPayment.Api;
 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
 logger.Debug("init main");
@@ -125,6 +126,8 @@ try
     app.MapHub<NotificationHub>("/notification");
 
     app.MapControllers();
+
+    app.Seed();
 
     app.Run();
 }

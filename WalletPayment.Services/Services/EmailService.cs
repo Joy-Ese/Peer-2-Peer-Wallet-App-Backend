@@ -271,52 +271,15 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendStatementAsAttachment(string userName, string userEmail, IFormFile attachment)
+        public async Task<bool> SendStatementAsAttachment(string userName, string userEmail, IFormFile attachment, string fileType)
         {
             try
             {
-                //var email = new MailMessage();
-                //email.IsBodyHtml = true;
-                //email.From = new MailAddress(_emailCredentials.EmailFrom, "no-reply");
-                //email.To.Add(userEmail);
-                //email.Subject = "Account Statemnet Request";
-
-                //string mailbody = string.Empty;
-
-                //email.Body = mailbody;
-
-                //string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\EmailTemplatesForAngularWallet\\emailAccountStatement.html");
-                //if (!File.Exists(filePath))
-                //{
-                //    return _httpContextAccessor.HttpContext.Response.StatusCode.Equals(404);
-                //}
-
-
-                //StreamReader reader = new StreamReader(filePath);
-                //mailbody = reader.ReadToEnd();
-                //mailbody = mailbody.Replace("{Username}", userName);
-
-                //if (attachment != null)
-                //{
-                //    email.Attachments.Add(new Attachment(attachment.OpenReadStream(), attachment.FileName));
-                //}
-
-                //using (var smtp = new System.Net.Mail.SmtpClient())
-                //{
-                //    smtp.EnableSsl = _emailCredentials.enableSSL ? true : false;
-                //    smtp.Host = _emailCredentials.EmailHost;
-                //    smtp.Port = 587;
-                //    smtp.Credentials = new NetworkCredential(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
-                //    smtp.UseDefaultCredentials = false;
-                //    smtp.Send(email);
-                //}
-
-
                 var email = new MimeMessage();
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
                 email.To.Add(new MailboxAddress("WalletUser", userEmail));
 
-                email.Subject = "Account Statemnet Request";
+                email.Subject = "Account Statement Request";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\EmailTemplatesForAngularWallet\\emailAccountStatement.html");
                 if (!File.Exists(filePath))
@@ -334,16 +297,14 @@ namespace WalletPayment.Services.Services
                 var bodyBuilder = new BodyBuilder();
                 bodyBuilder.HtmlBody = mailbody;
 
-                if (attachment != null)
+                if (attachment != null && fileType == "PDF")
                 {
-                    //byte[] fileBytes;
-
-                    //using (var ms = new MemoryStream())
-                    //{
-                    //    attachment.CopyTo(ms);
-                    //    fileBytes = ms.ToArray();
-                    //}
                     bodyBuilder.Attachments.Add($"C:\\Users\\joyihama\\Desktop\\StatementReport\\{userName}_GlobusWallet_Statement.pdf", ContentType.Parse(attachment.ContentType));
+                }
+
+                if (attachment != null && fileType == "EXCEL")
+                {
+                    bodyBuilder.Attachments.Add($"C:\\Users\\joyihama\\Desktop\\StatementReport\\{userName}_GlobusWallet_Sheet.xls", ContentType.Parse(attachment.ContentType));
                 }
 
 

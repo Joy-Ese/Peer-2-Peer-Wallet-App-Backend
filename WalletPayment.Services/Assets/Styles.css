@@ -12,7 +12,7 @@ table {
 }
 
 td, th {
-    border: 1px solid #dddddd;
+    border: 1px solid #003366;
     text-align: left;
     padding: 30px;
     font-weight: 500;
@@ -20,11 +20,15 @@ td, th {
 }
 
 tr:nth-child(even) {
-    background-color: #dddddd;
+    background-color: #003366;
 }
 
 .tableDiv {
     width: 38%;
+}
+
+.toWhite {
+    color: white;
 }
 
 .crediT {

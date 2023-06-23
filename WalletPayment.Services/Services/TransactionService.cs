@@ -451,22 +451,22 @@ namespace WalletPayment.Services.Services
                               <p class='tableDiv'>Statement Period {StartDate} to {EndDate}</p>
                             </div>
                             <div class='dispFlex'>
-                              <table class='tableDiv'>
+                              <table class='tableDiv' style='padding: 15px; font-size: 20px;'>
                                 <tr>
                                   <td>Generated Date</td>
                                   <td>{DateTime}</td>
                                 </tr>
                                 <tr>
-                                  <td>Account Number</td>
-                                  <td>{AcctNO}</td>
+                                  <td class='toWhite'>Account Number</td>
+                                  <td class='toWhite'>{AcctNO}</td>
                                 </tr>
                                 <tr>
                                   <td>Internal Reference</td>
                                   <td>{Reference}</td>
                                 </tr>
                                 <tr>
-                                  <td>Total Debit</td>
-                                  <td>{TotalDebit}</td>
+                                  <td class='toWhite'>Total Debit</td>
+                                  <td class='toWhite'>{TotalDebit}</td>
                                 </tr>
                                 <tr>
                                   <td>Total Credit</td>
@@ -477,8 +477,8 @@ namespace WalletPayment.Services.Services
                           </div>
                         </div>
                         <div class='row'>
-                          <h5>{Name}</h5>
-                          <table>
+                          <h3>Dear {Name}, your statement details below:</h3>
+                          <table style='padding: 15px; font-size: 20px;'>
                             <thead>
                               <tr>
                                 <th>AMOUNT</th>
@@ -550,7 +550,7 @@ namespace WalletPayment.Services.Services
                     </body>
                 </html>");
 
-                var refNO = DateTime.Now.ToString("YYYYMMHHffdd");
+                var refNO = DateTime.Now.ToString("yyyyMMHHffdd");
 
                 // Info to find and replace
                 var dateTime = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
@@ -566,8 +566,8 @@ namespace WalletPayment.Services.Services
                 sb.Replace("{DateTime}", dateTime);
                 sb.Replace("{AcctNO}", acctNO);
                 sb.Replace("{Reference}", reference);
-                sb.Replace("{TotalDebit}", totalCr.ToString("C", culture));
-                sb.Replace("{TotalCredit}", totalDr.ToString("C", culture));
+                sb.Replace("{TotalDebit}", totalDr.ToString("C", culture));
+                sb.Replace("{TotalCredit}", totalCr.ToString("C", culture));
                 sb.Replace("{Name}", name);
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -624,20 +624,19 @@ namespace WalletPayment.Services.Services
                     ContentType = "application/pdf"
                 };
 
+                var result = await _emailService.SendStatementAsAttachment(userName, userEmail, formFileAttachment, "PDF");
 
-                //var result = await _emailService.SendStatementAsAttachment(userName, userEmail, formFileAttachment);
-
-                //if (result == false)
-                //{
-                //    createPDFViewModel.status = false;
-                //    createPDFViewModel.message = "An error occured. Could not send to email!";
-                //    return createPDFViewModel;
-                //}
+                if (result == false)
+                {
+                    createPDFViewModel.status = false;
+                    createPDFViewModel.message = "An error occured. Could not send to email!";
+                    return createPDFViewModel;
+                }
 
                 /////////////////////////////////////////////////////////////////////////////////////////////////
 
                 createPDFViewModel.status = true;
-                createPDFViewModel.message = "Successfully created PDF document!! \r\n Please check your email to view document.";
+                createPDFViewModel.message = "Successfully created PDF document!! Please check your email to view document.";
                 return createPDFViewModel;
             }
             catch (Exception ex)
@@ -773,11 +772,11 @@ namespace WalletPayment.Services.Services
                 byte[] imageBytes;
                 //byte[] imageBytes = File.ReadAllBytes(getImagePath);
 
-                using (FileStream fileStream = new FileStream(getImagePath, FileMode.Open, FileAccess.Read))
+                using (FileStream fileStream1 = new FileStream(getImagePath, FileMode.Open, FileAccess.Read))
                 {
                     using (MemoryStream memoryStream = new MemoryStream())
                     {
-                        fileStream.CopyTo(memoryStream);
+                        fileStream1.CopyTo(memoryStream);
                         imageBytes = memoryStream.ToArray();
                     }
                 }
@@ -801,18 +800,53 @@ namespace WalletPayment.Services.Services
                 sheet.AddMergedRegion(mergedRegion);
 
 
+                byte[] excelBytes;
                 // Save the workbook to a file
                 using (FileStream fileStream = new FileStream($"C:/Users/joyihama/Desktop/StatementReport/{loggedInUser.User.Username}_GlobusWallet_Sheet.xls", FileMode.Create))
                 {
                     workbook.Write(fileStream, false);
+                    using (MemoryStream memoryStream = new MemoryStream())
+                    {
+                        fileStream.CopyTo(memoryStream);
+                        excelBytes = memoryStream.ToArray();
+                    }
                 }
 
                 workbook.Close();
                 workbook.Dispose();
 
 
+                var excelStream = new MemoryStream(excelBytes);
+                var copiedExcelStream = new MemoryStream();
+
+                excelStream.CopyTo(copiedExcelStream);
+                copiedExcelStream.Position = 0;
+
+
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                //// Send Excel to user email
+                var userName = loggedInUser.User.Username;
+                var userEmail = loggedInUser.User.Email;
+
+                IFormFile formFileAttachment = new FormFile(copiedExcelStream, 0, copiedExcelStream.Length, null, $"{loggedInUser.User.Username}_GlobusWallet_Sheet.xls")
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/xls"
+                };
+
+
+                var result = await _emailService.SendStatementAsAttachment(userName, userEmail, formFileAttachment, "EXCEL");
+
+                if (result == false)
+                {
+                    createExcelViewModel.status = false;
+                    createExcelViewModel.message = "An error occured. Could not send to email!";
+                    return createExcelViewModel;
+                }
+
+
                 createExcelViewModel.status = true;
-                createExcelViewModel.message = "Successfully created Excel document";
+                createExcelViewModel.message = "Successfully created Excel document!! Please check your email to view document.";
                 return createExcelViewModel;
             }
             catch (Exception ex)
@@ -823,8 +857,6 @@ namespace WalletPayment.Services.Services
                 return createExcelViewModel;
             }
         }
-
-
 
 
     }

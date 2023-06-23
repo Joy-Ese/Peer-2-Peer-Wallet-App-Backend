@@ -410,11 +410,13 @@ namespace WalletPayment.Services.Services
                         user.IsUserLocked = true;
                         await _context.SaveChangesAsync();
 
+                        changePasswordModel.isLocked = true;
                         changePasswordModel.message = $"You have exhausted all attempts. " +
                             $"You will be redirected to the login page. Please contact Admin for help!!!";
                         return changePasswordModel;
                     }
 
+                    changePasswordModel.isLocked = false;
                     changePasswordModel.message = $"Wrong answer to security question!! You have {failedTries} tries left";
                     return changePasswordModel;
                 }
@@ -433,6 +435,7 @@ namespace WalletPayment.Services.Services
                 await _context.SaveChangesAsync();
 
                 changePasswordModel.status = true;
+                changePasswordModel.isLocked = false;
                 changePasswordModel.message = "Password changed!";
                 return changePasswordModel;
             }
@@ -529,11 +532,13 @@ namespace WalletPayment.Services.Services
                         updatedUserProfile.IsUserLocked = true;
                         await _context.SaveChangesAsync();
 
+                        updatePinViewModel.isLocked = true;
                         updatePinViewModel.message = $"You have exhausted all attempts. " +
                             $"You will be redirected to the login page. Please contact Admin for help!!!";
                         return updatePinViewModel;
                     }
 
+                    updatePinViewModel.isLocked = false;
                     updatePinViewModel.message = $"Wrong answer to security question!! You have {failedTries} tries left";
                     return updatePinViewModel;
                 }
@@ -553,6 +558,7 @@ namespace WalletPayment.Services.Services
                 await _context.SaveChangesAsync();
 
                 updatePinViewModel.status = true;
+                updatePinViewModel.isLocked = false;
                 updatePinViewModel.message = "Pin updated successfully";
                 return updatePinViewModel;
             }
