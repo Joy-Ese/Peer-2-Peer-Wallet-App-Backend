@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.IO.Compression;
 using WalletPayment.Models.DataObjects;
 using WalletPayment.Models.Entites;
 using WalletPayment.Services.Data;
@@ -35,15 +36,17 @@ namespace WalletPayment.Services.Services
                 userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
                 var getAcctList = new List<AccountDetails>();
-                var accountDetails = new AccountDetails();
+               
                 var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
-
 
                 foreach (var item in acctData)
                 {
-                    accountDetails.AccountNumber = item.AccountNumber;
-                    accountDetails.Balance = item.Balance;
-                    accountDetails.Currency = item.Currency;
+                    var accountDetails = new AccountDetails()
+                    {
+                        AccountNumber = item.AccountNumber,
+                        Balance = item.Balance,
+                        Currency = item.Currency,
+                    };
                     getAcctList.Add(accountDetails);
                 }
 
@@ -644,6 +647,104 @@ namespace WalletPayment.Services.Services
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 return false;
+            }
+        }
+
+        public async Task<KycRequestViewModel> KycValidation(List<IFormFile> fileData)
+        {
+            KycRequestViewModel kycRequestViewModel = new KycRequestViewModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return kycRequestViewModel;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+                var loggedInUser = await _context.Users.Where(x => x.Id == userID).FirstOrDefaultAsync();
+                var uniqueNo = DateTime.Now.ToString("yyyyMMddHH");
+
+                var userUniqueFileRef = $"{loggedInUser.Username}{uniqueNo}";
+
+
+                string extractPath = @"C:\Users\joyihama\Desktop\KYCGlobusWallet";
+                
+                string zipFilePath = $"{userUniqueFileRef}.zip";
+
+                long size = fileData.Sum(f => f.Length);
+
+                using (var target = File.Create($"{userUniqueFileRef}.zip"))
+                {
+                    using (var zipArchive = new ZipArchive(target, ZipArchiveMode.Create, true))
+                    {
+                        foreach (var formFile in fileData)
+                        {
+                            if (formFile.Length > 0)
+                            {
+                                var zipEntry = zipArchive.CreateEntry(formFile.FileName, CompressionLevel.Optimal);
+
+                                using (var zipStream = zipEntry.Open())
+                                {
+                                    await formFile.CopyToAsync(zipStream);
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                using (var zipExtract = new ZipArchive(File.OpenRead(zipFilePath), ZipArchiveMode.Read))
+                {
+                    foreach (var entry in zipExtract.Entries)
+                    {
+                        if (!string.IsNullOrEmpty(entry.Name))
+                        {
+                            string extractFilePath = Path.Combine(extractPath, entry.FullName);
+                            entry.ExtractToFile(extractFilePath, true);
+                        }
+                    }
+                }
+
+
+                loggedInUser.UserProfile = "Verified";
+                await _context.SaveChangesAsync();
+
+
+                kycRequestViewModel.status = true;
+                kycRequestViewModel.message = "Thank you for submitting your documents. Account will be upgraded to allow foreign wallet creation!";
+                return kycRequestViewModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return kycRequestViewModel;
+            }
+        }
+
+        public async Task<UserProfileModel> GetUserProfileLevel()
+        {
+            UserProfileModel userProfile = new UserProfileModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return userProfile;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var info = await _context.Users.Where(x => x.Id == userID).FirstOrDefaultAsync();
+
+                userProfile.status = true;
+                userProfile.message = info.UserProfile;
+                return userProfile;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return userProfile;
             }
         }
 

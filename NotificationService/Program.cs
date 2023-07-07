@@ -1,10 +1,10 @@
-using Worker;
+//using Worker;
 
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services =>
-    {
-        services.AddHostedService<NotificationService>();
-    })
-    .Build();
+//IHost host = Host.CreateDefaultBuilder(args)
+//    .ConfigureServices(services =>
+//    {
+//        services.AddHostedService<NotificationService>();
+//    })
+//    .Build();
 
-await host.RunAsync();
+//await host.RunAsync();

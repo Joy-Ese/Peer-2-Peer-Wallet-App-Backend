@@ -4,41 +4,39 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
-using NPOI.XSSF.UserModel;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using WalletPayment.Models.DataObjects;
 using WalletPayment.Models.Entites;
 using WalletPayment.Services.Data;
 using WalletPayment.Services.Interfaces;
 
+
 namespace WalletPayment.Services.Services
 {
     public class TransactionService : ITransaction
     {
+        private readonly IHubContext<NotificationSignalR> _hub;
         private readonly DataContext _context;
         private IConverter _converter;
         private readonly IAccount _accountService;
+        private readonly INotification _notificationService;
         private readonly IEmail _emailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<TransactionService> _logger;
 
 
-        public TransactionService(DataContext context, IEmail emailService, IAccount accountService,
+        public TransactionService(DataContext context, IEmail emailService, IAccount accountService, INotification notificationService,
             IHttpContextAccessor httpContextAccessor, ILogger<TransactionService> logger, IConverter converter)
         {
             _context = context;
             _converter = converter;
             _accountService = accountService;
+            _notificationService = notificationService;
             _emailService = emailService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
@@ -115,6 +113,12 @@ namespace WalletPayment.Services.Services
                 await _context.Transactions.AddAsync(transaction);
                 await _context.SaveChangesAsync();
 
+                // Trigger Notification
+                var senderName = $"{sourceAccountData.User.FirstName} {sourceAccountData.User.LastName}";
+                var receiverID = destinationAccountData.User.Id;
+                var moneySent = transaction.Amount.ToString();
+                var moneySentCurrency = "NGN";
+                await _notificationService.SendTransferNotification(receiverID, moneySentCurrency, moneySent, senderName);
 
                 // Debit Email information
                 var senderEmail = sourceAccountData.User.Email;
@@ -173,6 +177,20 @@ namespace WalletPayment.Services.Services
 
                 foreach (var txn in userTranList)
                 {
+                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    {
+                        transactionsCreditList.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
+                            recepientInfo = "Create Wallet",
+                            transactionType = "DEBIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
                     if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
                         transactionsCreditList.Add(new TransactionListModel
@@ -201,7 +219,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber)
+                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
                     {
                         transactionsCreditList.Add(new TransactionListModel
                         {
@@ -253,6 +271,20 @@ namespace WalletPayment.Services.Services
 
                 foreach (var txn in last3Txns)
                 {
+                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    {
+                        getLastThreeTxns.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
+                            recepientInfo = "Create Wallet",
+                            transactionType = "DEBIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
                     if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
                         getLastThreeTxns.Add(new TransactionListModel
@@ -281,7 +313,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber)
+                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
                     {
                         getLastThreeTxns.Add(new TransactionListModel
                         {
@@ -338,6 +370,20 @@ namespace WalletPayment.Services.Services
 
                 foreach (var txn in allRange)
                 {
+                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    {
+                        txnsByDate.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
+                            recepientInfo = "Create Wallet",
+                            transactionType = "DEBIT",
+                            currency = "NGN",
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
                     if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
                         txnsByDate.Add(new TransactionListModel
@@ -366,7 +412,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber)
+                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
                     {
                         txnsByDate.Add(new TransactionListModel
                         {
@@ -395,7 +441,7 @@ namespace WalletPayment.Services.Services
         public async Task<CreateStatementViewModel> GeneratePDFStatement(CreateStatementRequestDTO request)
         {
             CreateStatementViewModel createPDFViewModel = new CreateStatementViewModel();
-            List<TransactionListModel> txnsByDate = new List<TransactionListModel>();
+            //List<TransactionListModel> txnsByDate = new List<TransactionListModel>();
             try
             {
                 int userID;
@@ -492,6 +538,22 @@ namespace WalletPayment.Services.Services
                             </thead>");
                 foreach (var txn in allRange)
                 {
+                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    {
+                       sb.AppendFormat(@$"
+                            <tbody>
+                              <tr>
+                               <td>{txn.Amount.ToString("C", culture)}</td>
+                               <td>{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}</td>
+                               <td>Create Wallet</td>
+                               <td class='crediT'>DEBIT</td>
+                               <td>{request.accountCurrency}</td>
+                               <td>{txn.Status}</td>
+                               <td>{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}</td>
+                              </tr>
+                            </tbody>");
+                    }
+
                     if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
                         sb.AppendFormat(@$"
@@ -524,7 +586,7 @@ namespace WalletPayment.Services.Services
                             </tbody>");
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber)
+                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
                     {
                         sb.AppendFormat(@$"
                             <tbody>
@@ -550,7 +612,7 @@ namespace WalletPayment.Services.Services
                     </body>
                 </html>");
 
-                var refNO = DateTime.Now.ToString("yyyyMMHHffdd");
+                var refNO = DateTime.Now.ToString("yyyyMMddHHff");
 
                 // Info to find and replace
                 var dateTime = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
@@ -571,6 +633,7 @@ namespace WalletPayment.Services.Services
                 sb.Replace("{Name}", name);
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////
+                var statementName = $"{loggedInUser.User.Username}";
                 var globalSettings = new GlobalSettings
                 {
                     ColorMode = ColorMode.Color,
@@ -578,7 +641,7 @@ namespace WalletPayment.Services.Services
                     PaperSize = PaperKind.A4,
                     Margins = new MarginSettings { Top = 10 },
                     DocumentTitle = "Globus Wallet Statement",
-                    Out = @$"C:\Users\joyihama\Desktop\StatementReport\{loggedInUser.User.Username}_GlobusWallet_Statement.pdf"
+                    Out = @$"C:\Users\joyihama\Desktop\StatementReport\{statementName}_GlobusWallet_Statement.pdf"
                 };
 
                 string path1 = "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Services";
@@ -618,7 +681,7 @@ namespace WalletPayment.Services.Services
                 var userName = loggedInUser.User.Username;
                 var userEmail = loggedInUser.User.Email;
 
-                IFormFile formFileAttachment = new FormFile(copiedStream, 0, copiedStream.Length, null, $"{loggedInUser.User.Username}_GlobusWallet_Statement.pdf")
+                IFormFile formFileAttachment = new FormFile(copiedStream, 0, copiedStream.Length, null, $"{statementName}_GlobusWallet_Statement.pdf")
                 {
                     Headers = new HeaderDictionary(),
                     ContentType = "application/pdf"
@@ -655,6 +718,7 @@ namespace WalletPayment.Services.Services
             Cell.SetCellValue(Value);
             Cell.CellStyle = Style;
         }
+
 
         public async Task<CreateStatementViewModel> GenerateExcelStatement(CreateStatementRequestDTO request)
         {
@@ -698,7 +762,11 @@ namespace WalletPayment.Services.Services
                 myFont.FontName = "Poppins";
                 myFont.Color = HSSFColor.DarkBlue.Index;
 
-                ISheet sheet = workbook.CreateSheet($"{loggedInUser.User.Username}_GlobusWallet_Sheet1");
+
+                
+                var statementName = $"{loggedInUser.User.Username}";
+
+                ISheet sheet = workbook.CreateSheet($"{statementName}_GlobusWallet_Sheet1");
 
                 // Defining a border
                 HSSFCellStyle borderedCellStyle = (HSSFCellStyle)workbook.CreateCellStyle();
@@ -730,6 +798,18 @@ namespace WalletPayment.Services.Services
 
                 foreach (var txn in allRange)
                 {
+                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    {
+                        IRow dataRow = sheet.CreateRow(rowIncr++);
+                        CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
+                        CreateCell(dataRow, 1, $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}", borderedCellStyle);
+                        CreateCell(dataRow, 2, "Create Wallet", borderedCellStyle);
+                        CreateCell(dataRow, 3, "DEBIT", borderedCellStyle);
+                        CreateCell(dataRow, 4, $"{request.accountCurrency}", borderedCellStyle);
+                        CreateCell(dataRow, 5, $"{txn.Status}", borderedCellStyle);
+                        CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
+                    }
+
                     if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
                     {
                         IRow dataRow = sheet.CreateRow(rowIncr++);
@@ -754,7 +834,7 @@ namespace WalletPayment.Services.Services
                         CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber)
+                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
                     {
                         IRow dataRow = sheet.CreateRow(rowIncr++);
                         CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
@@ -794,6 +874,7 @@ namespace WalletPayment.Services.Services
                 anchor.Dy2 = 500;
 
                 IPicture picture = patriarch.CreatePicture(anchor, pictureIndex);
+                picture.GetPreferredSize();
                 //picture.Resize();
 
                 CellRangeAddress mergedRegion = new CellRangeAddress(0, 6, 0, 6);
@@ -802,7 +883,7 @@ namespace WalletPayment.Services.Services
 
                 byte[] excelBytes;
                 // Save the workbook to a file
-                using (FileStream fileStream = new FileStream($"C:/Users/joyihama/Desktop/StatementReport/{loggedInUser.User.Username}_GlobusWallet_Sheet.xls", FileMode.Create))
+                using (FileStream fileStream = new FileStream($"C:/Users/joyihama/Desktop/StatementReport/{statementName}_GlobusWallet_Sheet.xls", FileMode.Create))
                 {
                     workbook.Write(fileStream, false);
                     using (MemoryStream memoryStream = new MemoryStream())
@@ -828,7 +909,7 @@ namespace WalletPayment.Services.Services
                 var userName = loggedInUser.User.Username;
                 var userEmail = loggedInUser.User.Email;
 
-                IFormFile formFileAttachment = new FormFile(copiedExcelStream, 0, copiedExcelStream.Length, null, $"{loggedInUser.User.Username}_GlobusWallet_Sheet.xls")
+                IFormFile formFileAttachment = new FormFile(copiedExcelStream, 0, copiedExcelStream.Length, null, $"{statementName}_GlobusWallet_Sheet.xls")
                 {
                     Headers = new HeaderDictionary(),
                     ContentType = "application/xls"

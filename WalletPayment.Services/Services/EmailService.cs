@@ -327,6 +327,58 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<bool> SendCreateWalletEmail(string recepientEmail, string amount, string currency, string firstName, string date, string balance)
+        {
+            try
+            {
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
+                email.To.Add(new MailboxAddress("WalletUser", recepientEmail));
+
+                email.Subject = $"Wallet App: NGN{amount} deducted for {currency} wallet creation";
+
+                string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\CreateWallet.html");
+                if (!File.Exists(filePath))
+                {
+                    return _httpContextAccessor.HttpContext.Response.StatusCode.Equals(404);
+                }
+
+                string mailbody = string.Empty;
+
+                StreamReader reader = new StreamReader(filePath);
+                mailbody = reader.ReadToEnd();
+
+                mailbody = mailbody.Replace("{FirstName}", firstName);
+                mailbody = mailbody.Replace("{transtime}", date);
+                mailbody = mailbody.Replace("{currency}", currency);
+                mailbody = mailbody.Replace("{Amount}", amount);
+                mailbody = mailbody.Replace("{Balance}", balance);
+
+
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.HtmlBody = mailbody;
+                email.Body = bodyBuilder.ToMessageBody();
+
+
+                using (var smtp = new SmtpClient())
+                {
+                    smtp.Connect(_emailCredentials.EmailHost, 587, false);
+                    smtp.Authenticate(_emailCredentials.EmailUsername, _emailCredentials.EmailPassword);
+                    smtp.Send(email);
+                    smtp.Disconnect(true);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
+
+
     }
 }
 

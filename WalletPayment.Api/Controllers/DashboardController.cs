@@ -139,5 +139,19 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPost("KycValidation"), Authorize]
+        public async Task<IActionResult> KycValidation([FromForm] KycRequestDTO req)
+        {
+            var result = await _dashboardService.KycValidation(req.KycDetails);
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserProfileLevel"), Authorize]
+        public async Task<IActionResult> GetUserProfileLevel()
+        {
+            var result = await _dashboardService.GetUserProfileLevel();
+            return Ok(result);
+        }
+
     }
 }

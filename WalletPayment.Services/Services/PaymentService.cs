@@ -167,8 +167,20 @@ namespace WalletPayment.Services.Services
 
                 var newBalance = acctInfo.Balance + depositInfo.Amount;
                 acctInfo.Balance = newBalance;
+                await _context.SaveChangesAsync();
 
+                // Save details in SystemTransactions
+                SystemTransaction saveSysAcctTxn = new SystemTransaction
+                {
+                    Status = StatusMessage.Successful.ToString(),
+                    Amount = depositInfo.Amount,
+                    Narration = $"Funded {depositInfo.User.Username} naira wallet with {depositInfo.Amount}",
+                    WalletUserAccount = acctInfo.AccountNumber,
+                    Date = DateTime.Now,
+                    WalletAccountUserId = depositInfo.UserId,
+                };
 
+                await _context.SystemTransactions.AddAsync(saveSysAcctTxn);
                 await _context.SaveChangesAsync();
 
                 //Desposit Email information to user email

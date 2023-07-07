@@ -12,6 +12,10 @@ namespace WalletPayment.Services.Interfaces
     {
         Task<Account> GetByAccountNumber(string AccountNumber);
         Task<AccountViewModel> AccountLookUp(string searchInfo);
+        Task<CreateWalletModel> CreateForeignWallet(CreateWalletDTO req);
+        Task<List<AvailableCurrenciesModel>> UnavailableCurrencies();
+        //Task<List<AccountDetails>> UserAccountDetails();
+        //Task<CurrencyChargeModel> GetCurrencyCharges();
     }
 }
 

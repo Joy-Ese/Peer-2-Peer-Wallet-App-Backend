@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using WalletPayment.Api.Hubs;
 using WalletPayment.Models.DataObjects;
 using WalletPayment.Services.Interfaces;
 
@@ -13,12 +11,10 @@ namespace WalletPayment.Api.Controllers
     public class TransactionController : ControllerBase
     {
         private ITransaction _transactionService;
-        private readonly IHubContext<NotificationHub> _notificationHubContext;
 
-        public TransactionController(ITransaction transactionService, IHubContext<NotificationHub> notificationHubContext)
+        public TransactionController(ITransaction transactionService)
         {
             _transactionService = transactionService;
-            _notificationHubContext = notificationHubContext;
         }
 
         [HttpPost("CreateTransfer"), Authorize]

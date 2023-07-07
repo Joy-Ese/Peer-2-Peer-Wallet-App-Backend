@@ -296,13 +296,6 @@ namespace WalletPayment.Models.DataObjects
         public decimal amount { get; set; }
     }
 
-    public class Notification
-    {
-        public string Id { get; set; } = string.Empty;
-        public string NotificationInfo { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
-    }
-
     public class PayStackRequestDto
     {
         public string reference { get; set; } = string.Empty;
@@ -370,6 +363,60 @@ namespace WalletPayment.Models.DataObjects
         public string adminUsername { get; set; } = string.Empty;
         public string adminRefreshedToken { get; set; } = string.Empty;
     }
+
+    public class KycRequestViewModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class KycRequestDTO
+    {
+        public List<IFormFile> KycDetails { get; set; }
+    }
+
+    public class UserProfileModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class CreateWalletDTO
+    {
+        public string currency { get; set; } = string.Empty;
+    }
+
+    public class CreateWalletModel
+    {
+        public bool status { get; set; }
+        public string currency { get; set; } = string.Empty;
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class AccountDetailsModel
+    {
+        public List<AccountDetails> AccountDetails { get; set; }
+    }
+
+    public class CurrencyChargeModel
+    {
+        public bool status { get; set; }
+        public decimal dollar { get; set; }
+        public decimal euro { get; set; }
+        public decimal pounds { get; set; }
+    }
+
+    public class AvailableCurrenciesModel
+    {
+        public string currency { get; set; } = string.Empty;
+    }
+
+
+
+
+
+
+
 
 
 

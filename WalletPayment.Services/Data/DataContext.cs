@@ -27,6 +27,9 @@ namespace WalletPayment.Services.Data
 
         public DbSet<SystemAccount> SystemAccounts { get; set; }
 
+        public DbSet<SystemTransaction> SystemTransactions { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
         //protected override void OnModelCreating(ModelBuilder builder)
         //{
 

@@ -13,7 +13,6 @@ using WalletPayment.Services.Services;
 using WalletPayment.Validation.Validators;
 using NLog;
 using NLog.Web;
-using WalletPayment.Api.Hubs;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using DinkToPdf.Contracts;
 using DinkToPdf;
@@ -63,6 +62,7 @@ try
     builder.Services.AddScoped<ITransaction, TransactionService>();
     builder.Services.AddScoped<IEmail, EmailService>();
     builder.Services.AddScoped<IPayment, PaymentService>();
+    builder.Services.AddScoped<INotification, NotificationService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddTransient<IValidator<UserSignUpDto>, UserValidator>();
     builder.Services.AddSignalR();
@@ -123,7 +123,7 @@ try
 
     app.UseAuthorization();
 
-    app.MapHub<NotificationHub>("/notification");
+    app.MapHub<NotificationSignalR>("/notification");
 
     app.MapControllers();
 

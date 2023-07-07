@@ -17,6 +17,7 @@ namespace WalletPayment.Services.Interfaces
         Task<bool> SendDebitEmail(string recepientEmail, string sender, string amount2, string balance2, string date2, string username2);
         Task<bool> SendDepositEmail(string selfEmail, string selfName, string selfAmount, string selfBalance, string date3);
         Task<bool> SendStatementAsAttachment(string userName, string userEmail, IFormFile attachments, string fileType);
+        Task<bool> SendCreateWalletEmail(string recepientEmail, string amount, string currency, string firstName, string date, string balance);
     }
 }
 

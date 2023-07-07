@@ -92,15 +92,6 @@ namespace WalletPayment.Services.Services
                 await _context.Admins.AddAsync(newAdmin);
                 await _context.SaveChangesAsync();
 
-                //SystemAccount sysAccount = new SystemAccount
-                //{
-                //    SystemBalance = 0,
-                //    Currency = "NGN",
-                //};
-
-                //await _context.SystemAccounts.AddAsync(sysAccount);
-                //await _context.SaveChangesAsync();
-
                 createAdminResponse.status = true;
                 createAdminResponse.message = $"Admin successfully created!!! Admin can login with username:{adminUsername} and set their password";
                 return createAdminResponse;
@@ -149,12 +140,23 @@ namespace WalletPayment.Services.Services
                     PhoneNumber = request.phoneNumber,
                     FirstName = request.firstName,
                     LastName = request.lastName,
+                    UserProfile = "Unverified",
                     Address = request.address,
                     IsUserLocked = false,
                     VerificationToken = randomToken,
                 };
                 await _context.Users.AddAsync(newUser);
                 await _context.SaveChangesAsync();
+
+
+                //SystemAccount sysAccount = new SystemAccount
+                //{
+                //    SystemBalance = 0,
+                //    Currency = "NGN",
+                //};
+
+                //await _context.SystemAccounts.AddAsync(sysAccount);
+                //await _context.SaveChangesAsync();
 
 
                 Account newAccount = new Account

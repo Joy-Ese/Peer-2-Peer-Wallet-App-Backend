@@ -27,6 +27,8 @@ namespace WalletPayment.Services.Interfaces
         Task<bool> GetUserPin();
         Task<bool> DoesUserHaveImage();
         Task<bool> NoSecurityAttemptsLeft();
+        Task<KycRequestViewModel> KycValidation(List<IFormFile> fileData);
+        Task<UserProfileModel> GetUserProfileLevel();
     }
 }
 

@@ -26,6 +26,9 @@ namespace WalletPayment.Models.Entites
         public string LastName { get; set; } = string.Empty;
 
         [Column(TypeName = "varchar(50)")]
+        public string UserProfile { get; set; } = string.Empty;
+
+        [Column(TypeName = "varchar(50)")]
         public string Address { get; set; } = string.Empty;
 
         public byte[]? PinHash { get; set; }
@@ -48,5 +51,7 @@ namespace WalletPayment.Models.Entites
         public virtual List<RefreshToken> RefreshTokens { get; set; }
         public virtual List<Deposit> Deposits { get; set; }
         public virtual List<Transaction> Transactions { get; set; }
+        public virtual List<SystemTransaction> SystemTransactions { get; set; }
+        public virtual List<Notification> Notifications { get; set; }
     }
 }
