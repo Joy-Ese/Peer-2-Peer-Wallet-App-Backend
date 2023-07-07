@@ -362,82 +362,82 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        //public async Task<CurrencyChargeModel> GetCurrencyCharges()
-        //{
-        //    CurrencyChargeModel currencyCharge = new CurrencyChargeModel();
-        //    try
-        //    {
-        //        int userID;
-        //        if (_httpContextAccessor.HttpContext == null)
-        //        {
-        //            return currencyCharge;
-        //        }
+        public async Task<CurrencyChargeModel> GetCurrencyCharges()
+        {
+            CurrencyChargeModel currencyCharge = new CurrencyChargeModel();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return currencyCharge;
+                }
 
-        //        userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
-        //        var dollarCurrencyCharge = await _context.Currencies.Where(x => x.Currencies == "USD").Select(x => x.CurrencyCharge).FirstOrDefaultAsync();
-        //        var euroCurrencyCharge = await _context.Currencies.Where(x => x.Currencies == "EUR").Select(x => x.CurrencyCharge).FirstOrDefaultAsync();
-        //        var poundsCurrencyCharge = await _context.Currencies.Where(x => x.Currencies == "GBP").Select(x => x.CurrencyCharge).FirstOrDefaultAsync();
-
-
-        //        currencyCharge.status = true;
-        //        currencyCharge.dollar = dollarCurrencyCharge;
-        //        currencyCharge.euro = euroCurrencyCharge;
-        //        currencyCharge.pounds = poundsCurrencyCharge;
-        //        return currencyCharge;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-        //        return currencyCharge;
-        //    }
-        //}
-
-        //public async Task<List<AccountDetails>> UserAccountDetails()
-        //{
-        //    try
-        //    {
-        //        int userID;
-        //        if (_httpContextAccessor.HttpContext == null)
-        //        {
-        //            return new List<AccountDetails>();
-        //        }
-
-        //        userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
-
-        //        var getAcctList = new List<AccountDetails>();
-                
-        //        var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
+                var dollarCurrencyCharge = await _context.Currencies.Where(x => x.Currencies == "USD").Select(x => x.CurrencyCharge).FirstOrDefaultAsync();
+                var euroCurrencyCharge = await _context.Currencies.Where(x => x.Currencies == "EUR").Select(x => x.CurrencyCharge).FirstOrDefaultAsync();
+                var poundsCurrencyCharge = await _context.Currencies.Where(x => x.Currencies == "GBP").Select(x => x.CurrencyCharge).FirstOrDefaultAsync();
 
 
-        //        foreach (var item in acctData)
-        //        {
-        //            var accountDetails = new AccountDetails()
-        //            {
-        //                AccountNumber = item.AccountNumber,
-        //                Balance = item.Balance,
-        //                Currency = item.Currency,
-        //            };
-        //            getAcctList.Add(accountDetails);
-        //        }
+                currencyCharge.status = true;
+                currencyCharge.dollar = dollarCurrencyCharge;
+                currencyCharge.euro = euroCurrencyCharge;
+                currencyCharge.pounds = poundsCurrencyCharge;
+                return currencyCharge;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return currencyCharge;
+            }
+        }
 
-        //        var userAcctDetails = await _context.Accounts
-        //                            .Where(x => x.UserId == userID)
-        //                            .Select(x => new AccountDetailsModel
-        //                            {
-        //                                AccountDetails = getAcctList
-        //                            }).ToListAsync();
+        public async Task<List<AccountDetails>> UserAccountDetails()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new List<AccountDetails>();
+                }
 
-        //        if (userAcctDetails == null) return new List<AccountDetails>();
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
 
-        //        return getAcctList;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-        //        return new List<AccountDetails>();
-        //    }
-        //}
+                var getAcctList = new List<AccountDetails>();
+
+                var acctData = await _context.Accounts.Where(x => x.UserId == userID).ToListAsync();
+
+
+                foreach (var item in acctData)
+                {
+                    var accountDetails = new AccountDetails()
+                    {
+                        AccountNumber = item.AccountNumber,
+                        Balance = item.Balance,
+                        Currency = item.Currency,
+                    };
+                    getAcctList.Add(accountDetails);
+                }
+
+                var userAcctDetails = await _context.Accounts
+                                    .Where(x => x.UserId == userID)
+                                    .Select(x => new AccountDetailsModel
+                                    {
+                                        AccountDetails = getAcctList
+                                    }).ToListAsync();
+
+                if (userAcctDetails == null) return new List<AccountDetails>();
+
+                return getAcctList;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return new List<AccountDetails>();
+            }
+        }
 
 
 

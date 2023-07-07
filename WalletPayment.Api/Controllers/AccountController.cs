@@ -40,19 +40,19 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("UserAccountDetails"), Authorize]
-        //public async Task<IActionResult> UserAccountDetails()
-        //{
-        //    var result = await _accountService.UserAccountDetails();
-        //    return Ok(result);
-        //}
+        [HttpGet("UserAccountDetails"), Authorize]
+        public async Task<IActionResult> UserAccountDetails()
+        {
+            var result = await _accountService.UserAccountDetails();
+            return Ok(result);
+        }
 
-        //[HttpGet("GetCurrencyCharges"), Authorize]
-        //public async Task<IActionResult> GetCurrencyCharges()
-        //{
-        //    var result = await _accountService.GetCurrencyCharges();
-        //    return Ok(result);
-        //}
+        [HttpGet("GetCurrencyCharges"), Authorize]
+        public async Task<IActionResult> GetCurrencyCharges()
+        {
+            var result = await _accountService.GetCurrencyCharges();
+            return Ok(result);
+        }
 
 
     }
