@@ -14,6 +14,10 @@ namespace WalletPayment.Models.Entites
         [Column(TypeName = "varchar(50)")]
         public string Username { get; set; } = string.Empty;
 
+        [Column(TypeName = "varchar(20)")]
+        public string Role { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+
         public byte[]? PasswordHash { get; set; }
 
         public byte[]? PasswordSalt { get; set; }

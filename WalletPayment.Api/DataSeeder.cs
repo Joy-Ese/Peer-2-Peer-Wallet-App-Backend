@@ -43,18 +43,20 @@ namespace WalletPayment.Api
                     }
 
 
-                    if (!_context.Admins.Any())
+                    if (!_context.Adminss.Any())
                     {
                         AuthService.CreatePasswordHash("Admin12345", out byte[] passwordHash, out byte[] passwordSalt);
 
-                        var adminCreatedOnAppStart = new Admin()
+                        var adminCreatedOnAppStart = new Admins()
                         {
-                            Username = "GlobusWalletAdmin",
+                            Username = "SuperAdmin1",
+                            Role = "SuperAdmin",
+                            Email = "joyeseihama@gmail.com",
                             PasswordHash = passwordHash,
                             PasswordSalt = passwordSalt,
                         };
 
-                        _context.Admins.AddRange(adminCreatedOnAppStart);
+                        _context.Adminss.AddRange(adminCreatedOnAppStart);
                         _context.SaveChanges();
                     }
                 }

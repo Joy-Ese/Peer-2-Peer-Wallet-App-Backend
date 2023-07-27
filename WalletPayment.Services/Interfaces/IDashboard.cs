@@ -27,8 +27,16 @@ namespace WalletPayment.Services.Interfaces
         Task<bool> GetUserPin();
         Task<bool> DoesUserHaveImage();
         Task<bool> NoSecurityAttemptsLeft();
-        Task<KycRequestViewModel> KycValidation(List<IFormFile> fileData);
+        Task<KycViewModel> KycUpload(IFormFile fileData);
+        Task<KycViewModel> KycReUpload(IFormFile fileData);
+        Task<List<UserInfoOnKycUploadsForAdminModel>> GetUserInfoOnKycUploadsForAdmin();
+        Task<List<KycAdminViewModel>> GetKycUploadsForAdmin();
+        Task<KycViewModel> RemoveImage(string filename, string userId);
+        Task<KycViewModel> AcceptImage(string filename, string userId);
         Task<UserProfileModel> GetUserProfileLevel();
+        Task<List<AllAdminsListModel>> AllAdminsLists();
+        Task<ResponseModel> DisableEnableAdmin(DisableEnableAdminDTO req);
+        Task<bool> GetKycStatus();
     }
 }
 

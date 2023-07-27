@@ -39,6 +39,12 @@ namespace WalletPayment.Models.Entites
 
         public bool? IsUserLocked { get; set; }
 
+        [Column(TypeName = "varchar(200)")]
+        public string? LockedReason { get; set; } = string.Empty;
+
+        [Column(TypeName = "varchar(10)")]
+        public string? LockedReasonCode { get; set; } = string.Empty;
+
         public DateTime? VerifiedAt { get; set; }
 
         public string? PasswordResetToken { get; set; }
@@ -47,6 +53,7 @@ namespace WalletPayment.Models.Entites
 
         public virtual List<Account> UserAccount { get; set; }
         public virtual Image UserImage { get; set; }
+        public virtual List<KycImage> UserKycImage { get; set; }
         public virtual SecurityQuestion SecurityQuestions { get; set; }
         public virtual List<RefreshToken> RefreshTokens { get; set; }
         public virtual List<Deposit> Deposits { get; set; }

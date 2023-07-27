@@ -14,6 +14,7 @@ namespace WalletPayment.Services.Interfaces
         Task<RegisterViewModel> Register(UserSignUpDto request);
         Task<LoginViewModel> Login(UserLoginDto request);
         Task<AdminLoginViewModel> AdminLogin(AdminLoginDTO request);
+        Task<ResponseModel> ChangeAdminPassword(ChangeAdminPasswordDTO req);
         Task<CreatePinViewModel> CreatePin(CreatePinDto request);
         Task<UpdatePinViewModel> UpdatePin(UpdatePinDto request);
         Task<ForgetPasswordModel> ForgetPassword(ForgetPasswordDto emailReq);

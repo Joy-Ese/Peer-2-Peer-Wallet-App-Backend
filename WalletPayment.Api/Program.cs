@@ -32,7 +32,7 @@ try
         options.AddPolicy("NotificationClientApp",
             new CorsPolicyBuilder()
             .WithOrigins("http://localhost:4200")
-            //.WithOrigins("http://127.0.0.1:5500") 
+            .WithOrigins("http://localhost:61747")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .SetIsOriginAllowed(origin => true)
@@ -112,6 +112,8 @@ try
         var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
         dbContext.Database.Migrate();
     }
+
+    app.UseStaticFiles();
 
     app.UseCors("NotificationClientApp");
 

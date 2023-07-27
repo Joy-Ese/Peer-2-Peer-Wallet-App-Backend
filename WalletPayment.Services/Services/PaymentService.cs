@@ -131,7 +131,7 @@ namespace WalletPayment.Services.Services
 
                 var acctInfo = await _context.Accounts.Where(x => x.UserId == depositInfo.UserId && x.Currency == "NGN").FirstOrDefaultAsync();
 
-                var sysAcct = await _context.SystemAccounts.FirstOrDefaultAsync();
+                var sysAcct = await _context.SystemAccounts.Where(x => x.Currency == "NGN" && x.Id == 10).FirstOrDefaultAsync();
 
                 //var txns = await _context.Transactions.FirstOrDefaultAsync();
 
@@ -152,6 +152,7 @@ namespace WalletPayment.Services.Services
                     {
                         Reference = depositInfo.Reference,
                         Status = StatusMessage.Successful.ToString(),
+                        Currencies = depositInfo.Currency, 
                         Amount = depositInfo.Amount,
                         TranSourceAccount = null,
                         TranDestinationAccount = acctInfo.AccountNumber,
@@ -163,19 +164,39 @@ namespace WalletPayment.Services.Services
                     await _context.Transactions.AddAsync(saveDepositInTxnDb);
                 }
 
-                sysAcct.SystemBalance -= depositInfo.Amount;
+                // Paystack credits naria GL(System Account)
+                sysAcct.SystemBalance += depositInfo.Amount;
 
+                // Save "Paystack credits naria GL(System Account)" details in SystemTransactions
+                SystemTransaction paystackCreditSysAcct = new SystemTransaction
+                {
+                    Amount = depositInfo.Amount,
+                    Narration = $"Paystack credited {sysAcct.Name} GL with {depositInfo.Amount}",
+                    ConversionRate = null,
+                    SystemAccount = sysAcct.AccountNumber,
+                    TransactionType = "CREDIT",
+                    Date = DateTime.Now,
+                    WalletAccountUserId = depositInfo.UserId,
+                };
+
+                await _context.SystemTransactions.AddAsync(paystackCreditSysAcct);
+                await _context.SaveChangesAsync();
+
+
+                // Naira GL(System Account) credits user's naira account
+                sysAcct.SystemBalance -= depositInfo.Amount;
                 var newBalance = acctInfo.Balance + depositInfo.Amount;
                 acctInfo.Balance = newBalance;
                 await _context.SaveChangesAsync();
 
-                // Save details in SystemTransactions
+                // Save "Naira GL(System Account) credits user's naira account" details in SystemTransactions
                 SystemTransaction saveSysAcctTxn = new SystemTransaction
                 {
-                    Status = StatusMessage.Successful.ToString(),
                     Amount = depositInfo.Amount,
-                    Narration = $"Funded {depositInfo.User.Username} naira wallet with {depositInfo.Amount}",
-                    WalletUserAccount = acctInfo.AccountNumber,
+                    Narration = $"Funded {depositInfo.User.Username} {depositInfo.Currency} wallet with {depositInfo.Amount}",
+                    ConversionRate = null,
+                    SystemAccount = sysAcct.AccountNumber,
+                    TransactionType = "DEBIT",
                     Date = DateTime.Now,
                     WalletAccountUserId = depositInfo.UserId,
                 };
@@ -189,8 +210,10 @@ namespace WalletPayment.Services.Services
                 var selfAmount = depositInfo.Amount.ToString();
                 var selfBalance = newBalance.ToString();
                 var date3 = depositInfo.Date.ToLongDateString();
+                var currency = "NGN";
+                var acctNum = acctInfo.AccountNumber;
 
-                await _emailService.SendDepositEmail(selfEmail, selfName, selfAmount, selfBalance, date3);
+                _emailService.SendDepositEmail(selfEmail, selfName, selfAmount, selfBalance, date3, currency, acctNum);
 
                 return webHookEventViewModel;
             }

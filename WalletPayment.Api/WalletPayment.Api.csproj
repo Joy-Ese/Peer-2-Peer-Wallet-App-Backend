@@ -41,4 +41,9 @@
     <ProjectReference Include="..\WalletPayment.Validation\WalletPayment.Validation.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\KycUploads\GovtIssued\" />
+    <Folder Include="wwwroot\KycUploads\common\" />
+  </ItemGroup>
+
 </Project>

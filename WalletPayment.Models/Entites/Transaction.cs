@@ -7,6 +7,7 @@ namespace WalletPayment.Models.Entites
         public int Id { get; set; }
         public string Reference { get; set; }
         public string Status { get; set; } = string.Empty;
+        public string Currencies { get; set; } = string.Empty;
         public decimal Amount { get; set; }
 
         [Column(TypeName = "varchar(50)")]

@@ -10,6 +10,12 @@ using WalletPayment.Models.Entites;
 
 namespace WalletPayment.Models.DataObjects
 {
+    public class ResponseModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
     public class ImageRequestViewModel
     {
         public bool status { get; set; }
@@ -115,7 +121,8 @@ namespace WalletPayment.Models.DataObjects
     {
         public string firstName { get; set; } = string.Empty;
         public string lastName { get; set; } = string.Empty;
-        public List<AccountDetails> accountDetails { get; set; }
+        public string acctNum { get; set; } = string.Empty;
+        //public List<AccountDetails> accountDetails { get; set; }
         public bool status { get; set; }
     }
 
@@ -174,13 +181,6 @@ namespace WalletPayment.Models.DataObjects
     public class UserAcctCurrencyModel
     {
         public List<AccountDetails> AccountDetails { get; set; }
-    }
-
-    public class EmailDto
-    {
-        public string to { get; set; } = string.Empty;
-        public string body { get; set; } = string.Empty;
-        public string subject { get; set; } = string.Empty;
     }
 
     public class ForgetPasswordDto
@@ -346,7 +346,9 @@ namespace WalletPayment.Models.DataObjects
 
     public class CreateAdminDTO
     {
-        public string password { get; set; } = string.Empty;
+        public string username { get; set; } = string.Empty;
+        public string role { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
     }
 
     public class AdminLoginDTO
@@ -358,21 +360,39 @@ namespace WalletPayment.Models.DataObjects
     public class AdminLoginViewModel
     {
         public bool status { get; set; }
-        public bool isAdmin { get; set; }
+        public bool isSecure { get; set; }
         public string result { get; set; } = string.Empty;
         public string adminUsername { get; set; } = string.Empty;
+        public string role { get; set; } = string.Empty;
         public string adminRefreshedToken { get; set; } = string.Empty;
     }
 
-    public class KycRequestViewModel
+    public class ChangeAdminPasswordDTO 
+    {
+        public string password { get; set; } = string.Empty;
+        public string confirmPassword { get; set; } = string.Empty;
+    }
+
+    public class KycViewModel
     {
         public bool status { get; set; }
         public string message { get; set; } = string.Empty;
     }
 
-    public class KycRequestDTO
+    public class KycAdminViewModel
     {
-        public List<IFormFile> KycDetails { get; set; }
+        public string image { get; set; } = string.Empty;
+        public string filename { get; set; } = string.Empty;
+        public string kycUploader { get; set; } = string.Empty;
+        public int userId { get; set; }
+        public bool isAccepted { get; set; }
+        public DateTime timeUploaded { get; set; }
+    }
+
+    public class UserInfoOnKycUploadsForAdminModel
+    {
+        public string firstname { get; set; } = string.Empty;
+        public string lastname { get; set; } = string.Empty;
     }
 
     public class UserProfileModel
@@ -411,7 +431,155 @@ namespace WalletPayment.Models.DataObjects
         public string currency { get; set; } = string.Empty;
     }
 
+    public class CreateSystemAccountsModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
 
+    public class CreateSystemAccountsDTO
+    {
+        public string currency { get; set; } = string.Empty;
+        public string name { get; set; } = string.Empty;
+    }
+
+    public class UpdateChargeOrRateDTO
+    {
+        public string currency { get; set; } = string.Empty;
+        public string action { get; set; } = string.Empty;
+        public decimal amount { get; set; }
+    }
+
+    public class UpdateChargeOrRateModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class GetNotificationModel
+    {
+        public int id { get; set; }
+        public string username { get; set; } = string.Empty;
+        public string heading { get; set; } = string.Empty;
+        public string summary { get; set; } = string.Empty;
+        public DateTime date { get; set; } 
+        public bool isRead { get; set; }
+    }
+
+    public class GetUnreadNotificationDTO
+    {
+        public int id { get; set; } 
+    }
+
+    public class GetUnreadNotificationModel
+    {
+        public int id { get; set; }
+        public string heading { get; set; } = string.Empty;
+    }
+
+    public class GetAllUnreadNotificationsNoModel
+    {
+        public int allNotifications { get; set; }
+    }
+
+    public class FundWalletDTO
+    {
+        public string currency { get; set; } = string.Empty;
+        public decimal amount { get; set; }
+    }
+
+    public class FundWalletModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class NairaBalModel
+    {
+        public decimal nairaBal { get; set; }
+    }
+
+    public class UserDataForAdminModel
+    {
+        public bool status { get; set; }
+        public int verified { get; set; }
+        public int unVerified { get; set; }
+        public int locked { get; set; }
+        public int unLocked { get; set; }
+    }
+
+    public class AdminDashboardViewModel
+    {
+        public string Username { get; set; } = string.Empty;
+    }
+
+    public class SystemAccountDetailsModel
+    {
+        public List<SystemAccountDetails> AccountDetails { get; set; }
+    }
+
+    public class SystemTransactionListModel
+    {
+        public decimal amount { get; set; }
+        public string narration { get; set; } = string.Empty;
+        public string systAccountNumber { get; set; } = string.Empty;
+        public string transactionType { get; set; } = string.Empty;
+        public decimal? rate { get; set; }
+        public DateTime date { get; set; }
+    }
+
+    public class SystemAccountDetails
+    {
+        public string Name { get; set; } = string.Empty;
+        public string AccountNumber { get; set; } = string.Empty;
+        public decimal Balance { get; set; }
+        public string Currency { get; set; } = string.Empty;
+    }
+
+    public class SendMoneyCheckModel
+    {
+        public string senderAccountNumber { get; set; } = string.Empty;
+    }
+
+    public class SendMoneyCheckDTO
+    {
+        public string currency { get; set; } = string.Empty;
+    }
+
+    public class LockOrUnlockUsersDTO
+    {
+        public string username { get; set; } = string.Empty;
+        public string action { get; set; } = string.Empty;
+        public string code { get; set; } = string.Empty;
+        public string reason { get; set; } = string.Empty;
+    }
+
+    public class LockOrUnlockUsersModel
+    {
+        public bool status { get; set; }
+        public string message { get; set; } = string.Empty;
+    }
+
+    public class LockedUsersListModel
+    {
+        public string username { get; set; } = string.Empty;
+        public string reason { get; set; } = string.Empty;
+        public string code { get; set; } = string.Empty;
+    }
+
+    public class DisableEnableAdminDTO
+    {
+        public int id { get; set; }
+    }
+
+    public class AllAdminsListModel
+    {
+        public string username { get; set; } = string.Empty;
+        public string role { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
+        public bool isDisabled { get; set; }
+        public int id { get; set; }
+    }
 
 
 

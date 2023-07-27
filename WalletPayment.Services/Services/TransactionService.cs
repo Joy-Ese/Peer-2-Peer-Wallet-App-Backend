@@ -83,6 +83,12 @@ namespace WalletPayment.Services.Services
                     return transactionResponse;
                 }
 
+                if (sourceAccountData.Currency != destinationAccountData.Currency)
+                {
+                    transactionResponse.responseMessage = "You can't transfer between different currencies";
+                    return transactionResponse;
+                }
+
                 if (sourceAccountData.Balance < request.amount)
                 {
                     transactionResponse.responseMessage = "Insufficient Funds";
@@ -109,6 +115,7 @@ namespace WalletPayment.Services.Services
                 transaction.SourceAccountUserId = userLoggedInDetails.Id;
                 transaction.DestinationAccountUserId = destinationAccountData.User.Id;
                 transaction.Status = StatusMessage.Successful.ToString();
+                transaction.Currencies = sourceAccountData.Currency;
 
                 await _context.Transactions.AddAsync(transaction);
                 await _context.SaveChangesAsync();
@@ -117,7 +124,7 @@ namespace WalletPayment.Services.Services
                 var senderName = $"{sourceAccountData.User.FirstName} {sourceAccountData.User.LastName}";
                 var receiverID = destinationAccountData.User.Id;
                 var moneySent = transaction.Amount.ToString();
-                var moneySentCurrency = "NGN";
+                var moneySentCurrency = sourceAccountData.Currency;
                 await _notificationService.SendTransferNotification(receiverID, moneySentCurrency, moneySent, senderName);
 
                 // Debit Email information
@@ -127,6 +134,8 @@ namespace WalletPayment.Services.Services
                 var balance2 = sourceAccountData.Balance.ToString();
                 var date2 = transaction.Date.ToLongDateString();
                 var username2 = destinationAccountData.User.Username;
+                var currency2 = sourceAccountData.Currency;
+                var acctNum2 = sourceAccountData.AccountNumber;
 
                 // Credit Email information
                 var recepientEmail = destinationAccountData.User.Email;
@@ -135,9 +144,11 @@ namespace WalletPayment.Services.Services
                 var balance = destinationAccountData.Balance.ToString();
                 var date = transaction.Date.ToLongDateString();
                 var username = sourceAccountData.User.Username;
+                var currency = sourceAccountData.Currency;
+                var acctNum = destinationAccountData.AccountNumber;
 
-                await _emailService.SendDebitEmail(senderEmail, sender, amount2, balance2, date2, username2);
-                await _emailService.SendCreditEmail(recepientEmail, recipient, amount, balance, date, username);
+                _emailService.SendDebitEmail(senderEmail, sender, amount2, balance2, date2, username2, currency2, acctNum2);
+                _emailService.SendCreditEmail(recepientEmail, recipient, amount, balance, date, username, currency, acctNum);
 
                 dbTransaction.Commit();
 
@@ -172,26 +183,68 @@ namespace WalletPayment.Services.Services
                 var loggedInUser = await _context.Accounts.Include("User").Where(senderID => senderID.UserId == userID).FirstOrDefaultAsync();
 
                 var userTranList = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
-                            .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber 
-                            || txn.TranSourceAccount == loggedInUser.AccountNumber).ToListAsync();
+                            .Where(txn => txn.DestinationAccountUserId == userID 
+                            || txn.SourceAccountUserId == userID).ToListAsync();
 
                 foreach (var txn in userTranList)
                 {
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
                     {
                         transactionsCreditList.Add(new TransactionListModel
                         {
                             amount = txn.Amount,
-                            senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
-                            recepientInfo = "Create Wallet",
-                            transactionType = "DEBIT",
-                            currency = "NGN",
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = txn.Currencies,
                             status = txn.Status,
                             date = txn.Date,
                         });
                     }
 
-                    if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies != "NGN")
+                    {
+                        transactionsCreditList.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "DEBIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+                    ////////////////////////////////
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
+                    {
+                        transactionsCreditList.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
+                            recepientInfo = $"{txn.Currencies}Credits",
+                            transactionType = "CREDIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+                    ///////////////////////////////////////////////////////////////////////////
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId == null && txn.Currencies == "NGN")
+                    {
+                        transactionsCreditList.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
+                            recepientInfo = "NGNDebits",
+                            transactionType = "DEBIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         transactionsCreditList.Add(new TransactionListModel
                         {
@@ -199,13 +252,13 @@ namespace WalletPayment.Services.Services
                             senderInfo = "P2P Wallet",
                             recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
                             transactionType = "CREDIT",
-                            currency = "NGN",
+                            currency = txn.Currencies,
                             status = txn.Status,
                             date = txn.Date,
                         });
                     }
 
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         transactionsCreditList.Add(new TransactionListModel
                         {
@@ -213,13 +266,13 @@ namespace WalletPayment.Services.Services
                             senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
                             recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
                             transactionType = "CREDIT",
-                            currency = "NGN",
+                            currency = txn.Currencies,
                             status = txn.Status,
                             date = txn.Date,
                         });
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies == "NGN")
                     {
                         transactionsCreditList.Add(new TransactionListModel
                         {
@@ -227,7 +280,7 @@ namespace WalletPayment.Services.Services
                             senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
                             recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
                             transactionType = "DEBIT",
-                            currency = "NGN",
+                            currency = txn.Currencies,
                             status = txn.Status,
                             date = txn.Date,
                         });
@@ -264,20 +317,61 @@ namespace WalletPayment.Services.Services
                 var loggedInUser = await _context.Accounts.Include("User").Where(senderID => senderID.UserId == userID).FirstOrDefaultAsync();
 
                 var last3Txns = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
-                                .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber
-                                || txn.TranSourceAccount == loggedInUser.AccountNumber)
-                                .OrderByDescending(txn => txn.Id).Take(3).ToListAsync();
+                                .Where(txn => txn.DestinationAccountUserId == userID
+                                || txn.SourceAccountUserId == userID).OrderByDescending(x => x.Date).Take(3).ToListAsync();
 
 
                 foreach (var txn in last3Txns)
                 {
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
+                    {
+                        getLastThreeTxns.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies != "NGN")
+                    {
+                        getLastThreeTxns.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "DEBIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+                    ////////////////////////////////
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
                     {
                         getLastThreeTxns.Add(new TransactionListModel
                         {
                             amount = txn.Amount,
                             senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
-                            recepientInfo = "Create Wallet",
+                            recepientInfo = $"{txn.Currencies}Credits",
+                            transactionType = "CREDIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+                    ///////////////////////////////////////////////////////////////////////////
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId == null && txn.Currencies == "NGN")
+                    {
+                        getLastThreeTxns.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
+                            recepientInfo = "NGNDebits",
                             transactionType = "DEBIT",
                             currency = "NGN",
                             status = txn.Status,
@@ -285,7 +379,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         getLastThreeTxns.Add(new TransactionListModel
                         {
@@ -299,7 +393,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         getLastThreeTxns.Add(new TransactionListModel
                         {
@@ -313,7 +407,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies == "NGN")
                     {
                         getLastThreeTxns.Add(new TransactionListModel
                         {
@@ -362,21 +456,62 @@ namespace WalletPayment.Services.Services
                 endDate = endDate.AddDays(1);
 
                 var txnsRange = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
-                               .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber
-                                || txn.TranSourceAccount == loggedInUser.AccountNumber)
-                               .ToListAsync();
+                                .Where(txn => txn.DestinationAccountUserId == userID
+                                || txn.SourceAccountUserId == userID).ToListAsync();
 
                 var allRange = txnsRange.Where(txn => txn.Date >= startDate && txn.Date <= endDate).ToList();
 
                 foreach (var txn in allRange)
                 {
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
+                    {
+                        txnsByDate.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "CREDIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies != "NGN")
+                    {
+                        txnsByDate.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}",
+                            recepientInfo = $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}",
+                            transactionType = "DEBIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+                    ////////////////////////////////
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
                     {
                         txnsByDate.Add(new TransactionListModel
                         {
                             amount = txn.Amount,
                             senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
-                            recepientInfo = "Create Wallet",
+                            recepientInfo = $"{txn.Currencies}Credits",
+                            transactionType = "CREDIT",
+                            currency = txn.Currencies,
+                            status = txn.Status,
+                            date = txn.Date,
+                        });
+                    }
+                    ///////////////////////////////////////////////////////////////////////////
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId == null && txn.Currencies == "NGN")
+                    {
+                        txnsByDate.Add(new TransactionListModel
+                        {
+                            amount = txn.Amount,
+                            senderInfo = $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}",
+                            recepientInfo = "NGNDebits",
                             transactionType = "DEBIT",
                             currency = "NGN",
                             status = txn.Status,
@@ -384,7 +519,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         txnsByDate.Add(new TransactionListModel
                         {
@@ -398,7 +533,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         txnsByDate.Add(new TransactionListModel
                         {
@@ -412,7 +547,7 @@ namespace WalletPayment.Services.Services
                         });
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies == "NGN")
                     {
                         txnsByDate.Add(new TransactionListModel
                         {
@@ -441,7 +576,6 @@ namespace WalletPayment.Services.Services
         public async Task<CreateStatementViewModel> GeneratePDFStatement(CreateStatementRequestDTO request)
         {
             CreateStatementViewModel createPDFViewModel = new CreateStatementViewModel();
-            //List<TransactionListModel> txnsByDate = new List<TransactionListModel>();
             try
             {
                 int userID;
@@ -454,24 +588,38 @@ namespace WalletPayment.Services.Services
 
                 var txnType = "";
 
-                var loggedInUser = await _context.Accounts.Include("User").Where(x => x.UserId == userID).FirstOrDefaultAsync();
+                var userLoggedIn = await _context.Users.Where(x => x.Id == userID).FirstOrDefaultAsync();
 
                 var startDate = Convert.ToDateTime(request.startDate);
                 var endDate = Convert.ToDateTime(request.endDate);
 
                 endDate = endDate.AddDays(1);
 
-                var currencyType = await _context.Accounts.Where(x => x.UserId == userID).Select(x => x.Currency).FirstOrDefaultAsync();
-
                 var txnsRange = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
-                               .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber
-                                || txn.TranSourceAccount == loggedInUser.AccountNumber)
-                               .ToListAsync();
+                                .Where(txn => txn.DestinationAccountUserId == userID
+                                || txn.SourceAccountUserId == userID).ToListAsync();
 
                 var allRange = txnsRange.Where(txn => txn.Date >= startDate && txn.Date <= endDate 
-                && currencyType == request.accountCurrency).ToList();
+                && txn.Currencies == request.accountCurrency).ToList();
 
-                CultureInfo culture = new CultureInfo("ig-NG");
+                CultureInfo culture = new CultureInfo("");
+
+                if (request.accountCurrency == "NGN")
+                {
+                    culture = new CultureInfo("ig-NG");
+                }
+                if (request.accountCurrency == "USD")
+                {
+                    culture = new CultureInfo("en-US");
+                }
+                if (request.accountCurrency == "EUR")
+                {
+                    culture = new CultureInfo("eu-ES");
+                }
+                if (request.accountCurrency == "GBP")
+                {
+                    culture = new CultureInfo("en-GB");
+                }
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////
                 // String builder
@@ -518,6 +666,14 @@ namespace WalletPayment.Services.Services
                                   <td>Total Credit</td>
                                   <td>{TotalCredit}</td>
                                 </tr>
+                                <tr>
+                                  <td class='toWhite'>Opening Balance</td>
+                                  <td class='toWhite'>{OpeningBalance}</td>
+                                </tr>
+                                <tr>
+                                  <td>Closing Balance</td>
+                                  <td>{ClosingBalance}</td>
+                                </tr>
                               </table>
                             </div>
                           </div>
@@ -538,15 +694,63 @@ namespace WalletPayment.Services.Services
                             </thead>");
                 foreach (var txn in allRange)
                 {
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
+                    {
+                        sb.AppendFormat(@$"
+                            <tbody>
+                              <tr>
+                               <td>{txn.Amount.ToString("C", culture)}</td>
+                               <td>{txn.SourceUser.FirstName}-{txn.TranSourceAccount}</td>
+                               <td>{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}</td>
+                               <td class='crediT'>CREDIT</td>
+                               <td>{txn.Currencies}</td>
+                               <td>{txn.Status}</td>
+                               <td>{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}</td>
+                              </tr>
+                            </tbody>");
+                    }
+
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies != "NGN")
+                    {
+                        sb.AppendFormat(@$"
+                            <tbody>
+                              <tr>
+                               <td>{txn.Amount.ToString("C", culture)}</td>
+                               <td>{txn.SourceUser.FirstName}-{txn.TranSourceAccount}</td>
+                               <td>{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}</td>
+                               <td class='debiT'>DEBIT</td>
+                               <td>{txn.Currencies}</td>
+                               <td>{txn.Status}</td>
+                               <td>{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}</td>
+                              </tr>
+                            </tbody>");
+                    }
+                    ////////////////////////////////
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
+                    {
+                        sb.AppendFormat(@$"
+                            <tbody>
+                              <tr>
+                               <td>{txn.Amount.ToString("C", culture)}</td>
+                               <td>{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}</td>
+                               <td>{txn.Currencies}Credits</td>
+                               <td class='crediT'>CREDIT</td>
+                               <td>{request.accountCurrency}</td>
+                               <td>{txn.Status}</td>
+                               <td>{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}</td>
+                              </tr>
+                            </tbody>");
+                    }
+                    ///////////////////////////////////////////////////////////////////////////
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId == null && txn.Currencies == "NGN")
                     {
                        sb.AppendFormat(@$"
                             <tbody>
                               <tr>
                                <td>{txn.Amount.ToString("C", culture)}</td>
-                               <td>{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}</td>
-                               <td>Create Wallet</td>
-                               <td class='crediT'>DEBIT</td>
+                               <td>{txn.SourceUser.FirstName}-{txn.TranSourceAccount}</td>
+                               <td>NGNDebits</td>
+                               <td class='debiT'>DEBIT</td>
                                <td>{request.accountCurrency}</td>
                                <td>{txn.Status}</td>
                                <td>{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}</td>
@@ -554,7 +758,7 @@ namespace WalletPayment.Services.Services
                             </tbody>");
                     }
 
-                    if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         sb.AppendFormat(@$"
                             <tbody>
@@ -570,7 +774,7 @@ namespace WalletPayment.Services.Services
                             </tbody>");
                     }
 
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         sb.AppendFormat(@$"
                             <tbody>
@@ -586,7 +790,7 @@ namespace WalletPayment.Services.Services
                             </tbody>");
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies == "NGN")
                     {
                         sb.AppendFormat(@$"
                             <tbody>
@@ -614,13 +818,45 @@ namespace WalletPayment.Services.Services
 
                 var refNO = DateTime.Now.ToString("yyyyMMddHHff");
 
+                var getAcct = await _context.Accounts.Where(x => x.UserId == userID && x.Currency == request.accountCurrency).FirstOrDefaultAsync();
+
                 // Info to find and replace
                 var dateTime = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
-                var acctNO = loggedInUser.AccountNumber;
+                var acctNO = getAcct.AccountNumber;
                 var reference = $"REF-{refNO}";
-                var totalCr = await _context.Transactions.Where(x => x.TranDestinationAccount == loggedInUser.AccountNumber).Select(x => x.Amount).SumAsync();
-                var totalDr = await _context.Transactions.Where(x => x.TranSourceAccount == loggedInUser.AccountNumber).Select(x => x.Amount).SumAsync();
-                var name = $"{loggedInUser.User.FirstName} {loggedInUser.User.LastName}";
+                var totalCr = await _context.Transactions.Where(x => x.DestinationAccountUserId == userID && x.Currencies == request.accountCurrency).Select(x => x.Amount).SumAsync();
+                var totalDr = await _context.Transactions.Where(x => x.SourceAccountUserId == userID && x.Currencies == request.accountCurrency).Select(x => x.Amount).SumAsync();
+                var name = $"{userLoggedIn.FirstName} {userLoggedIn.LastName}";
+
+                // Get opening and closing bal
+                decimal tlDebit = 0;
+                decimal tlCredit = 0;
+                var currentMonth = DateTime.Now.Month;
+                var currentYear = DateTime.Now.Year;
+                var opnStartDate = new DateTime(currentYear, currentMonth, 1);
+                var opnClosingDate = new DateTime(currentYear, currentMonth + 1, 1);
+
+                var txnsOpenRange = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
+                                .Where(txn => txn.DestinationAccountUserId == userID
+                                || txn.SourceAccountUserId == userID).ToListAsync();
+
+                var allOpenRange = txnsOpenRange.Where(txn => txn.Date >= opnStartDate && txn.Date <= opnClosingDate
+                && txn.Currencies == request.accountCurrency).ToList();
+
+                foreach (var txn in allOpenRange)
+                {
+                    if (txn.SourceAccountUserId == userID)
+                    {
+                        tlDebit += txn.Amount;
+                        continue;
+                    }
+                    tlCredit += txn.Amount;
+                }
+
+
+                var closingBal = getAcct.Balance;
+                var openingBal = closingBal + totalDr - totalCr;
+                
                 /////////////////////////////////////////////////////////////////////////////////////////////
 
                 sb.Replace("{StartDate}", request.startDate);
@@ -630,10 +866,14 @@ namespace WalletPayment.Services.Services
                 sb.Replace("{Reference}", reference);
                 sb.Replace("{TotalDebit}", totalDr.ToString("C", culture));
                 sb.Replace("{TotalCredit}", totalCr.ToString("C", culture));
+                //
+                sb.Replace("{OpeningBalance}", openingBal.ToString("C", culture));
+                sb.Replace("{ClosingBalance}", closingBal.ToString("C", culture));
+                //
                 sb.Replace("{Name}", name);
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////
-                var statementName = $"{loggedInUser.User.Username}";
+                var statementName = $"{userLoggedIn.Username}";
                 var globalSettings = new GlobalSettings
                 {
                     ColorMode = ColorMode.Color,
@@ -678,8 +918,9 @@ namespace WalletPayment.Services.Services
 
                 ///////////////////////////////////////////////////////////////////////////////////////////////
                 // Send pdf to user email
-                var userName = loggedInUser.User.Username;
-                var userEmail = loggedInUser.User.Email;
+                var userName = userLoggedIn.Username;
+                var userEmail = userLoggedIn.Email;
+                var currencyEmail = request.accountCurrency;
 
                 IFormFile formFileAttachment = new FormFile(copiedStream, 0, copiedStream.Length, null, $"{statementName}_GlobusWallet_Statement.pdf")
                 {
@@ -687,9 +928,9 @@ namespace WalletPayment.Services.Services
                     ContentType = "application/pdf"
                 };
 
-                var result = await _emailService.SendStatementAsAttachment(userName, userEmail, formFileAttachment, "PDF");
+                var result = _emailService.SendStatementAsAttachment(userName, userEmail, currencyEmail, formFileAttachment, "PDF");
 
-                if (result == false)
+                if (result == null)
                 {
                     createPDFViewModel.status = false;
                     createPDFViewModel.message = "An error occured. Could not send to email!";
@@ -711,14 +952,12 @@ namespace WalletPayment.Services.Services
             }
         }
 
-
         private void CreateCell(IRow CurrentRow, int CellIndex, string Value, HSSFCellStyle Style)
         {
             ICell Cell = CurrentRow.CreateCell(CellIndex);
             Cell.SetCellValue(Value);
             Cell.CellStyle = Style;
         }
-
 
         public async Task<CreateStatementViewModel> GenerateExcelStatement(CreateStatementRequestDTO request)
         {
@@ -735,24 +974,39 @@ namespace WalletPayment.Services.Services
 
                 var txnType = "";
 
-                var loggedInUser = await _context.Accounts.Include("User").Where(x => x.UserId == userID).FirstOrDefaultAsync();
+                var userLoggedIn = await _context.Users.Where(x => x.Id == userID).FirstOrDefaultAsync();
 
                 var startDate = Convert.ToDateTime(request.startDate);
                 var endDate = Convert.ToDateTime(request.endDate);
 
                 endDate = endDate.AddDays(1);
 
-                var currencyType = await _context.Accounts.Where(x => x.UserId == userID).Select(x => x.Currency).FirstOrDefaultAsync();
-
                 var txnsRange = await _context.Transactions.Include("SourceUser").Include("DestinationUser")
-                               .Where(txn => txn.TranDestinationAccount == loggedInUser.AccountNumber
-                                || txn.TranSourceAccount == loggedInUser.AccountNumber)
-                               .ToListAsync();
+                                .Where(txn => txn.DestinationAccountUserId == userID
+                                || txn.SourceAccountUserId == userID).ToListAsync();
 
                 var allRange = txnsRange.Where(txn => txn.Date >= startDate && txn.Date <= endDate
-                && currencyType == request.accountCurrency).ToList();
+                && txn.Currencies == request.accountCurrency).ToList();
 
-                CultureInfo culture = new CultureInfo("ig-NG");
+
+                CultureInfo culture = new CultureInfo("");
+
+                if (request.accountCurrency == "NGN")
+                {
+                    culture = new CultureInfo("ig-NG");
+                }
+                if (request.accountCurrency == "USD")
+                {
+                    culture = new CultureInfo("en-US");
+                }
+                if (request.accountCurrency == "EUR")
+                {
+                    culture = new CultureInfo("eu-ES");
+                }
+                if (request.accountCurrency == "GBP")
+                {
+                    culture = new CultureInfo("en-GB");
+                }
 
                 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -764,7 +1018,7 @@ namespace WalletPayment.Services.Services
 
 
                 
-                var statementName = $"{loggedInUser.User.Username}";
+                var statementName = $"{userLoggedIn.Username}";
 
                 ISheet sheet = workbook.CreateSheet($"{statementName}_GlobusWallet_Sheet1");
 
@@ -798,19 +1052,55 @@ namespace WalletPayment.Services.Services
 
                 foreach (var txn in allRange)
                 {
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == null)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
                     {
                         IRow dataRow = sheet.CreateRow(rowIncr++);
                         CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
-                        CreateCell(dataRow, 1, $"{loggedInUser.User.FirstName}-{loggedInUser.AccountNumber}", borderedCellStyle);
-                        CreateCell(dataRow, 2, "Create Wallet", borderedCellStyle);
+                        CreateCell(dataRow, 1, $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 2, $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 3, "CREDIT", borderedCellStyle);
+                        CreateCell(dataRow, 4, $"{txn.Currencies}", borderedCellStyle);
+                        CreateCell(dataRow, 5, $"{txn.Status}", borderedCellStyle);
+                        CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
+                    }
+
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies != "NGN")
+                    {
+                        IRow dataRow = sheet.CreateRow(rowIncr++);
+                        CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
+                        CreateCell(dataRow, 1, $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 2, $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 3, "DEBIT", borderedCellStyle);
+                        CreateCell(dataRow, 4, $"{txn.Currencies}", borderedCellStyle);
+                        CreateCell(dataRow, 5, $"{txn.Status}", borderedCellStyle);
+                        CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
+                    }
+                    ////////////////////////////////
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies != "NGN")
+                    {
+                        IRow dataRow = sheet.CreateRow(rowIncr++);
+                        CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
+                        CreateCell(dataRow, 1, $"{txn.DestinationUser.FirstName}-{txn.TranDestinationAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 2, $"{txn.Currencies}Credits", borderedCellStyle);
+                        CreateCell(dataRow, 3, "CREDIT", borderedCellStyle);
+                        CreateCell(dataRow, 4, $"{request.accountCurrency}", borderedCellStyle);
+                        CreateCell(dataRow, 5, $"{txn.Status}", borderedCellStyle);
+                        CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
+                    }
+                    ///////////////////////////////////////////////////////////////////////////
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId == null && txn.Currencies == "NGN")
+                    {
+                        IRow dataRow = sheet.CreateRow(rowIncr++);
+                        CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
+                        CreateCell(dataRow, 1, $"{txn.SourceUser.FirstName}-{txn.TranSourceAccount}", borderedCellStyle);
+                        CreateCell(dataRow, 2, "NGNDebits", borderedCellStyle);
                         CreateCell(dataRow, 3, "DEBIT", borderedCellStyle);
                         CreateCell(dataRow, 4, $"{request.accountCurrency}", borderedCellStyle);
                         CreateCell(dataRow, 5, $"{txn.Status}", borderedCellStyle);
                         CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
                     }
 
-                    if (txn.SourceAccountUserId == null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId == null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         IRow dataRow = sheet.CreateRow(rowIncr++);
                         CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
@@ -822,7 +1112,7 @@ namespace WalletPayment.Services.Services
                         CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
                     }
 
-                    if (txn.SourceAccountUserId != null && txn.TranDestinationAccount == loggedInUser.AccountNumber)
+                    if (txn.SourceAccountUserId != null && txn.DestinationAccountUserId == userID && txn.Currencies == "NGN")
                     {
                         IRow dataRow = sheet.CreateRow(rowIncr++);
                         CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
@@ -834,7 +1124,7 @@ namespace WalletPayment.Services.Services
                         CreateCell(dataRow, 6, $"{txn.Date.ToString("MM/dd/yyyy hh:mm tt")}", borderedCellStyle);
                     }
 
-                    if (txn.TranSourceAccount == loggedInUser.AccountNumber && txn.TranDestinationAccount != null)
+                    if (txn.SourceAccountUserId == userID && txn.DestinationAccountUserId != null && txn.Currencies == "NGN")
                     {
                         IRow dataRow = sheet.CreateRow(rowIncr++);
                         CreateCell(dataRow, 0, $"{txn.Amount.ToString("C", culture)}", borderedCellStyle);
@@ -874,8 +1164,7 @@ namespace WalletPayment.Services.Services
                 anchor.Dy2 = 500;
 
                 IPicture picture = patriarch.CreatePicture(anchor, pictureIndex);
-                picture.GetPreferredSize();
-                //picture.Resize();
+                picture.Resize(2.0, 2.0);
 
                 CellRangeAddress mergedRegion = new CellRangeAddress(0, 6, 0, 6);
                 sheet.AddMergedRegion(mergedRegion);
@@ -906,8 +1195,9 @@ namespace WalletPayment.Services.Services
 
                 /////////////////////////////////////////////////////////////////////////////////////////////////
                 //// Send Excel to user email
-                var userName = loggedInUser.User.Username;
-                var userEmail = loggedInUser.User.Email;
+                var userName = userLoggedIn.Username;
+                var userEmail = userLoggedIn.Email;
+                var currencyEmail = request.accountCurrency;
 
                 IFormFile formFileAttachment = new FormFile(copiedExcelStream, 0, copiedExcelStream.Length, null, $"{statementName}_GlobusWallet_Sheet.xls")
                 {
@@ -916,9 +1206,9 @@ namespace WalletPayment.Services.Services
                 };
 
 
-                var result = await _emailService.SendStatementAsAttachment(userName, userEmail, formFileAttachment, "EXCEL");
+                var result = _emailService.SendStatementAsAttachment(userName, userEmail, currencyEmail, formFileAttachment, "EXCEL");
 
-                if (result == false)
+                if (result == null)
                 {
                     createExcelViewModel.status = false;
                     createExcelViewModel.message = "An error occured. Could not send to email!";
@@ -938,6 +1228,46 @@ namespace WalletPayment.Services.Services
                 return createExcelViewModel;
             }
         }
+
+        public async Task<List<SystemTransactionListModel>> GetSystemTransactionList()
+        {
+            List<SystemTransactionListModel> systemTransactions = new List<SystemTransactionListModel>();
+            try
+            {
+                string getRole;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return systemTransactions;
+                }
+
+                getRole = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.Role)?.Value;
+
+                var sysTxns = await _context.SystemTransactions.ToListAsync();
+
+                foreach (var txn in sysTxns)
+                {
+                    systemTransactions.Add(new SystemTransactionListModel
+                    {
+                        amount = txn.Amount,
+                        narration = txn.Narration,
+                        systAccountNumber = txn.SystemAccount,
+                        transactionType = txn.TransactionType,
+                        rate = txn.ConversionRate,
+                        date = txn.Date,
+                    });
+                }
+
+                return systemTransactions;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                _logger.LogInformation("The error occurred at",
+                    DateTime.UtcNow.ToLongTimeString());
+                return systemTransactions;
+            }
+        }
+
 
 
     }

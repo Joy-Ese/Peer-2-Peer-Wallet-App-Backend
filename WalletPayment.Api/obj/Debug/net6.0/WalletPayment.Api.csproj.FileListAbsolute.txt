@@ -126,3 +126,4 @@ C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debu
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\System.Security.Cryptography.Xml.dll
 C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\joyihama\Documents\Projects\WalletPaymentApp\WalletPayment.Api\bin\Debug\net6.0\WalletPayment.Api.staticwebassets.runtime.json

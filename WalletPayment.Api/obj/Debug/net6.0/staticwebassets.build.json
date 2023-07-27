@@ -1,11 +1,37 @@
 {
   "Version": 1,
-  "Hash": "rdowTU4LX3VTmkT6ZopfZCnolWDfQACoZ5t7IzZKYlg=",
+  "Hash": "VaqNMPm9OX1nt5mHt4Ms5oP9w/KYKoAaMeJxnUpUSd8=",
   "Source": "WalletPayment.Api",
   "BasePath": "_content/WalletPayment.Api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "WalletPayment.Api\\wwwroot",
+      "Source": "WalletPayment.Api",
+      "ContentRoot": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Api\\wwwroot\\",
+      "BasePath": "_content/WalletPayment.Api",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Api\\wwwroot\\KycUploads\\common\\download.png",
+      "SourceId": "WalletPayment.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Api\\wwwroot\\",
+      "BasePath": "_content/WalletPayment.Api",
+      "RelativePath": "KycUploads/common/download.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\KycUploads\\common\\download.png"
+    }
+  ]
 }

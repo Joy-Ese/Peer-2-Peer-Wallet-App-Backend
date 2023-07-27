@@ -6,12 +6,14 @@ namespace WalletPayment.Models.Entites
     {
         public int Id { get; set; }
         public string Reference { get; set; }
-        public string Status { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public string Narration { get; set; } = string.Empty;
 
+        public decimal? ConversionRate { get; set; }
+
         [Column(TypeName = "varchar(50)")]
-        public string WalletUserAccount { get; set; }
+        public string SystemAccount { get; set; } = string.Empty;
+        public string TransactionType { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public int WalletAccountUserId { get; set; }
 

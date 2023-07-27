@@ -139,10 +139,45 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("KycValidation"), Authorize]
-        public async Task<IActionResult> KycValidation([FromForm] KycRequestDTO req)
+        [HttpPost("KycUpload"), Authorize]
+        public async Task<IActionResult> KycUpload([FromForm] ImageRequestDTO req)
         {
-            var result = await _dashboardService.KycValidation(req.KycDetails);
+            var result = await _dashboardService.KycUpload(req.ImageDetails);
+            return Ok(result);
+        }
+
+        [HttpPut("KycReUpload"), Authorize]
+        public async Task<IActionResult> KycReUpload([FromForm] ImageRequestDTO req)
+        {
+            var result = await _dashboardService.KycReUpload(req.ImageDetails);
+            return Ok(result);
+        }
+
+        [HttpGet("GetKycUploadsForAdmin"), Authorize]
+        public async Task<IActionResult> GetKycUploadsForAdmin()
+        {
+            var result = await _dashboardService.GetKycUploadsForAdmin();
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserInfoOnKycUploadsForAdmin"), Authorize]
+        public async Task<IActionResult> GetUserInfoOnKycUploadsForAdmin()
+        {
+            var result = await _dashboardService.GetUserInfoOnKycUploadsForAdmin();
+            return Ok(result);
+        }
+
+        [HttpPut("RemoveImage"), Authorize]
+        public async Task<IActionResult> RemoveImage(string filename, string userId)
+        {
+            var result = await _dashboardService.RemoveImage(filename, userId);
+            return Ok(result);
+        }
+
+        [HttpPut("AcceptImage"), Authorize]
+        public async Task<IActionResult> AcceptImage(string filename, string userId)
+        {
+            var result = await _dashboardService.AcceptImage(filename, userId);
             return Ok(result);
         }
 
@@ -152,6 +187,29 @@ namespace WalletPayment.Api.Controllers
             var result = await _dashboardService.GetUserProfileLevel();
             return Ok(result);
         }
+
+        [HttpGet("AllAdminsLists"), Authorize]
+        public async Task<IActionResult> AllAdminsLists()
+        {
+            var result = await _dashboardService.AllAdminsLists();
+            return Ok(result);
+        }
+
+        [HttpPut("DisableEnableAdmin"), Authorize]
+        public async Task<IActionResult> DisableEnableAdmin(DisableEnableAdminDTO req)
+        {
+            var result = await _dashboardService.DisableEnableAdmin(req);
+            return Ok(result);
+        }
+
+        [HttpGet("GetKycStatus"), Authorize]
+        public async Task<IActionResult> GetKycStatus()
+        {
+            var result = await _dashboardService.GetKycStatus();
+            return Ok(result);
+        }
+
+
 
     }
 }

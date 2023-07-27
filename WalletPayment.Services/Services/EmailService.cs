@@ -29,18 +29,18 @@ namespace WalletPayment.Services.Services
             _logger.LogDebug(1, "Nlog injected into DashboardService");
         }
 
-        public async Task<bool> SendEmail(EmailDto request, string emailUser)
+        public async Task<bool> SendEmail(string subject, string userEmail, string body)
         {
             try
             {
                 var email = new MimeMessage();
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
-                email.To.Add(new MailboxAddress("WalletUser", request.to = emailUser));
+                email.To.Add(new MailboxAddress("WalletUser", userEmail));
 
-                email.Subject = "Welcome to The Globus Wallet App";
+                email.Subject = subject;
                 email.Body = new TextPart(MimeKit.Text.TextFormat.Plain)
                 {
-                    Text = "Thank You for registering with The Globus Wallet App. Enjoy a seamless experience! \u263A \ud83c\udf81"
+                    Text = body
                 };
 
                 using (var smtp = new SmtpClient())
@@ -91,7 +91,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendEmailVerifyUser(string Link, string emailUser)
+        public async Task<bool> SendEmailVerifyUser(string Link, string emailUser, string subject)
         {
             try
             {
@@ -99,7 +99,7 @@ namespace WalletPayment.Services.Services
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
                 email.To.Add(new MailboxAddress("WalletUser", emailUser));
 
-                email.Subject = "Link to verify your email";
+                email.Subject = subject;
                 email.Body = new TextPart(MimeKit.Text.TextFormat.Plain)
                 {
                     Text = Link
@@ -122,7 +122,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendCreditEmail(string senderEmail, string recipient, string amount, string balance, string date, string username)
+        public async Task<bool> SendCreditEmail(string senderEmail, string recipient, string amount, string balance, string date, string username, string currency, string acctNum)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace WalletPayment.Services.Services
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
                 email.To.Add(new MailboxAddress("WalletUser", senderEmail));
 
-                email.Subject = $"Wallet App: NGN{amount} Credit transaction";
+                email.Subject = $"Wallet App: {currency}{amount} Credit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\CreditAlert.html");
                 if (!File.Exists(filePath))
@@ -146,6 +146,8 @@ namespace WalletPayment.Services.Services
                 mailbody = mailbody.Replace("{FirstName}", recipient);
                 mailbody = mailbody.Replace("{transtime}", date);
                 mailbody = mailbody.Replace("{Amount}", amount);
+                mailbody = mailbody.Replace("{Currency}", currency);
+                mailbody = mailbody.Replace("{AccountNumber}", acctNum);
                 mailbody = mailbody.Replace("{Username}", username);
                 mailbody = mailbody.Replace("{Balance}", balance);
 
@@ -172,7 +174,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendDebitEmail(string recepientEmail, string sender, string amount2, string balance2, string date2, string username2)
+        public async Task<bool> SendDebitEmail(string recepientEmail, string sender, string amount2, string balance2, string date2, string username2, string currency2, string acctNum2)
         {
             try
             {
@@ -180,7 +182,7 @@ namespace WalletPayment.Services.Services
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
                 email.To.Add(new MailboxAddress("WalletUser", recepientEmail));
 
-                email.Subject = $"Wallet App: NGN{amount2} Debit transaction";
+                email.Subject = $"Wallet App: {currency2}{amount2} Debit transaction";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\Wallet Payment App\\emailTemplates\\DebitAlert.html");
                 if (!File.Exists(filePath))
@@ -196,6 +198,8 @@ namespace WalletPayment.Services.Services
                 mailbody = mailbody.Replace("{FirstName}", sender);
                 mailbody = mailbody.Replace("{transtime}", date2);
                 mailbody = mailbody.Replace("{Amount}", amount2);
+                mailbody = mailbody.Replace("{Currency}", currency2);
+                mailbody = mailbody.Replace("{AccountNumber}", acctNum2);
                 mailbody = mailbody.Replace("{Username}", username2);
                 mailbody = mailbody.Replace("{Balance}", balance2);
 
@@ -222,7 +226,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendDepositEmail(string selfEmail, string selfName, string selfAmount, string selfBalance, string date3)
+        public async Task<bool> SendDepositEmail(string selfEmail, string selfName, string selfAmount, string selfBalance, string date3, string currency, string acctNum)
         {
             try
             {
@@ -246,6 +250,8 @@ namespace WalletPayment.Services.Services
                 mailbody = mailbody.Replace("{FirstName}", selfName);
                 mailbody = mailbody.Replace("{transtime}", date3);
                 mailbody = mailbody.Replace("{Amount}", selfAmount);
+                mailbody = mailbody.Replace("{Currency}", currency);
+                mailbody = mailbody.Replace("{AccountNumber}", acctNum);
                 mailbody = mailbody.Replace("{Balance}", selfBalance);
 
 
@@ -271,7 +277,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> SendStatementAsAttachment(string userName, string userEmail, IFormFile attachment, string fileType)
+        public async Task<bool> SendStatementAsAttachment(string userName, string userEmail, string currencyEmail, IFormFile attachment, string fileType)
         {
             try
             {
@@ -279,7 +285,7 @@ namespace WalletPayment.Services.Services
                 email.From.Add(new MailboxAddress("no-reply", _emailCredentials.EmailFrom));
                 email.To.Add(new MailboxAddress("WalletUser", userEmail));
 
-                email.Subject = "Account Statement Request";
+                email.Subject = $"({currencyEmail})Account Statement Request";
 
                 string filePath = Path.GetFullPath("C:\\Users\\joyihama\\Documents\\FrontEnd Projects\\EmailTemplatesForAngularWallet\\emailAccountStatement.html");
                 if (!File.Exists(filePath))

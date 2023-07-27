@@ -12,8 +12,8 @@ using WalletPayment.Services.Data;
 namespace WalletPayment.Services.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230621143531_MigOne")]
-    partial class MigOne
+    [Migration("20230725154151_Mig1")]
+    partial class Mig1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -53,7 +53,7 @@ namespace WalletPayment.Services.Migrations
                     b.ToTable("Accounts");
                 });
 
-            modelBuilder.Entity("WalletPayment.Models.Entites.Admin", b =>
+            modelBuilder.Entity("WalletPayment.Models.Entites.Admins", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -61,11 +61,19 @@ namespace WalletPayment.Services.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<byte[]>("PasswordHash")
                         .HasColumnType("varbinary(max)");
 
                     b.Property<byte[]>("PasswordSalt")
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -73,7 +81,7 @@ namespace WalletPayment.Services.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Admins");
+                    b.ToTable("Adminss");
                 });
 
             modelBuilder.Entity("WalletPayment.Models.Entites.Currency", b =>
@@ -166,6 +174,70 @@ namespace WalletPayment.Services.Migrations
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.KycImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("TimeUploaded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("KycImages");
+                });
+
+            modelBuilder.Entity("WalletPayment.Models.Entites.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsNotificationRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NotificationUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationUserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -232,9 +304,17 @@ namespace WalletPayment.Services.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("Currency")
                         .IsRequired()
                         .HasColumnType("varchar(10)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)");
 
                     b.Property<decimal>("SystemBalance")
                         .HasColumnType("decimal(18,2)");
@@ -242,6 +322,49 @@ namespace WalletPayment.Services.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SystemAccounts");
+                });
+
+            modelBuilder.Entity("WalletPayment.Models.Entites.SystemTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("ConversionRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Narration")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SystemAccount")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WalletAccountUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WalletAccountUserId");
+
+                    b.ToTable("SystemTransactions");
                 });
 
             modelBuilder.Entity("WalletPayment.Models.Entites.Transaction", b =>
@@ -254,6 +377,10 @@ namespace WalletPayment.Services.Migrations
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Currencies")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
@@ -314,6 +441,12 @@ namespace WalletPayment.Services.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("LockedReason")
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("LockedReasonCode")
+                        .HasColumnType("varchar(10)");
+
                     b.Property<byte[]>("PasswordHash")
                         .HasColumnType("varbinary(max)");
 
@@ -335,6 +468,10 @@ namespace WalletPayment.Services.Migrations
 
                     b.Property<DateTime?>("ResetTokenExpiresAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("UserProfile")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -384,6 +521,28 @@ namespace WalletPayment.Services.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.KycImage", b =>
+                {
+                    b.HasOne("WalletPayment.Models.Entites.User", "User")
+                        .WithMany("UserKycImage")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WalletPayment.Models.Entites.Notification", b =>
+                {
+                    b.HasOne("WalletPayment.Models.Entites.User", "NotificationUser")
+                        .WithMany("Notifications")
+                        .HasForeignKey("NotificationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NotificationUser");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.RefreshToken", b =>
                 {
                     b.HasOne("WalletPayment.Models.Entites.User", "User")
@@ -406,6 +565,17 @@ namespace WalletPayment.Services.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WalletPayment.Models.Entites.SystemTransaction", b =>
+                {
+                    b.HasOne("WalletPayment.Models.Entites.User", "WalletUser")
+                        .WithMany("SystemTransactions")
+                        .HasForeignKey("WalletAccountUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WalletUser");
+                });
+
             modelBuilder.Entity("WalletPayment.Models.Entites.Transaction", b =>
                 {
                     b.HasOne("WalletPayment.Models.Entites.User", "DestinationUser")
@@ -425,10 +595,14 @@ namespace WalletPayment.Services.Migrations
                 {
                     b.Navigation("Deposits");
 
+                    b.Navigation("Notifications");
+
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("SecurityQuestions")
                         .IsRequired();
+
+                    b.Navigation("SystemTransactions");
 
                     b.Navigation("Transactions");
 
@@ -436,6 +610,8 @@ namespace WalletPayment.Services.Migrations
 
                     b.Navigation("UserImage")
                         .IsRequired();
+
+                    b.Navigation("UserKycImage");
                 });
 #pragma warning restore 612, 618
         }

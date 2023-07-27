@@ -21,7 +21,6 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> TransferFund(TransactionDto request)
         {
             var result = await _transactionService.TransferFund(request);
-            //await _notificationHubContext.Clients.Clients;
             return Ok(result);
         }
 
@@ -59,6 +58,15 @@ namespace WalletPayment.Api.Controllers
             var result = await _transactionService.GenerateExcelStatement(request);
             return Ok(result);
         }
+
+        [HttpGet("GetSystemTransactionList"), Authorize]
+        public async Task<IActionResult> GetSystemTransactionList()
+        {
+            var result = await _transactionService.GetSystemTransactionList();
+            return Ok(result);
+        }
+
+
 
     }
 }

@@ -50,6 +50,13 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPost("ChangeAdminPassword"), Authorize]
+        public async Task<IActionResult> ChangeAdminPassword(ChangeAdminPasswordDTO req)
+        {
+            var result = await _authService.ChangeAdminPassword(req);
+            return Ok(result);
+        }
+
         [HttpPost("CreatePin"), Authorize]
         public async Task<IActionResult> CreatePin(CreatePinDto request)
         {

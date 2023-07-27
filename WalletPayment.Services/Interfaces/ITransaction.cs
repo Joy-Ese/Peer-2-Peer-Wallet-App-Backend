@@ -16,6 +16,7 @@ namespace WalletPayment.Services.Interfaces
         Task<List<TransactionListModel>> TransactionsByDateRange(TransactionDateDto request);
         Task<CreateStatementViewModel> GeneratePDFStatement(CreateStatementRequestDTO request);
         Task<CreateStatementViewModel> GenerateExcelStatement(CreateStatementRequestDTO request);
+        Task<List<SystemTransactionListModel>> GetSystemTransactionList();
     }
 }
 

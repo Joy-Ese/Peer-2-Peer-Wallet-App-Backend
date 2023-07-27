@@ -58,6 +58,12 @@ namespace WalletPayment.Services.Services
             return accountNumber;
         }
 
+        private string ReferenceGenerator()
+        {
+            var referenceString = $"{Guid.NewGuid().ToString().Replace("-", "").Substring(1, 10)}";
+            return referenceString;
+        }
+
         public async Task<AdminViewModel> CreateAdmin(CreateAdminDTO request)
         {
             AdminViewModel createAdminResponse = new AdminViewModel();
@@ -71,29 +77,44 @@ namespace WalletPayment.Services.Services
 
                 getRole = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.Role)?.Value;
 
-                if (getRole != "Admin")
+                if (getRole != "SuperAdmin")
                 {
-                    createAdminResponse.message = "Sorry!!Only an authourized Admin can create another Admin";
+                    createAdminResponse.status = false;
+                    createAdminResponse.message = "Sorry!!Only a Super Admin can create another Admin";
                     return createAdminResponse;
                 }
 
-
-                CreatePasswordHash(request.password, out byte[] passwordHash, out byte[] passwordSalt);
-
-                var adminUsername = "GlobusWalletAdmin";
-
-                Admin newAdmin = new Admin
+                var checkAdminss = await _context.Adminss.AnyAsync(x => x.Email == request.email || x.Username == request.username);
+                if (checkAdminss)
                 {
-                    Username = adminUsername,
+                    createAdminResponse.status = false;
+                    createAdminResponse.message = "Already exists!!!";
+                    return createAdminResponse;
+                }
+
+                string password = ReferenceGenerator();
+
+                CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                Admins newAdmin = new Admins
+                {
+                    Username = request.username,
+                    Role = request.role,
+                    Email = request.email,
                     PasswordHash = passwordHash,
                     PasswordSalt = passwordSalt,
                 };
 
-                await _context.Admins.AddAsync(newAdmin);
+                await _context.Adminss.AddAsync(newAdmin);
                 await _context.SaveChangesAsync();
 
+
+                var subjectReg = "Important Notice To Admin";
+                var body = $"Admin username:{newAdmin.Username} and password: {password}. You can now log in!";
+                _emailService.SendEmail(subjectReg, request.email, body);
+
                 createAdminResponse.status = true;
-                createAdminResponse.message = $"Admin successfully created!!! Admin can login with username:{adminUsername} and set their password";
+                createAdminResponse.message = $"Admin username:{newAdmin.Username} and password: {password} has been emailed!";
                 return createAdminResponse;
             }
             catch (Exception ex)
@@ -148,17 +169,6 @@ namespace WalletPayment.Services.Services
                 await _context.Users.AddAsync(newUser);
                 await _context.SaveChangesAsync();
 
-
-                //SystemAccount sysAccount = new SystemAccount
-                //{
-                //    SystemBalance = 0,
-                //    Currency = "NGN",
-                //};
-
-                //await _context.SystemAccounts.AddAsync(sysAccount);
-                //await _context.SaveChangesAsync();
-
-
                 Account newAccount = new Account
                 {
                     AccountNumber = generatedAcc,
@@ -173,6 +183,7 @@ namespace WalletPayment.Services.Services
 
                 var verifyToken = randomToken;
                 var verifyEmail = request.email;
+                var subject = "Link to verify your email";
 
                 var queryParams = new Dictionary<string, string>()
                     {
@@ -181,14 +192,12 @@ namespace WalletPayment.Services.Services
                     };
 
                 var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndVerifyLink, queryParams);
-                await _emailService.SendEmailVerifyUser(callbackUrl, verifyEmail);
+                _emailService.SendEmailVerifyUser(callbackUrl, verifyEmail, subject);
 
 
-                var sendEmail = new EmailDto
-                {
-                    to = request.email,
-                };
-                await _emailService.SendEmail(sendEmail, request.email);
+                var subjectReg = "Welcome to The Globus Wallet App";
+                var body = "Thank You for registering with The Globus Wallet App. Enjoy a seamless experience! \u263A \ud83c\udf81";
+                _emailService.SendEmail(subjectReg, request.email, body);
 
                 registerResponse.status = true;
                 registerResponse.message = "Check email to verify your registration";
@@ -229,18 +238,7 @@ namespace WalletPayment.Services.Services
                     return loginResponse;
                 }
 
-                string getRole;
-
-                if (request.username.Contains("Admin"))
-                {
-                    getRole = "Admin";
-                }
-                else
-                {
-                    getRole = "User";
-                }
-                
-                string token = CreateToken(data, getRole);
+                string token = CreateToken(data);
 
                 var refreshToken = GenerateRefreshToken();
                 SetRefreshToken(refreshToken);
@@ -250,7 +248,7 @@ namespace WalletPayment.Services.Services
                     Token = refreshToken.Token,
                     CreatedAt = refreshToken.CreatedAt,
                     ExpiresAt = refreshToken.ExpiresAt,
-                    UserId = data.Id
+                    UserId = data.Id,
                 };
 
                 await _context.RefreshTokens.AddAsync(addRefreshTokenToDb);
@@ -282,12 +280,12 @@ namespace WalletPayment.Services.Services
             AdminLoginViewModel adminLoginResponse = new AdminLoginViewModel();
             try
             {
-                var data = await _context.Admins.FirstOrDefaultAsync(x => x.Username == request.username);
+                var data = await _context.Adminss.FirstOrDefaultAsync(x => x.Username == request.username);
 
                 if (data == null)
                 {
-                    adminLoginResponse.result = "Invalid Admin Username or Password. Contact Admin if you've made a mistake!!!";
-                    _logger.LogWarning("Invalid Admin Username or Password");
+                    adminLoginResponse.result = "Invalid Username or Password. Contact SuperAdmin!!!";
+                    _logger.LogWarning("Invalid Username or Password");
                     return adminLoginResponse;
                 }
 
@@ -297,38 +295,27 @@ namespace WalletPayment.Services.Services
                     return adminLoginResponse;
                 }
 
-                string getRole;
-
-                if (request.username.Contains("Admin"))
+                if (data.IsDisabled == true)
                 {
-                    getRole = "Admin";
-                }
-                else
-                {
-                    getRole = "User";
-                }
-
-                if (getRole != "Admin")
-                {
-                    adminLoginResponse.result = "Sorry!!Only an authourized Admin can login";
+                    adminLoginResponse.result = "Your account has been disabled! Contact Admin to know why!!";
                     return adminLoginResponse;
                 }
 
-                string token = CreateAdminToken(data, getRole);
+                string token = CreateAdminToken(data);
 
                 var refreshToken = GenerateRefreshToken();
                 SetRefreshToken(refreshToken);
 
-                RefreshToken addRefreshTokenToDb = new RefreshToken
-                {
-                    Token = refreshToken.Token,
-                    CreatedAt = refreshToken.CreatedAt,
-                    ExpiresAt = refreshToken.ExpiresAt,
-                    UserId = data.Id
-                };
+                //RefreshToken addRefreshTokenToDb = new RefreshToken
+                //{
+                //    Token = refreshToken.Token,
+                //    CreatedAt = refreshToken.CreatedAt,
+                //    ExpiresAt = refreshToken.ExpiresAt,
+                //    UserId = 0,
+                //};
 
-                await _context.RefreshTokens.AddAsync(addRefreshTokenToDb);
-                await _context.SaveChangesAsync();
+                //await _context.RefreshTokens.AddAsync(addRefreshTokenToDb);
+                //await _context.SaveChangesAsync();
 
                 if (token == null || token == "" || refreshToken == null)
                 {
@@ -337,9 +324,10 @@ namespace WalletPayment.Services.Services
                 }
 
                 adminLoginResponse.status = true;
-                adminLoginResponse.isAdmin = true;
+                adminLoginResponse.isSecure = data.IsSecure;
                 adminLoginResponse.result = token;
                 adminLoginResponse.adminUsername = data.Username;
+                adminLoginResponse.role = data.Role;
                 adminLoginResponse.adminRefreshedToken = refreshToken.Token;
                 _logger.LogInformation($"Admin successfully logged in with {data.Username}");
                 return adminLoginResponse;
@@ -349,6 +337,49 @@ namespace WalletPayment.Services.Services
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 adminLoginResponse.result = "An exception occured";
                 return adminLoginResponse;
+            }
+        }
+
+        public async Task<ResponseModel> ChangeAdminPassword(ChangeAdminPasswordDTO req)
+        {
+            ResponseModel response = new ResponseModel();
+            try
+            {
+                string getRole;
+                string getUsername;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return response;
+                }
+
+                getRole = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.Role)?.Value;
+                getUsername = _httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserName)?.Value;
+
+                var adminUser = await _context.Adminss.FirstOrDefaultAsync(x => x.Role == getRole && x.Username == getUsername);
+
+                if (!req.password.Equals(req.confirmPassword))
+                {
+                    response.status = false;
+                    response.message = "Passwords do not match!! Check email to reconfirm!";
+                    return response;
+                }
+
+                CreatePasswordHash(req.password, out byte[] passwordHash, out byte[] passwordSalt);
+
+                adminUser.PasswordHash = passwordHash;
+                adminUser.PasswordSalt = passwordSalt;
+                adminUser.IsSecure = true;
+                await _context.SaveChangesAsync();
+
+                response.status = true;
+                response.message = "Password changed!!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                response.message = "An exception occured";
+                return response;
             }
         }
 
@@ -399,7 +430,7 @@ namespace WalletPayment.Services.Services
                 int tries = userSecurityQuest.Attempts;
                 int failedTries;
 
-                if (!(userSecurityQuest.Answer == request.answer))
+                if (!(userSecurityQuest.Answer == request.answer.ToLower()))
                 {
                     tries--;
                     failedTries = tries--;
@@ -410,6 +441,8 @@ namespace WalletPayment.Services.Services
                     if (failedTries == 0)
                     {
                         user.IsUserLocked = true;
+                        user.LockedReason = "Exhausted security answers attempts";
+                        user.LockedReasonCode = "111";
                         await _context.SaveChangesAsync();
 
                         changePasswordModel.isLocked = true;
@@ -521,7 +554,7 @@ namespace WalletPayment.Services.Services
                 int tries = userSecurityQuest.Attempts;
                 int failedTries;
 
-                if (!(userSecurityQuest.Answer == request.answer))
+                if (!(userSecurityQuest.Answer == request.answer.ToLower()))
                 {
                     tries--;
                     failedTries = tries--;
@@ -532,6 +565,8 @@ namespace WalletPayment.Services.Services
                     if (failedTries == 0)
                     {
                         updatedUserProfile.IsUserLocked = true;
+                        updatedUserProfile.LockedReason = "Exhausted security answers attempts";
+                        updatedUserProfile.LockedReasonCode = "111";
                         await _context.SaveChangesAsync();
 
                         updatePinViewModel.isLocked = true;
@@ -609,7 +644,7 @@ namespace WalletPayment.Services.Services
 
                 var callbackUrl = QueryHelpers.AddQueryString(_resetLink.FrontEndResetLink, queryParams);
 
-                await _emailService.SendEmailPasswordReset(callbackUrl, email);
+                _emailService.SendEmailPasswordReset(callbackUrl, email);
 
                 if (forgetPassword.status)
                 {
@@ -730,18 +765,7 @@ namespace WalletPayment.Services.Services
                     return loginRefreshResponse;
                 }
 
-                string getRole;
-
-                if (userData.Username.Contains("Admin"))
-                {
-                    getRole = "Admin";
-                }
-                else
-                {
-                    getRole = "User";
-                }
-
-                string token = CreateToken(userData, getRole);
+                string token = CreateToken(userData);
 
                 var newRefreshT = GenerateRefreshToken();
                 SetRefreshToken(newRefreshT);
@@ -777,14 +801,13 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        private string CreateToken(User user, string role)
+        private string CreateToken(User user)
         {
             List<Claim> claims = new List<Claim>
             {
                 new Claim(CustomClaims.UserId, user.Id.ToString()),
                 new Claim(CustomClaims.UserName, user.Username),
                 new Claim(CustomClaims.FirstName, user.FirstName),
-                new Claim(CustomClaims.Role, role),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
@@ -802,12 +825,12 @@ namespace WalletPayment.Services.Services
             return jwt;
         }
 
-        private string CreateAdminToken(Admin adminUser, string role)
+        private string CreateAdminToken(Admins adminUser)
         {
             List<Claim> claims = new List<Claim>
             {
                 new Claim(AdminCustomClaims.UserName, adminUser.Username),
-                new Claim(AdminCustomClaims.Role, role),
+                new Claim(AdminCustomClaims.Role, adminUser.Role),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(

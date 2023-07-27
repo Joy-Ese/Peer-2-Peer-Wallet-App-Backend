@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using WalletPayment.Models.DataObjects;
-using WalletPayment.Models.Entites;
 using WalletPayment.Services.Interfaces;
 
 namespace WalletPayment.Api.Controllers
@@ -19,10 +16,31 @@ namespace WalletPayment.Api.Controllers
             _accountService = accountService;
         }
 
-        [HttpPost("AccountLookUp"), Authorize]
-        public async Task<IActionResult> AccountLookUp(string searchInfo)
+        [HttpPut("UpdateChargeOrRate"), Authorize]
+        public async Task<IActionResult> UpdateChargeOrRate(UpdateChargeOrRateDTO req)
         {
-            var result = await _accountService.AccountLookUp(searchInfo);
+            var result = await _accountService.UpdateChargeOrRate(req);
+            return Ok(result);
+        }
+
+        [HttpPost("CreateSystemAccount"), Authorize]
+        public async Task<IActionResult> CreateSystemAccount(CreateSystemAccountsDTO request)
+        {
+            var result = await _accountService.CreateSystemAccount(request);
+            return Ok(result);
+        }
+
+        [HttpPost("AccountLookUp"), Authorize]
+        public async Task<IActionResult> AccountLookUp(string searchInfo, string currency)
+        {
+            var result = await _accountService.AccountLookUp(searchInfo, currency);
+            return Ok(result);
+        }
+
+        [HttpPost("SendMoneyCheck"), Authorize]
+        public async Task<IActionResult> SendMoneyCheck(string currency)
+        {
+            var result = await _accountService.SendMoneyCheck(currency);
             return Ok(result);
         }
 
@@ -40,6 +58,20 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("CurrenciesSeededInDb"), Authorize]
+        public async Task<IActionResult> CurrenciesSeededInDb()
+        {
+            var result = await _accountService.CurrenciesSeededInDb();
+            return Ok(result);
+        }
+
+        [HttpGet("FundWalletCurrencies"), Authorize]
+        public async Task<IActionResult> FundWalletCurrencies()
+        {
+            var result = await _accountService.FundWalletCurrencies();
+            return Ok(result);
+        }
+
         [HttpGet("UserAccountDetails"), Authorize]
         public async Task<IActionResult> UserAccountDetails()
         {
@@ -51,6 +83,55 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> GetCurrencyCharges()
         {
             var result = await _accountService.GetCurrencyCharges();
+            return Ok(result);
+        }
+
+        [HttpGet("GetConversionRates"), Authorize]
+        public async Task<IActionResult> GetConversionRates()
+        {
+            var result = await _accountService.GetConversionRates();
+            return Ok(result);
+        }
+
+        [HttpPost("FundForeignWallet"), Authorize]
+        public async Task<IActionResult> FundForeignWallet(FundWalletDTO req)
+        {
+            var result = await _accountService.FundForeignWallet(req);
+            return Ok(result);
+        }
+
+        [HttpGet("GetNairaBalance"), Authorize]
+        public async Task<IActionResult> GetNairaBalance()
+        {
+            var result = await _accountService.GetNairaBalance();
+            return Ok(result);
+        }
+
+        [HttpGet("GetUserDataForAdmin"), Authorize]
+        public async Task<IActionResult> GetUserDataForAdmin()
+        {
+            var result = await _accountService.GetUserDataForAdmin();
+            return Ok(result);
+        }
+
+        [HttpGet("SystemAccountDetails"), Authorize]
+        public async Task<IActionResult> SystemAccountDetails()
+        {
+            var result = await _accountService.SystemAccountDetails();
+            return Ok(result);
+        }
+
+        [HttpPut("LockOrUnlockUsers"), Authorize]
+        public async Task<IActionResult> LockOrUnlockUsers(LockOrUnlockUsersDTO req)
+        {
+            var result = await _accountService.LockOrUnlockUsers(req);
+            return Ok(result);
+        }
+
+        [HttpGet("GetLockedUsersList"), Authorize]
+        public async Task<IActionResult> GetLockedUsersList()
+        {
+            var result = await _accountService.GetLockedUsersList();
             return Ok(result);
         }
 
