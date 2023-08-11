@@ -140,23 +140,9 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPost("KycUpload"), Authorize]
-        public async Task<IActionResult> KycUpload([FromForm] ImageRequestDTO req)
+        public async Task<IActionResult> KycUpload([FromForm] ImageRequestDTO req, string fileCode)
         {
-            var result = await _dashboardService.KycUpload(req.ImageDetails);
-            return Ok(result);
-        }
-
-        [HttpPut("KycReUpload"), Authorize]
-        public async Task<IActionResult> KycReUpload([FromForm] ImageRequestDTO req)
-        {
-            var result = await _dashboardService.KycReUpload(req.ImageDetails);
-            return Ok(result);
-        }
-
-        [HttpGet("GetKycUploadsForAdmin"), Authorize]
-        public async Task<IActionResult> GetKycUploadsForAdmin()
-        {
-            var result = await _dashboardService.GetKycUploadsForAdmin();
+            var result = await _dashboardService.KycUpload(req.ImageDetails, fileCode);
             return Ok(result);
         }
 
@@ -168,16 +154,23 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPut("RemoveImage"), Authorize]
-        public async Task<IActionResult> RemoveImage(string filename, string userId)
+        public async Task<IActionResult> RemoveImage(string filename, string userId, string filecode)
         {
-            var result = await _dashboardService.RemoveImage(filename, userId);
+            var result = await _dashboardService.RemoveImage(filename, userId, filecode);
             return Ok(result);
         }
 
         [HttpPut("AcceptImage"), Authorize]
-        public async Task<IActionResult> AcceptImage(string filename, string userId)
+        public async Task<IActionResult> AcceptImage(string filename, string userId, string filecode)
         {
-            var result = await _dashboardService.AcceptImage(filename, userId);
+            var result = await _dashboardService.AcceptImage(filename, userId, filecode);
+            return Ok(result);
+        }
+
+        [HttpGet("ListKycDocs"), Authorize]
+        public async Task<IActionResult> ListKycDocs()
+        {
+            var result = await _dashboardService.ListKycDocs();
             return Ok(result);
         }
 
@@ -202,13 +195,14 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("GetKycStatus"), Authorize]
-        public async Task<IActionResult> GetKycStatus()
+        [HttpPut("AdminLogout"), Authorize]
+        public async Task<IActionResult> AdminLogout(string adminUsername)
         {
-            var result = await _dashboardService.GetKycStatus();
+            var result = await _dashboardService.AdminLogout(adminUsername);
             return Ok(result);
         }
 
+        
 
 
     }

@@ -13,6 +13,9 @@ namespace WalletPayment.Models.Entites
 
         [Column(TypeName = "varchar(50)")]
         public string SystemAccount { get; set; } = string.Empty;
+
+        [Column(TypeName = "varchar(50)")]
+        public string WalletAccountNumber { get; set; } = string.Empty;
         public string TransactionType { get; set; } = string.Empty;
         public DateTime Date { get; set; }
         public int WalletAccountUserId { get; set; }

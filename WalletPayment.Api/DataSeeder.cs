@@ -59,6 +59,27 @@ namespace WalletPayment.Api
                         _context.Adminss.AddRange(adminCreatedOnAppStart);
                         _context.SaveChanges();
                     }
+
+                    if (!_context.KycDocuments.Any())
+                    {
+                        var kycDocs = new List<KycDocument>()
+                        {
+                            new KycDocument()
+                            {
+                                Name = "Government Id",
+                                Code = "A",
+                            },
+                            new KycDocument()
+                            {
+                                Name = "Utility Bill",
+                                Code = "B",
+                            },
+                        };
+
+                        _context.KycDocuments.AddRange(kycDocs);
+                        _context.SaveChanges();
+                    }
+
                 }
                 catch (Exception ex)
                 {

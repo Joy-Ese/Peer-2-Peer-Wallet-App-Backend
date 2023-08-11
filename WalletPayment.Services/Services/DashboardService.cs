@@ -655,7 +655,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<KycViewModel> KycUpload(IFormFile fileData)
+        public async Task<KycViewModel> KycUpload(IFormFile fileData, string fileCode)
         {
             KycViewModel kycRequestViewModel = new KycViewModel();
             try
@@ -703,7 +703,7 @@ namespace WalletPayment.Services.Services
                 File.Delete($"{userUniqueFileRef}.zip");
 
                 string fileName = fileData.FileName;
-                string filePath = GetFilePath();
+                string filePath = GetFilePath(userID);
 
                 if (!System.IO.Directory.Exists(filePath))
                 {
@@ -726,6 +726,7 @@ namespace WalletPayment.Services.Services
                     TimeUploaded = DateTime.Now,
                     UserId = userID,
                     FileName = $"{userID}{fileData.FileName}",
+                    FileCode = fileCode,
                     IsAccepted = false
                 };
 
@@ -740,7 +741,7 @@ namespace WalletPayment.Services.Services
                 }
 
                 kycRequestViewModel.status = true;
-                kycRequestViewModel.message = "Thank you for submitting your document. Account will be upgraded!";
+                kycRequestViewModel.message = "Thank you for submitting your document.";
                 return kycRequestViewModel;
             }
             catch (Exception ex)
@@ -750,81 +751,16 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<KycViewModel> KycReUpload(IFormFile fileData)
+        private string GetFilePath(int userId)
         {
-            KycViewModel kycRequestViewModel = new KycViewModel();
-            try
-            {
-                int userID;
-                if (_httpContextAccessor.HttpContext == null)
-                {
-                    return kycRequestViewModel;
-                }
-
-                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
-
-                var kycImageToUpdate = await _context.KycImages.Where(x => x.UserId == userID).FirstOrDefaultAsync();
-
-                string fileName = fileData.FileName;
-                string filePath = GetFilePath();
-
-                if (!System.IO.Directory.Exists(filePath))
-                {
-                    System.IO.Directory.CreateDirectory(filePath);
-                }
-
-                string imagePath = filePath + fileName;
-
-                if (System.IO.File.Exists(imagePath))
-                {
-                    System.IO.File.Delete(imagePath);
-                }
-                using (FileStream stream = System.IO.File.Create(imagePath))
-                {
-                    await fileData.CopyToAsync(stream);
-                }
-
-                KycImage kyc = new KycImage
-                {
-                    TimeUploaded = DateTime.Now,
-                    UserId = userID,
-                    FileName = $"{userID}{fileData.FileName}",
-                    IsAccepted = false
-                };
-
-                kycImageToUpdate.FileName = fileData.FileName;
-                kycImageToUpdate.TimeUploaded = DateTime.Now;
-
-                var result = await _context.SaveChangesAsync();
-
-                if (result < 0)
-                {
-                    kycRequestViewModel.status = false;
-                    kycRequestViewModel.message = "Image could not be re-uploaded";
-                    return kycRequestViewModel;
-                }
-
-                kycRequestViewModel.status = true;
-                kycRequestViewModel.message = "Thank you for submitting your document. Account will be upgraded!";
-                return kycRequestViewModel;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return kycRequestViewModel;
-            }
+            return _environment.WebRootPath + $"\\KycUploads\\GovtIssued\\{userId}";
         }
 
-        private string GetFilePath()
-        {
-            return _environment.WebRootPath + $"\\KycUploads\\GovtIssued\\";
-        }
-
-        private string GetImage()
+        private string GetImage(int userId)
         {
             string imageUrl = string.Empty;
             string hostUrl = "http://localhost:7236";
-            string filePath = GetFilePath();
+            string filePath = GetFilePath(userId);
 
             if (!System.IO.Directory.Exists(filePath))
             {
@@ -838,12 +774,12 @@ namespace WalletPayment.Services.Services
             return imageUrl;
         }
 
-        public async Task<List<UserInfoOnKycUploadsForAdminModel>> GetUserInfoOnKycUploadsForAdmin()
+        public async Task<List<KycAdminViewModel2>> GetUserInfoOnKycUploadsForAdmin()
         {
             List<UserInfoOnKycUploadsForAdminModel> kycs = new List<UserInfoOnKycUploadsForAdminModel>();
             try
             {
-                var getPendingKyc = await _context.KycImages.Where(x => x.IsAccepted == false).ToListAsync();
+                var getPendingKyc = await _context.KycImages.Where(x => x.IsAccepted == false && x.IsRejected == false).ToListAsync();
 
                 foreach (var kyc in getPendingKyc)
                 {
@@ -852,51 +788,84 @@ namespace WalletPayment.Services.Services
                     {
                         firstname = userDetail.FirstName,
                         lastname = userDetail.LastName,
+                        id = kyc.UserId
                     });
                 }
 
-                return kycs;
+                var variable = await TrimInfo(kycs);
+                return variable;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return new List<UserInfoOnKycUploadsForAdminModel>();
+                return new List<KycAdminViewModel2>();
             }
         }
 
-        public async Task<List<KycAdminViewModel>> GetKycUploadsForAdmin()
+        private async Task<List<KycAdminViewModel2>> TrimInfo(List<UserInfoOnKycUploadsForAdminModel> kycs)
         {
-            List<KycAdminViewModel> kycs = new List<KycAdminViewModel>();
+            var emptyList = new List<int>();
+            try
+            {
+                foreach (var item in kycs)
+                {
+                    if (!emptyList.Contains(item.id))
+                    {
+                        emptyList.Add(item.id);
+                    }
+                }
+
+                var variable = await GetKycUploadsForAdmin(emptyList);
+
+                return variable;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return new List<KycAdminViewModel2>();
+            }
+        }
+
+        private async Task<List<KycAdminViewModel2>> GetKycUploadsForAdmin(List<int> ints)
+        {
+            List<KycAdminViewModel2> kycs = new List<KycAdminViewModel2>();
             try
             {
                 string getRole;
                 if (_httpContextAccessor.HttpContext == null)
                 {
-                    return new List<KycAdminViewModel>();
+                    return new List<KycAdminViewModel2>();
                 }
 
-                var imagesUploaded = await _context.KycImages.ToListAsync();
-
-                if (imagesUploaded == null && imagesUploaded.Count == 0)
+                foreach (var item in ints)
                 {
-                    return new List<KycAdminViewModel>();
-                }
+                    var imagesUploaded = await _context.KycImages.Include("User").Where(x => x.UserId == item && x.IsAccepted == false && x.IsRejected == false).ToListAsync();
 
-                foreach (var image in imagesUploaded)
-                {
-                    var user = await _context.Users.Where(x => x.Id == image.UserId).FirstOrDefaultAsync();
+                    List<KycAdminViewModel> models = new List<KycAdminViewModel>();
 
-                    string imgUrl = GetImage();
-                    string url = $"{imgUrl}{image.FileName}";
-
-                    kycs.Add(new KycAdminViewModel
+                    foreach (var image in imagesUploaded)
                     {
-                        image = url,
-                        filename = image.FileName,
-                        timeUploaded = image.TimeUploaded,
-                        kycUploader = user.Username,
-                        userId = image.UserId,
-                        isAccepted = image.IsAccepted,
+                        var user = await _context.Users.Where(x => x.Id == image.UserId).FirstOrDefaultAsync();
+
+                        string imgUrl = GetImage(image.UserId);
+                        string url = $"{imgUrl}{image.FileName}";
+
+                        models.Add(new KycAdminViewModel
+                        {
+                            image = url,
+                            filename = image.FileName,
+                            filecode = image.FileCode,
+                            timeUploaded = image.TimeUploaded,
+                            userId = image.UserId,
+                            isAccepted = image.IsAccepted,
+                        });
+                    }
+
+                    kycs.Add(new KycAdminViewModel2
+                    {
+                        firstname = imagesUploaded[0].User.FirstName,
+                        lastname = imagesUploaded[0].User.LastName,
+                        list = models
                     });
                 }
 
@@ -905,11 +874,11 @@ namespace WalletPayment.Services.Services
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
-                return new List<KycAdminViewModel>();
+                return new List<KycAdminViewModel2>();
             }
         }
 
-        public async Task<KycViewModel> RemoveImage(string filename, string userId)
+        public async Task<KycViewModel> RemoveImage(string filename, string userId, string filecode)
         {
             KycViewModel kycRemove = new KycViewModel();
             try
@@ -918,9 +887,11 @@ namespace WalletPayment.Services.Services
                 userID = Convert.ToInt32(userId);
 
                 var user = await _context.Users.Where(x => x.Id == userID).FirstOrDefaultAsync();
-                var fileNAME = await _context.KycImages.Where(x => x.FileName == filename).FirstOrDefaultAsync();
+                var fileNAME = await _context.KycImages.Where(x => x.FileName == filename && x.UserId == userID && x.FileCode == filecode).FirstOrDefaultAsync();
 
-                string filePath = GetFilePath();
+                var getDocName = await _context.KycDocuments.Where(x => x.Code == filecode).Select(x => x.Name).FirstOrDefaultAsync();
+
+                string filePath = GetFilePath(userID);
                 string imagePath = filePath + fileNAME.FileName;
 
                 if (System.IO.File.Exists(imagePath))
@@ -931,12 +902,11 @@ namespace WalletPayment.Services.Services
                 Notification newNotification = new Notification
                 {
                     Title = $"Kyc Validation Failed",
-                    Description = $"You need to redo your kyc validation. One or more documents found wanting!!",
+                    Description = $"You need to re-upload your {getDocName} document!!",
                     Date = DateTime.Now,
                     NotificationUserId = userID,
                     IsNotificationRead = false,
                 };
-
                 await _context.Notifications.AddAsync(newNotification);
                 await _context.SaveChangesAsync();
 
@@ -946,7 +916,7 @@ namespace WalletPayment.Services.Services
                 await _context.SaveChangesAsync();
 
                 kycRemove.status = true;
-                kycRemove.message = $"Rejected {user.Username}'s documents";
+                kycRemove.message = $"Rejected {user.Username}'s {getDocName} document";
                 return kycRemove;
             }
             catch (Exception ex)
@@ -956,7 +926,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<KycViewModel> AcceptImage(string filename, string userId)
+        public async Task<KycViewModel> AcceptImage(string filename, string userId, string filecode)
         {
             KycViewModel kycAccept = new KycViewModel();
             try
@@ -965,45 +935,98 @@ namespace WalletPayment.Services.Services
                 userID = Convert.ToInt32(userId);
 
                 var user = await _context.Users.Where(x => x.Id == userID).FirstOrDefaultAsync();
-                var fileNAME = await _context.KycImages.Where(x => x.FileName == filename).FirstOrDefaultAsync();
+                var fileNAME = await _context.KycImages.Where(x => x.FileName == filename && x.UserId == userID && x.FileCode == filecode).FirstOrDefaultAsync();
 
-                string filePath = GetFilePath();
-                string imagePath = filePath + fileNAME.FileName;
+                var getDocName = await _context.KycDocuments.Where(x => x.Code == filecode).Select(x => x.Name).FirstOrDefaultAsync();
+
+                string filePath = GetFilePath(userID);
+                string imagePath = filePath + fileNAME.FileName; //Find a way to make image path unqiue so users can send documents of the same name.
 
                 if (System.IO.File.Exists(imagePath))
                 {
                     System.IO.File.Delete(imagePath);
                 }
-
-                user.UserProfile = "Verified";
-                await _context.SaveChangesAsync();
+               
 
                 Notification newNotification = new Notification
                 {
                     Title = $"Kyc Validation Successful",
-                    Description = $"Your documents have been accepted. You can now create foreign wallets.",
+                    Description = $"Your {getDocName} document has been accepted!!",
                     Date = DateTime.Now,
                     NotificationUserId = userID,
                     IsNotificationRead = false,
                 };
-
-
                 await _context.Notifications.AddAsync(newNotification);
                 await _context.SaveChangesAsync();
+
 
                 fileNAME.IsAccepted = true;
                 fileNAME.IsRejected = false;
                 fileNAME.TimeUploaded = DateTime.Now;
                 await _context.SaveChangesAsync();
 
+                var countUserIsAccepted = await _context.KycImages.Where(x => x.UserId == userID && x.IsAccepted == true).CountAsync();
+                var kycDocs = await _context.KycDocuments.CountAsync();
+                if (countUserIsAccepted == kycDocs)
+                {
+                    user.UserProfile = "Verified";
+
+
+                    Notification verifiedNotification = new Notification
+                    {
+                        Title = $"Kyc Validation Successful",
+                        Description = $"You can now create Foreign Wallets!!",
+                        Date = DateTime.Now,
+                        NotificationUserId = userID,
+                        IsNotificationRead = false,
+                    };
+                    await _context.Notifications.AddAsync(verifiedNotification);
+
+
+                    await _context.SaveChangesAsync();
+                }
+
                 kycAccept.status = true;
-                kycAccept.message = $"Accepted {user.Username}'s documents";
+                kycAccept.message = $"Accepted {user.Username}'s {getDocName} documents";
                 return kycAccept;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 return kycAccept;
+            }
+        }
+
+        public async Task<List<KycDocs>> ListKycDocs()
+        {
+            List<KycDocs> docs = new List<KycDocs>();
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return docs;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var kycDocs = await _context.KycDocuments.ToListAsync();
+
+                foreach (var item in kycDocs)
+                {
+                    docs.Add(new KycDocs
+                    {
+                        name = item.Name,
+                        code = item.Code,
+                    });
+                }
+
+                return docs;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return new List<KycDocs>();
             }
         }
 
@@ -1119,23 +1142,15 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<bool> GetKycStatus()
+        public async Task<bool> AdminLogout(string adminUsername)
         {
             try
             {
-                int userID;
-                if (_httpContextAccessor.HttpContext == null)
-                {
-                    return false;
-                }
+                var getAdminLoggedIn = await _context.Adminss.Where(x => x.Username == adminUsername).FirstOrDefaultAsync();
+                getAdminLoggedIn.IsUserLogin = false;
+                await _context.SaveChangesAsync();
 
-                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
-
-                var userKycStatus = await _context.KycImages.Where(s => s.UserId == userID).FirstOrDefaultAsync();
-
-                if (userKycStatus == null) return false;
-
-                return userKycStatus.IsRejected;
+                return true;
             }
             catch (Exception ex)
             {
@@ -1143,6 +1158,7 @@ namespace WalletPayment.Services.Services
                 return false;
             }
         }
+
 
 
     }

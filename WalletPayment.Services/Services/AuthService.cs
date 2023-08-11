@@ -24,11 +24,13 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.WebUtilities;
 using WalletPayment.Models.DataObjects.Common;
+using Microsoft.AspNetCore.SignalR;
 
 namespace WalletPayment.Services.Services
 {
     public class AuthService : IAuth
     {
+        private readonly IHubContext<NotificationSignalR> _hub;
         private readonly DataContext _context;
         private readonly LinkGenerator _linkGenerator;
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -39,7 +41,8 @@ namespace WalletPayment.Services.Services
         private readonly FrontEndResetDetail? _resetLink;
 
         public AuthService(DataContext context, IEmail emailService, IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor, LinkGenerator linkGenerator, ILogger<AuthService> logger, IWebHostEnvironment webHostEnvironment)
+            IHttpContextAccessor httpContextAccessor, LinkGenerator linkGenerator, ILogger<AuthService> logger, IWebHostEnvironment webHostEnvironment,
+             IHubContext<NotificationSignalR> hub)
         {
             _context = context;
             _emailService = emailService;
@@ -50,6 +53,7 @@ namespace WalletPayment.Services.Services
             _resetLink = configuration.GetSection("FrontEndResetDetails").Get<FrontEndResetDetail>();
             _logger = logger;
             _logger.LogDebug(1, "Nlog injected into AuthService");
+            _hub = hub;
         }
 
         public string AccountNumberGenerator()
@@ -99,7 +103,7 @@ namespace WalletPayment.Services.Services
                 Admins newAdmin = new Admins
                 {
                     Username = request.username,
-                    Role = request.role,
+                    Role = "Admin",
                     Email = request.email,
                     PasswordHash = passwordHash,
                     PasswordSalt = passwordSalt,
@@ -251,6 +255,9 @@ namespace WalletPayment.Services.Services
                     UserId = data.Id,
                 };
 
+                data.IsUserLogin = true;
+                data.LastLogin = DateTime.Now;
+
                 await _context.RefreshTokens.AddAsync(addRefreshTokenToDb);
                 await _context.SaveChangesAsync();
 
@@ -264,6 +271,9 @@ namespace WalletPayment.Services.Services
                 loginResponse.result = token;
                 loginResponse.refreshedToken = refreshToken.Token;
                 _logger.LogInformation($"User successfully logged in with {data.Email}");
+
+                await _hub.Clients.All.SendAsync("UpdateAdmin");
+                
                 return loginResponse;
 
             }
@@ -315,7 +325,10 @@ namespace WalletPayment.Services.Services
                 //};
 
                 //await _context.RefreshTokens.AddAsync(addRefreshTokenToDb);
-                //await _context.SaveChangesAsync();
+
+                data.IsUserLogin = true;
+                data.LastLogin = DateTime.Now;
+                await _context.SaveChangesAsync();
 
                 if (token == null || token == "" || refreshToken == null)
                 {

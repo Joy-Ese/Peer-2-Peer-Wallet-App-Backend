@@ -1055,7 +1055,60 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<IsLoggedInModelAdmin> GetAdminIsLoggedIn()
+        {
+            IsLoggedInModelAdmin admin = new IsLoggedInModelAdmin();
+            try
+            {
+                var allUsersLoggedIn = await _context.Users.Where(x => x.IsUserLogin == true).ToListAsync();
+                var allUsersLoggedInCount = allUsersLoggedIn.Count(); //await _context.Users.Where(x => x.IsUserLogin == true).CountAsync();
 
+                var users = new List<ReturnedModel>();
+                foreach (var item in allUsersLoggedIn)
+                {
+                    users.Add(new ReturnedModel
+                    {
+                        username = item.Username,
+                        email = item.Email,
+                        id = item.Id.ToString()
+                    });
+                }
+
+                admin.count = allUsersLoggedInCount;
+                admin.returneds = users;
+                return admin;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return admin;
+            }
+        }
+
+        public async Task<bool> IsUserLoggedIn()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return false;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var isUserLoggedIN = await _context.Users.Where(x => x.Id == userID).FirstOrDefaultAsync();
+
+                return isUserLoggedIN.IsUserLogin;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
+        
 
 
     }

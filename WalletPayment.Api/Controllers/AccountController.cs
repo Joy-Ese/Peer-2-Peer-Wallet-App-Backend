@@ -135,6 +135,23 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("GetAdminIsLoggedIn"), Authorize]
+        public async Task<IActionResult> GetAdminIsLoggedIn()
+        {
+            var result = await _accountService.GetAdminIsLoggedIn();
+            return Ok(result);
+        }
+
+        [HttpGet("IsUserLoggedIn"), Authorize]
+        public async Task<IActionResult> IsUserLoggedIn()
+        {
+            var result = await _accountService.IsUserLoggedIn();
+            return Ok(result);
+        }
+
+        
+
+
 
     }
 }

@@ -90,7 +90,7 @@ namespace WalletPayment.Services.Services
                                 date = DateTime.Now,
                                 isRead = x.IsNotificationRead,
 
-                            }).ToListAsync();
+                            }).OrderByDescending(x => x.id).ToListAsync();
 
                 if (allUserNotifications == null) return getNotification;
 

@@ -15,6 +15,8 @@ namespace WalletPayment.Services.Data
 
         public DbSet<Currency> Currencies { get; set; }
 
+        public DbSet<KycDocument> KycDocuments { get; set; }
+
         public DbSet<Image> Images { get; set; }
 
         public DbSet<Transaction> Transactions { get; set; }
@@ -32,6 +34,9 @@ namespace WalletPayment.Services.Data
         public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<KycImage> KycImages { get; set; }
+
+        public DbSet<Chat> Chats { get; set; }
+
 
         //protected override void OnModelCreating(ModelBuilder builder)
         //{

@@ -28,6 +28,9 @@ namespace WalletPayment.Services.Interfaces
         Task<List<SystemAccountDetails>> SystemAccountDetails();
         Task<LockOrUnlockUsersModel> LockOrUnlockUsers(LockOrUnlockUsersDTO req);
         Task<List<LockedUsersListModel>> GetLockedUsersList();
+        Task<IsLoggedInModelAdmin> GetAdminIsLoggedIn();
+        Task<bool> IsUserLoggedIn();
+        
     }
 }
 

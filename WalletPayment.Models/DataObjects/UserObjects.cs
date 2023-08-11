@@ -55,20 +55,6 @@ namespace WalletPayment.Models.DataObjects
         public string message { get; set; } = string.Empty;
     }
 
-    public class UserViewModel
-    {
-        public int Id { get; set; }
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string Pin { get; set; } = string.Empty;
-        public string ConfirmPin { get; set; } = string.Empty;
-    }
-
     public class UserDashboardViewModel
     {
         public string Username { get; set; } = string.Empty;
@@ -296,14 +282,6 @@ namespace WalletPayment.Models.DataObjects
         public decimal amount { get; set; }
     }
 
-    public class PayStackRequestDto
-    {
-        public string reference { get; set; } = string.Empty;
-        public string email { get; set; } = string.Empty;
-        public string currency { get; set; } = string.Empty;
-        public decimal amount { get; set; } 
-    }
-
     public class PayStackResponseViewModel
     {
         public bool status { get; set; }
@@ -347,7 +325,6 @@ namespace WalletPayment.Models.DataObjects
     public class CreateAdminDTO
     {
         public string username { get; set; } = string.Empty;
-        public string role { get; set; } = string.Empty;
         public string email { get; set; } = string.Empty;
     }
 
@@ -379,11 +356,18 @@ namespace WalletPayment.Models.DataObjects
         public string message { get; set; } = string.Empty;
     }
 
+    public class KycAdminViewModel2
+    {
+        public string firstname { get; set; } = string.Empty;
+        public string lastname { get; set; } = string.Empty;
+        public List<KycAdminViewModel> list { get; set; }
+    }
+
     public class KycAdminViewModel
     {
         public string image { get; set; } = string.Empty;
         public string filename { get; set; } = string.Empty;
-        public string kycUploader { get; set; } = string.Empty;
+        public string filecode { get; set; } = string.Empty;
         public int userId { get; set; }
         public bool isAccepted { get; set; }
         public DateTime timeUploaded { get; set; }
@@ -393,6 +377,7 @@ namespace WalletPayment.Models.DataObjects
     {
         public string firstname { get; set; } = string.Empty;
         public string lastname { get; set; } = string.Empty;
+        public int id { get; set; }
     }
 
     public class UserProfileModel
@@ -508,11 +493,6 @@ namespace WalletPayment.Models.DataObjects
         public int unLocked { get; set; }
     }
 
-    public class AdminDashboardViewModel
-    {
-        public string Username { get; set; } = string.Empty;
-    }
-
     public class SystemAccountDetailsModel
     {
         public List<SystemAccountDetails> AccountDetails { get; set; }
@@ -522,6 +502,7 @@ namespace WalletPayment.Models.DataObjects
     {
         public decimal amount { get; set; }
         public string narration { get; set; } = string.Empty;
+        public string walletAccount { get; set; } = string.Empty;
         public string systAccountNumber { get; set; } = string.Empty;
         public string transactionType { get; set; } = string.Empty;
         public decimal? rate { get; set; }
@@ -539,11 +520,6 @@ namespace WalletPayment.Models.DataObjects
     public class SendMoneyCheckModel
     {
         public string senderAccountNumber { get; set; } = string.Empty;
-    }
-
-    public class SendMoneyCheckDTO
-    {
-        public string currency { get; set; } = string.Empty;
     }
 
     public class LockOrUnlockUsersDTO
@@ -581,8 +557,25 @@ namespace WalletPayment.Models.DataObjects
         public int id { get; set; }
     }
 
+    public class ReturnedModel
+    {
+        public string id { get; set; } = string.Empty;
+        public string username { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
+        public string connId { get; set; } = string.Empty;
+    }
 
+    public class IsLoggedInModelAdmin
+    {
+        public int count { get; set; }
+        public List<ReturnedModel> returneds { get; set; }
+    }
 
+    public class KycDocs
+    {
+        public string name { get; set; } = string.Empty;
+        public string code { get; set; } = string.Empty;
+    }
 
 
 

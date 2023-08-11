@@ -46,12 +46,17 @@ namespace WalletPayment.Models.Entites
         public string? LockedReasonCode { get; set; } = string.Empty;
 
         public DateTime? VerifiedAt { get; set; }
+        // RUN MIGAR
+        public bool IsUserLogin { get; set; } = false;
+
+        public DateTime? LastLogin { get; set; }
 
         public string? PasswordResetToken { get; set; }
 
         public DateTime? ResetTokenExpiresAt { get; set; }
 
         public virtual List<Account> UserAccount { get; set; }
+        public virtual List<Chat> UserChat { get; set; }
         public virtual Image UserImage { get; set; }
         public virtual List<KycImage> UserKycImage { get; set; }
         public virtual SecurityQuestion SecurityQuestions { get; set; }

@@ -20,7 +20,6 @@ namespace WalletPayment.Services.Services
 {
     public class TransactionService : ITransaction
     {
-        private readonly IHubContext<NotificationSignalR> _hub;
         private readonly DataContext _context;
         private IConverter _converter;
         private readonly IAccount _accountService;
@@ -1250,6 +1249,7 @@ namespace WalletPayment.Services.Services
                     {
                         amount = txn.Amount,
                         narration = txn.Narration,
+                        walletAccount = txn.WalletAccountNumber,
                         systAccountNumber = txn.SystemAccount,
                         transactionType = txn.TransactionType,
                         rate = txn.ConversionRate,

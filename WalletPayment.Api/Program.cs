@@ -32,7 +32,7 @@ try
         options.AddPolicy("NotificationClientApp",
             new CorsPolicyBuilder()
             .WithOrigins("http://localhost:4200")
-            .WithOrigins("http://localhost:61747")
+            .WithOrigins("http://localhost:51471")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .SetIsOriginAllowed(origin => true)

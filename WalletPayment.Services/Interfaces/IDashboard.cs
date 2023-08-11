@@ -1,9 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WalletPayment.Models.DataObjects;
 
 namespace WalletPayment.Services.Interfaces
@@ -27,16 +22,15 @@ namespace WalletPayment.Services.Interfaces
         Task<bool> GetUserPin();
         Task<bool> DoesUserHaveImage();
         Task<bool> NoSecurityAttemptsLeft();
-        Task<KycViewModel> KycUpload(IFormFile fileData);
-        Task<KycViewModel> KycReUpload(IFormFile fileData);
-        Task<List<UserInfoOnKycUploadsForAdminModel>> GetUserInfoOnKycUploadsForAdmin();
-        Task<List<KycAdminViewModel>> GetKycUploadsForAdmin();
-        Task<KycViewModel> RemoveImage(string filename, string userId);
-        Task<KycViewModel> AcceptImage(string filename, string userId);
+        Task<KycViewModel> KycUpload(IFormFile fileData, string fileCode);
+        Task<List<KycAdminViewModel2>> GetUserInfoOnKycUploadsForAdmin();
+        Task<KycViewModel> RemoveImage(string filename, string userId, string filecode);
+        Task<KycViewModel> AcceptImage(string filename, string userId, string filecode);
+        Task<List<KycDocs>> ListKycDocs();
         Task<UserProfileModel> GetUserProfileLevel();
         Task<List<AllAdminsListModel>> AllAdminsLists();
         Task<ResponseModel> DisableEnableAdmin(DisableEnableAdminDTO req);
-        Task<bool> GetKycStatus();
+        Task<bool> AdminLogout(string adminUsername);
     }
 }
 
