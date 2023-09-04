@@ -15,6 +15,7 @@ namespace WalletPayment.Models.Entites
         public bool IsAccepted { get; set; }
         public bool IsRejected { get; set; }
         public string FileCode { get; set; } = string.Empty;
+        public string? Reason { get; set; } = string.Empty;
 
         [ForeignKey("User")]
         public int UserId { get; set; }

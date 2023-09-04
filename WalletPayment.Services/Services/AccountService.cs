@@ -1055,9 +1055,9 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<IsLoggedInModelAdmin> GetAdminIsLoggedIn()
+        public async Task<IsLoggedInModel> GetAdminIsLoggedIn()
         {
-            IsLoggedInModelAdmin admin = new IsLoggedInModelAdmin();
+            IsLoggedInModel admin = new IsLoggedInModel();
             try
             {
                 var allUsersLoggedIn = await _context.Users.Where(x => x.IsUserLogin == true).ToListAsync();
@@ -1082,6 +1082,31 @@ namespace WalletPayment.Services.Services
             {
                 _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
                 return admin;
+            }
+        }
+
+        public async Task<List<ReturnedModel>> GetUserIsLoggedIn()
+        {
+            List<ReturnedModel> admins = new List<ReturnedModel>();
+            try
+            {
+                var allAdminsLoggedIn = await _context.Adminss.Where(x => x.IsUserLogin == true).ToListAsync();
+
+                foreach (var item in allAdminsLoggedIn)
+                {
+                    admins.Add(new ReturnedModel
+                    {
+                        username = item.Username,
+                        id = item.Id.ToString(),
+                    });
+                }
+
+                return admins;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return admins;
             }
         }
 

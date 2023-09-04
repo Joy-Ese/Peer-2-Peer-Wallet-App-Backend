@@ -32,7 +32,7 @@ try
         options.AddPolicy("NotificationClientApp",
             new CorsPolicyBuilder()
             .WithOrigins("http://localhost:4200")
-            .WithOrigins("http://localhost:51471")
+            .WithOrigins("http://localhost:51220")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .SetIsOriginAllowed(origin => true)
@@ -63,6 +63,8 @@ try
     builder.Services.AddScoped<IEmail, EmailService>();
     builder.Services.AddScoped<IPayment, PaymentService>();
     builder.Services.AddScoped<INotification, NotificationService>();
+    builder.Services.AddScoped<IChat, ChatService>();
+    builder.Services.AddScoped<IContact, ContactService>();
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddTransient<IValidator<UserSignUpDto>, UserValidator>();
     builder.Services.AddSignalR();

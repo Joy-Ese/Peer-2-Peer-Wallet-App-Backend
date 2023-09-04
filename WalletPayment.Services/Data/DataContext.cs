@@ -37,6 +37,12 @@ namespace WalletPayment.Services.Data
 
         public DbSet<Chat> Chats { get; set; }
 
+        public DbSet<LockedOutUser> LockedOutUsers { get; set; }
+
+        public DbSet<UserToUserChat> UserToUserChats { get; set; }
+
+        public DbSet<InitiatedChat> InitiatedChats { get; set; }
+
 
         //protected override void OnModelCreating(ModelBuilder builder)
         //{
@@ -51,6 +57,10 @@ namespace WalletPayment.Services.Data
         //    //.WithMany() // no collection
         //    //.OnDelete(DeleteBehavior.NoAction);
         //}
+
+
+
+
 
     }
 }

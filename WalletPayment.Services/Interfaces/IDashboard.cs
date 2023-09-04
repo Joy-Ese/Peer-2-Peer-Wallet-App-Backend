@@ -24,13 +24,14 @@ namespace WalletPayment.Services.Interfaces
         Task<bool> NoSecurityAttemptsLeft();
         Task<KycViewModel> KycUpload(IFormFile fileData, string fileCode);
         Task<List<KycAdminViewModel2>> GetUserInfoOnKycUploadsForAdmin();
-        Task<KycViewModel> RemoveImage(string filename, string userId, string filecode);
+        Task<KycViewModel> RemoveImage(KycRejectDTO req, string filename, string userId, string filecode);
         Task<KycViewModel> AcceptImage(string filename, string userId, string filecode);
-        Task<List<KycDocs>> ListKycDocs();
         Task<UserProfileModel> GetUserProfileLevel();
         Task<List<AllAdminsListModel>> AllAdminsLists();
         Task<ResponseModel> DisableEnableAdmin(DisableEnableAdminDTO req);
         Task<bool> AdminLogout(string adminUsername);
+        Task<List<KycDocs>> GetUnavailableDocuments();
+        Task<List<UsersForAdmin>> GetUsersInSysAdmin();
     }
 }
 

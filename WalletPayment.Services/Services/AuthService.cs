@@ -343,6 +343,9 @@ namespace WalletPayment.Services.Services
                 adminLoginResponse.role = data.Role;
                 adminLoginResponse.adminRefreshedToken = refreshToken.Token;
                 _logger.LogInformation($"Admin successfully logged in with {data.Username}");
+
+                await _hub.Clients.All.SendAsync("UpdateUser");
+
                 return adminLoginResponse;
             }
             catch (Exception ex)
@@ -842,6 +845,7 @@ namespace WalletPayment.Services.Services
         {
             List<Claim> claims = new List<Claim>
             {
+                new Claim(CustomClaims.UserId, adminUser.Id.ToString()),
                 new Claim(AdminCustomClaims.UserName, adminUser.Username),
                 new Claim(AdminCustomClaims.Role, adminUser.Role),
             };

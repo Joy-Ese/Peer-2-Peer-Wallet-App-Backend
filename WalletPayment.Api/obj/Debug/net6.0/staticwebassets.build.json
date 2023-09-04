@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "VaqNMPm9OX1nt5mHt4Ms5oP9w/KYKoAaMeJxnUpUSd8=",
+  "Hash": "Olndw16+K6B/63p4WftkFRMtnasI/JPUk1yJHd4meI4=",
   "Source": "WalletPayment.Api",
   "BasePath": "_content/WalletPayment.Api",
   "Mode": "Default",
@@ -32,6 +32,40 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\KycUploads\\common\\download.png"
+    },
+    {
+      "Identity": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Api\\wwwroot\\KycUploads\\GovtIssued\\2car.jpg",
+      "SourceId": "WalletPayment.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Api\\wwwroot\\",
+      "BasePath": "_content/WalletPayment.Api",
+      "RelativePath": "KycUploads/GovtIssued/2car.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\KycUploads\\GovtIssued\\2car.jpg"
+    },
+    {
+      "Identity": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Api\\wwwroot\\KycUploads\\GovtIssued\\2nails.jpg",
+      "SourceId": "WalletPayment.Api",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\joyihama\\Documents\\Projects\\WalletPaymentApp\\WalletPayment.Api\\wwwroot\\",
+      "BasePath": "_content/WalletPayment.Api",
+      "RelativePath": "KycUploads/GovtIssued/2nails.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\KycUploads\\GovtIssued\\2nails.jpg"
     }
   ]
 }

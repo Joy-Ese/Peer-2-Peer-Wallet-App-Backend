@@ -46,7 +46,7 @@ namespace WalletPayment.Models.Entites
         public string? LockedReasonCode { get; set; } = string.Empty;
 
         public DateTime? VerifiedAt { get; set; }
-        // RUN MIGAR
+        
         public bool IsUserLogin { get; set; } = false;
 
         public DateTime? LastLogin { get; set; }
@@ -65,5 +65,6 @@ namespace WalletPayment.Models.Entites
         public virtual List<Transaction> Transactions { get; set; }
         public virtual List<SystemTransaction> SystemTransactions { get; set; }
         public virtual List<Notification> Notifications { get; set; }
+        
     }
 }

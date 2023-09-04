@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using WalletPayment.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using WalletPayment.Models.DataObjects;
+using Microsoft.AspNetCore.Cors;
 
 namespace WalletPayment.Api.Controllers
 {
@@ -11,12 +12,10 @@ namespace WalletPayment.Api.Controllers
     [ApiController]
     public class DashboardController : ControllerBase
     {
-        private readonly DataContext _context;
         private IDashboard _dashboardService;
 
-        public DashboardController(DataContext context, IDashboard dashboardService)
+        public DashboardController(IDashboard dashboardService)
         {
-            _context = context;
             _dashboardService = dashboardService;
         }
 
@@ -154,9 +153,9 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpPut("RemoveImage"), Authorize]
-        public async Task<IActionResult> RemoveImage(string filename, string userId, string filecode)
+        public async Task<IActionResult> RemoveImage(KycRejectDTO req, string filename, string userId, string filecode)
         {
-            var result = await _dashboardService.RemoveImage(filename, userId, filecode);
+            var result = await _dashboardService.RemoveImage(req, filename, userId, filecode);
             return Ok(result);
         }
 
@@ -164,13 +163,6 @@ namespace WalletPayment.Api.Controllers
         public async Task<IActionResult> AcceptImage(string filename, string userId, string filecode)
         {
             var result = await _dashboardService.AcceptImage(filename, userId, filecode);
-            return Ok(result);
-        }
-
-        [HttpGet("ListKycDocs"), Authorize]
-        public async Task<IActionResult> ListKycDocs()
-        {
-            var result = await _dashboardService.ListKycDocs();
             return Ok(result);
         }
 
@@ -202,7 +194,19 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-        
+        [HttpGet("GetUnavailableDocuments"), Authorize]
+        public async Task<IActionResult> GetUnavailableDocuments()
+        {
+            var result = await _dashboardService.GetUnavailableDocuments();
+            return Ok(result);
+        }
+
+        [HttpGet("GetUsersInSysAdmin"), Authorize]
+        public async Task<IActionResult> GetUsersInSysAdmin()
+        {
+            var result = await _dashboardService.GetUsersInSysAdmin();
+            return Ok(result);
+        }
 
 
     }

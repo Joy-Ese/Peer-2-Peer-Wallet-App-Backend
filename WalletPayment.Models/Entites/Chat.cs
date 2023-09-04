@@ -12,13 +12,12 @@ namespace WalletPayment.Models.Entites
         public int Id { get; set; }
         public string Message { get; set; } = string.Empty;
         public DateTime Date { get; set; }
-
-        [ForeignKey("User")]
         public int? UserId { get; set; }
         public virtual User User { get; set; }
 
-        [ForeignKey("AdminUser")]
         public int? AdminUserId { get; set; }
         public virtual Admins AdminUser { get; set; }
+        public bool IsChatRead { get; set; }
+        public string ChattingWith { get; set; } = string.Empty;
     }
 }

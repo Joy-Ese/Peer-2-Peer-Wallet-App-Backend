@@ -1,12 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using WalletPayment.Models.Entites;
 
 namespace WalletPayment.Models.DataObjects
 {
@@ -365,7 +358,8 @@ namespace WalletPayment.Models.DataObjects
 
     public class KycAdminViewModel
     {
-        public string image { get; set; } = string.Empty;
+        public string? isPdf { get; set; } = string.Empty;
+        public string? image { get; set; } = string.Empty;
         public string filename { get; set; } = string.Empty;
         public string filecode { get; set; } = string.Empty;
         public int userId { get; set; }
@@ -378,6 +372,11 @@ namespace WalletPayment.Models.DataObjects
         public string firstname { get; set; } = string.Empty;
         public string lastname { get; set; } = string.Empty;
         public int id { get; set; }
+    }
+
+    public class KycRejectDTO
+    {
+        public string reason { get; set; } = string.Empty;
     }
 
     public class UserProfileModel
@@ -562,10 +561,9 @@ namespace WalletPayment.Models.DataObjects
         public string id { get; set; } = string.Empty;
         public string username { get; set; } = string.Empty;
         public string email { get; set; } = string.Empty;
-        public string connId { get; set; } = string.Empty;
     }
 
-    public class IsLoggedInModelAdmin
+    public class IsLoggedInModel
     {
         public int count { get; set; }
         public List<ReturnedModel> returneds { get; set; }
@@ -575,6 +573,55 @@ namespace WalletPayment.Models.DataObjects
     {
         public string name { get; set; } = string.Empty;
         public string code { get; set; } = string.Empty;
+    }
+
+    public class ChatDTO
+    {
+        public string message { get; set; } = string.Empty;
+    }
+
+    //public class PaginatedResult<T>
+    //{
+    //    public List<T> items { get; set; }
+    //    public int totalCount { get; set; }
+    //}
+
+    public class ChatDetails
+    {
+        public string chattingWith { get; set; } = string.Empty;
+        public string message { get; set; } = string.Empty;
+        public DateTime date { get; set; }
+        public int? idUser { get; set; }
+        public int? idAdmin { get; set; }
+    }
+
+    public class ReadChatsDTO
+    {
+        public string username { get; set; } = string.Empty;
+    }
+
+    public class GetAllChatsCount
+    {
+        public int allChats { get; set; }
+    }
+
+    public class UsersForAdmin
+    {
+        public string userName { get; set; } = string.Empty;
+        public string userProfile { get; set; } = string.Empty;
+    }
+
+    public class User2UserChat
+    {
+        public string message { get; set; } = string.Empty;
+        public DateTime date { get; set; }
+        public string sender { get; set; } = string.Empty;
+        public string recipient { get; set; } = string.Empty;
+    }
+
+    public class User2UserChatDTO
+    {
+        public string message { get; set; } = string.Empty;
     }
 
 
