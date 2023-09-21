@@ -63,5 +63,12 @@ namespace WalletPayment.Services.Services
         }
 
 
+        public async Task RefreshChat(string loggedInUser, string userChattingWith)
+        {
+            await Clients.All.SendAsync("UserRefreshChat", loggedInUser, userChattingWith);
+        }
+
+
+
     }
 }

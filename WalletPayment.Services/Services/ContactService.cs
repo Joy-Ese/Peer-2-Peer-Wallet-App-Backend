@@ -130,6 +130,56 @@ namespace WalletPayment.Services.Services
             }
         }
 
+        public async Task<bool> GetOnlineStatus(string chattingWith)
+        {
+            try
+            {
+                var getUserOnlineStatus = await _context.Users.Where(x => x.Username == chattingWith).Select(x => x.IsUserLogin).FirstOrDefaultAsync();
+
+                return getUserOnlineStatus;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<List<UnreadChats>> GetUnreadChatCount()
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return new List<UnreadChats>();
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userLoggedIn = await _context.Users.Where(x => x.Id == userID).Select(x => x.Username).FirstOrDefaultAsync();
+
+                var unreadChatsGrouped = await _context.UserToUserChats
+                    .Where(x => x.RecipientUsername == userLoggedIn && !x.IsChatRead)
+                    //.Where(x => x.SenderUsernmae != userLoggedIn)
+                    .GroupBy(x => x.SenderUsernmae)
+                    .Select(group => new UnreadChats 
+                    {
+                        senderUsername = group.Key,
+                        unreadChat = group.Count()
+                    })
+                    .ToListAsync();
+
+                return unreadChatsGrouped;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return new List<UnreadChats>();
+            }
+        }
+
+
 
     }
 }

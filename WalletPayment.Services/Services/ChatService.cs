@@ -150,7 +150,7 @@ namespace WalletPayment.Services.Services
                 await _context.Chats.AddAsync(newUserChat);
                 await _context.SaveChangesAsync();
 
-                // increment admin
+                _hub.Clients.All.SendAsync("ReceiveMessage", chattingWIth);
 
                 response.status = true;
                 response.message = "Sent!!!";
@@ -191,7 +191,7 @@ namespace WalletPayment.Services.Services
                 await _context.Chats.AddAsync(newAdminChat);
                 await _context.SaveChangesAsync();
 
-                // increment user
+                _hub.Clients.All.SendAsync("ReceiveMessage", chattingWIth);
 
                 response.status = true;
                 response.message = "Sent!!!";
@@ -545,7 +545,7 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        public async Task<List<User2UserChat>> GetUser2UserChats(string chatWith)
+        public async Task<List<User2UserChat>> GetUser2UserChats()
         {
             try
             {
@@ -561,7 +561,7 @@ namespace WalletPayment.Services.Services
 
                 var chatList = new List<User2UserChat>();
 
-                var chats = await _context.UserToUserChats.Where(x => x.SenderUsernmae == loggedInUsername && x.RecipientUsername == chatWith).ToListAsync();
+                var chats = await _context.UserToUserChats.Where(x => x.SenderUsernmae == loggedInUsername || x.RecipientUsername == loggedInUsername).ToListAsync();
 
                 foreach (var item in chats)
                 {
@@ -612,6 +612,7 @@ namespace WalletPayment.Services.Services
                 await _context.UserToUserChats.AddAsync(newUser2UserChat);
                 await _context.SaveChangesAsync();
 
+                _hub.Clients.All.SendAsync("User2UserReceiveMessage", chattingWith);
 
                 response.status = true;
                 response.message = "Sent!!!";
@@ -624,7 +625,40 @@ namespace WalletPayment.Services.Services
             }
         }
 
-        
+        public async Task<bool> ReadUserChats(string chattingWith)
+        {
+            try
+            {
+                int userID;
+                if (_httpContextAccessor.HttpContext == null)
+                {
+                    return false;
+                }
+
+                userID = Convert.ToInt32(_httpContextAccessor.HttpContext.User?.FindFirst(CustomClaims.UserId)?.Value);
+
+                var userLoggedIn = await _context.Users.Where(x => x.Id == userID).Select(x => x.Username).FirstOrDefaultAsync();
+
+                var chats = await _context.UserToUserChats.Where(x => x.SenderUsernmae == userLoggedIn && x.RecipientUsername == chattingWith && x.IsChatRead == false).ToListAsync();
+
+                foreach (var item in chats)
+                {
+                    item.IsChatRead = true;
+                }
+                await _context.SaveChangesAsync();
+
+                if (chats == null) return false;
+
+                await _hub.Clients.All.SendAsync("UpdatChatCount", userLoggedIn);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"AN ERROR OCCURRED... => {ex.Message}");
+                return false;
+            }
+        }
 
 
 

@@ -25,7 +25,8 @@ namespace WalletPayment.Services.Interfaces
 
         Task<RespModel> InitiateChats(string chattingWith);
         Task<List<InitiatedChats>> GetInitiatedChats();
-        Task<List<User2UserChat>> GetUser2UserChats(string chatWith);
+        Task<List<User2UserChat>> GetUser2UserChats();
         Task<ResponseModel> User2User(User2UserChatDTO req, string chattingWith);
+        Task<bool> ReadUserChats(string chattingWith);
     }
 }

@@ -11,5 +11,7 @@ namespace WalletPayment.Services.Interfaces
     {
         Task<RespnModel<SearchContactModel>> GetSearchedContact(string searchInfo);
         Task<ChatTrnModel> GetChatTrnAcctNums(string currency, string destAcctUser);
+        Task<bool> GetOnlineStatus(string chattingWith);
+        Task<List<UnreadChats>> GetUnreadChatCount();
     }
 }

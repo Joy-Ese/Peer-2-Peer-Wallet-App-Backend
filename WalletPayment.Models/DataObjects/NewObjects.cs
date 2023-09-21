@@ -54,7 +54,11 @@ namespace WalletPayment.Models.DataObjects
         public string receivedFrom { get; set; } = string.Empty;
     }
 
-    
+    public class UnreadChats
+    {
+        public string senderUsername { get; set; } = string.Empty;
+        public int unreadChat { get; set; }
+    }
 
 
 

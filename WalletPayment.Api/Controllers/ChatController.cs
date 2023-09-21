@@ -111,9 +111,9 @@ namespace WalletPayment.Api.Controllers
         }
 
         [HttpGet("GetUser2UserChats"), Authorize]
-        public async Task<IActionResult> GetUser2UserChats(string chatWith)
+        public async Task<IActionResult> GetUser2UserChats()
         {
-            var result = await _chatService.GetUser2UserChats(chatWith);
+            var result = await _chatService.GetUser2UserChats();
             return Ok(result);
         }
 
@@ -124,7 +124,12 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-
+        [HttpPut("ReadUserChats"), Authorize]
+        public async Task<IActionResult> ReadUserChats(string chattingWith)
+        {
+            var result = await _chatService.ReadUserChats(chattingWith);
+            return Ok(result);
+        }
 
 
     }

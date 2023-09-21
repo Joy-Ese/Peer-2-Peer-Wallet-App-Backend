@@ -30,12 +30,19 @@ namespace WalletPayment.Api.Controllers
             return Ok(result);
         }
 
-        //[HttpGet("GetChatsAdmin"), Authorize]
-        //public async Task<IActionResult> GetChatsAdmin(string user)
-        //{
-        //    var result = await _chatService.GetChatsAdmin(user);
-        //    return Ok(result);
-        //}
+        [HttpGet("GetOnlineStatus"), Authorize]
+        public async Task<IActionResult> GetOnlineStatus(string chattingWith)
+        {
+            var result = await _contactService.GetOnlineStatus(chattingWith);
+            return Ok(result);
+        }
+
+        [HttpGet("GetUnreadChatCount"), Authorize]
+        public async Task<IActionResult> GetUnreadChatCount()
+        {
+            var result = await _contactService.GetUnreadChatCount();
+            return Ok(result);
+        }
 
 
     }
